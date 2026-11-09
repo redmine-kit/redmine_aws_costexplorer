@@ -1,0 +1,10 @@
+*
+!init.rb
+!Gemfile
+!redmine_serverless_cost.gemspec
+!LICENSE
+!app/
+!db/
+!config/
+!lib/
+!test/

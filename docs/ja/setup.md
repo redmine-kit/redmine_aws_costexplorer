@@ -15,7 +15,20 @@ Redmine Serverless Cost Explorer を使うために、Redmine に必要なもの
 
 ## インストール
 
-**プラグインの入手:** バージョンのタグ(`v*`)ごとに、プラグインを gem として GitHub Packages(`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`)に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル(`init.rb`、`lib/`、`app/`、`config/`、`db/`、`LICENSE`)が入っていて、プラグインの `Gemfile` は入っていません。Redmine は `plugins/` からだけプラグインを読むので、インストールした gem をそこにリンクします。
+1. プラグインを `plugins/redmine_serverless_costexplorer` に置きます。gem をインストールするか([gem](#gem))、リポジトリをクローンします([gem を使わないとき](#without-the-gem))。
+2. プラグインの migration を実行します。スナップショットの表(`serverless_costexplorer_snapshots`)を作ります。
+
+   ```sh
+   bin/rake redmine:plugins:migrate
+   ```
+
+3. 環境変数(下記)とスケジュール([スケジュール](#schedule))を設定します。
+
+<a id="gem"></a>
+
+### gem
+
+バージョンのタグ(`v*`)ごとに、プラグインを gem として GitHub Packages(`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`)に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル(`init.rb`、`lib/`、`app/`、`config/`、`db/`、`LICENSE`)が入っていて、プラグインの `Gemfile` は入っていません。Redmine は `plugins/` からだけプラグインを読むので、インストールした gem をそこにリンクします。
 
 ```ruby
 # Redmine の Gemfile.local
@@ -30,11 +43,16 @@ bundle install
 ln -s "$(bundle info --path redmine_serverless_costexplorer)" plugins/redmine_serverless_costexplorer
 ```
 
-gem を使わないときは、リポジトリを `plugins/redmine_serverless_costexplorer` にクローンし(`git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer`)、`bundle install` を実行します(Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を足します)。
+<a id="without-the-gem"></a>
 
-1. 上のとおり、プラグインを `plugins/redmine_serverless_costexplorer` に置きます。
-2. `bin/rake redmine:plugins:migrate` を実行します。スナップショットの表(`serverless_costexplorer_snapshots`)を作ります。
-3. 環境変数(下記)とスケジュール([スケジュール](#schedule))を設定します。
+### gem を使わないとき
+
+リポジトリを `plugins/redmine_serverless_costexplorer` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を足します。
+
+```sh
+git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer
+bundle install
+```
 
 <a id="configuration"></a>
 

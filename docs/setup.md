@@ -11,7 +11,18 @@ What a Redmine needs to use Redmine Serverless Cost Explorer: installation, conf
 
 ## Installation
 
-**Getting the plugin:** Each version tag (`v*`) publishes the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`; `.github/workflows/gem.yml`). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `config/`, `db/`, `LICENSE`); the plugin's `Gemfile` is not in it. Redmine loads plugins only from `plugins/`, so the installed gem is linked there:
+1. Put the plugin in `plugins/redmine_serverless_costexplorer`: install the gem ([Gem](#gem)) or clone the repository ([Without the gem](#without-the-gem)).
+2. Run the plugin's migrations. They create the table of snapshots (`serverless_costexplorer_snapshots`).
+
+   ```sh
+   bin/rake redmine:plugins:migrate
+   ```
+
+3. Set the environment variables (below) and the schedule ([Schedule](#schedule)).
+
+### Gem
+
+Each version tag (`v*`) publishes the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`; `.github/workflows/gem.yml`). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `config/`, `db/`, `LICENSE`); the plugin's `Gemfile` is not in it. Redmine loads plugins only from `plugins/`, so the installed gem is linked there:
 
 ```ruby
 # Redmine's Gemfile.local
@@ -26,11 +37,14 @@ bundle install
 ln -s "$(bundle info --path redmine_serverless_costexplorer)" plugins/redmine_serverless_costexplorer
 ```
 
-Without the gem, clone the repository into `plugins/redmine_serverless_costexplorer` (`git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer`) and run `bundle install` (Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`).
+### Without the gem
 
-1. Put the plugin in `plugins/redmine_serverless_costexplorer` as above.
-2. Run `bin/rake redmine:plugins:migrate`. It creates the table of snapshots (`serverless_costexplorer_snapshots`).
-3. Set the environment variables (below) and the schedule ([Schedule](#schedule)).
+Clone the repository into `plugins/redmine_serverless_costexplorer` and install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`.
+
+```sh
+git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer
+bundle install
+```
 
 ## Configuration
 

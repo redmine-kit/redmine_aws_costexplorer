@@ -4,9 +4,11 @@ require_relative '../test_helper'
 
 module RedmineServerlessCostexplorer
   # On LocalStack's Cost Explorer (Ultimate plan), when bin/test runs with
-  # LOCALSTACK_AUTH_TOKEN. LocalStack has no billing data; these tests check
-  # that the requests the plugin makes are accepted and that the SDK parses
-  # the answers, and print what LocalStack returns (docs/setup.md#tests).
+  # LOCALSTACK_AUTH_TOKEN. LocalStack has no billing data: GetCostAndUsage
+  # answers with no results, and GetCostForecast is not implemented
+  # (docs/setup.md#tests). The tests check that the plugin's requests are
+  # accepted, that the SDK parses the answers, and that a fetch is kept
+  # without a forecast; they print what LocalStack returns.
   class LocalstackTest < ActiveSupport::TestCase
     include RedmineServerlessCostexplorer::TestHelper
 
@@ -54,16 +56,17 @@ module RedmineServerlessCostexplorer
       assert_kind_of Array, response.results_by_time
     end
 
-    def test_forecast
+    # Not implemented in LocalStack 2026.10.6. When this fails, LocalStack
+    # has started answering; update docs/setup.md#tests.
+    def test_forecast_is_not_implemented
       today = Time.now.utc.to_date
-      response = @client.get_cost_forecast(time_period: period(today, today.beginning_of_month.next_month),
-                                           metric: 'UNBLENDED_COST', granularity: 'MONTHLY')
-      show('GetCostForecast', response)
+      error = assert_raises(Aws::CostExplorer::Errors::InternalFailure) do
+        @client.get_cost_forecast(time_period: period(today, today.beginning_of_month.next_month),
+                                  metric: 'UNBLENDED_COST', granularity: 'MONTHLY')
+      end
+      puts "\n[LocalStack GetCostForecast] #{error.class}: #{error.message}"
 
-      assert response.total
-    rescue Aws::Errors::ServiceError => e
-      puts "\n[LocalStack GetCostForecast] #{e.class}: #{e.message}"
-      raise
+      assert_match(/not been implemented/, error.message)
     end
 
     def test_the_whole_fetch
@@ -72,7 +75,9 @@ module RedmineServerlessCostexplorer
       puts "\n[LocalStack fetch] #{data.to_json.truncate(2000)}"
 
       assert_equal 4, fetcher.requests
-      assert data.key?('this_month')
+      assert_equal({ 'total' => '0.0', 'estimated' => false }, data['this_month'])
+      assert data.dig('forecast', 'error')
+      assert_empty data['tags']
     end
   end
 end

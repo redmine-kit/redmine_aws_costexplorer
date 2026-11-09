@@ -97,7 +97,7 @@ bin/rake redmine_serverless_costexplorer:refresh
 
 - **単体テストと機能テスト:** SDK の応答のスタブを使います。応答は `test/fixtures/cost_explorer/` の JSON の本文で、SDK が、実際の応答と同じように解析します。API リファレンスの応答の構文に合わせたもので、アカウントから記録したものではありません。テストには AWS のアカウントがないためです。
 - **moto での結合テスト:** moto は、API で前もって渡した結果(`/moto-api/static/ce/cost-and-usage-results`)で `GetCostAndUsage` に答えます。要求と解析は、SDK と HTTP を通ります。moto には `GetCostForecast` がない(500 を返す)ので、予測のない取得のテストにもなります。rake のタスクも moto に対して動かします。
-- **LocalStack:** `LOCALSTACK_AUTH_TOKEN`(CI では組織のシークレット)があると、`bin/services` が LocalStack も起動し、`test/integration/localstack_test.rb` が、プラグインの要求(サービスごとの月ごと、タグごとの月ごと、日ごとの `GetCostAndUsage`、`GetCostForecast`、タグありの取得の全体)を送って、応答をログに出します。LocalStack の Cost Explorer は Ultimate のプランのもので、そのページには `GetCostAndUsage` はあり、`GetCostForecast` はなく、費用のデータはないと書かれています(LocalStack の Cost Explorer のページ。2026-11-10 に確認)。実際に何を返すかは、まだ確認していません。2026-11-10 には、CI のライセンスが期限切れで、LocalStack が起動しませんでした。LocalStack は追加の確認なので、起動しないときは、`bin/services` がログを出し、テストは moto だけで動きます。どちらで動いたかはログに出ます(`AWS backends: ...`)。
+- **LocalStack:** `LOCALSTACK_AUTH_TOKEN`(CI では組織のシークレット)があると、`bin/services` が LocalStack も起動し、`test/integration/localstack_test.rb` が、プラグインの要求(サービスごとの月ごと、タグごとの月ごと、日ごとの `GetCostAndUsage`、`GetCostForecast`、タグありの取得の全体)を送って、応答をログに出します。LocalStack の Cost Explorer は Ultimate のプランのもので、そのページには `GetCostAndUsage` はあり、`GetCostForecast` はなく、費用のデータはないと書かれています(LocalStack の Cost Explorer のページ。2026-11-10 に確認)。2026-11-10 に(LocalStack 2026.10.6)、`GetCostAndUsage` は 3 つの要求すべてに、実際の応答の形で、結果なし(`ResultsByTime` と `DimensionValueAttributes` が空)を返し、`GetCostForecast` は `InternalFailure`(「The get_cost_forecast action has not been implemented」)を返しました。そのため LocalStack では、費用が 0 で予測のない取得が保存されます。テストはそれを確認し、費用の値そのものは、スタブと moto で確認します。LocalStack は追加の確認なので、起動しないときは、`bin/services` がログを出し、テストは moto だけで動きます。どちらで動いたかはログに出ます(`AWS backends: ...`)。
 
 `bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインを入れた状態で Redmine のすべてのテストを動かします。プラグインのテストは、プラグインのファイルのカバレッジ(SimpleCov。Cobertura の XML を `coverage/coverage.xml` に)も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer) に送ります。
 
@@ -112,7 +112,6 @@ bin/services --down # PostgreSQL、moto、LocalStack を止める
 
 ## 確認すること
 
-- プラグインの要求に、LocalStack の Cost Explorer が何を返すか
 - 実際のアカウントでの要求と応答(テストはスタブと moto)。サービスごとの `GetCostAndUsage` のページの数も
 - 予測を、コンソールの月末の予測と比べる
 - 「Linked account access」のないメンバーアカウントでのアクセスのエラー

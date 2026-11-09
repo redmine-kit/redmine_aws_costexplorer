@@ -79,3 +79,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 - **接続の確認はない:** Redmine Serverless の「状態と接続」には、確認を足しません。確認のたびに、課金される要求になるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
 - **コードの構成:** `lib/redmine_serverless_costexplorer/fetcher.rb` が要求を送り、`app/models/serverless_costexplorer_snapshot.rb` が取得を保存し、`app/jobs/serverless_costexplorer_refresh_job.rb` と `lib/tasks/redmine_serverless_costexplorer.rake` が取得を実行し、`app/controllers/serverless_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。
 - **マイグレーション:** スナップショットの表(`serverless_costexplorer_snapshots`)を作ります。`redmine:plugins:migrate` を実行します。
+
+## スポンサー
+
+<Sponsors><a href="https://localstack.cloud">LocalStack</a></Sponsors>

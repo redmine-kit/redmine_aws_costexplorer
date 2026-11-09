@@ -69,3 +69,7 @@ For an AWS account that holds several Redmine instances, the costs can be split 
 - **No connection check:** The plugin does not add a check to Redmine Serverless's "Status and connections": each check would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
 - **Code structure:** `lib/redmine_serverless_costexplorer/fetcher.rb` makes the requests, `app/models/serverless_costexplorer_snapshot.rb` keeps the fetches, `app/jobs/serverless_costexplorer_refresh_job.rb` and `lib/tasks/redmine_serverless_costexplorer.rake` run them, and `app/controllers/serverless_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
 - **Migrations:** A table for the snapshots (`serverless_costexplorer_snapshots`). Run `redmine:plugins:migrate`.
+
+## Sponsors
+
+<Sponsors><a href="https://localstack.cloud">LocalStack</a></Sponsors>

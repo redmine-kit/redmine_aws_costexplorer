@@ -93,11 +93,13 @@ bin/rake redmine_serverless_costexplorer:refresh
 
 ## テスト
 
-テストは `test/` にあり、Redmine の標準のしくみで、Docker の Redmine 7.0.3、PostgreSQL 16、moto で動かします。`LOCALSTACK_AUTH_TOKEN` があれば、LocalStack でも動かします。
+テストは `test/` にあり、Redmine の標準のしくみで、Docker の Redmine 7.0.3 と PostgreSQL 16 で動かします。Cost Explorer は、`LOCALSTACK_AUTH_TOKEN`(CI では組織のシークレット)があれば LocalStack、なければ moto です。
 
 - **単体テストと機能テスト:** SDK の応答のスタブを使います。応答は `test/fixtures/cost_explorer/` の JSON の本文で、SDK が、実際の応答と同じように解析します。API リファレンスの応答の構文に合わせたもので、アカウントから記録したものではありません。テストには AWS のアカウントがないためです。
-- **moto での結合テスト:** moto は、API で前もって渡した結果(`/moto-api/static/ce/cost-and-usage-results`)で `GetCostAndUsage` に答えます。要求と解析は、SDK と HTTP を通ります。moto には `GetCostForecast` がない(500 を返す)ので、予測のない取得のテストにもなります。rake のタスクも moto に対して動かします。
-- **LocalStack:** `LOCALSTACK_AUTH_TOKEN`(CI では組織のシークレット)があると、`bin/services` が LocalStack も起動し、`test/integration/localstack_test.rb` が、プラグインの要求(サービスごとの月ごと、タグごとの月ごと、日ごとの `GetCostAndUsage`、`GetCostForecast`、タグありの取得の全体)を送って、応答をログに出します。LocalStack の Cost Explorer は Ultimate のプランのもので、そのページには `GetCostAndUsage` はあり、`GetCostForecast` はなく、費用のデータはないと書かれています(LocalStack の Cost Explorer のページ。2026-11-10 に確認)。2026-11-10 に(LocalStack 2026.10.6)、`GetCostAndUsage` は 3 つの要求すべてに、実際の応答の形で、結果なし(`ResultsByTime` と `DimensionValueAttributes` が空)を返し、`GetCostForecast` は `InternalFailure`(「The get_cost_forecast action has not been implemented」)を返しました。そのため LocalStack では、費用が 0 で予測のない取得が保存されます。テストはそれを確認し、費用の値そのものは、スタブと moto で確認します。LocalStack は追加の確認なので、起動しないときは、`bin/services` がログを出し、テストは moto だけで動きます。どちらで動いたかはログに出ます(`AWS backends: ...`)。
+- **結合テスト:** `test/integration/cost_explorer_test.rb` が、プラグインの要求を、SDK と HTTP を通してバックエンドに送ります。取得、タグありの取得、rake のタスクです。トークンがあれば LocalStack で動かし、LocalStack が起動しないときは、`bin/services` がログを出して、実行が失敗します。どちらで動いたかはログに出ます(`AWS backend: ...`)。
+- **LocalStack:** Cost Explorer は Ultimate のプランのものです。対応状況のページには `GetCostAndUsage` はあり、`GetCostForecast` はなく、費用のデータはないと書かれています(LocalStack の Cost Explorer のページ。2026-11-10 に確認)。LocalStack 2026.10.6 では(2026-11-10 に確認)、`GetCostAndUsage` は、プラグインのすべての要求(サービスごとの月ごと、タグごとの月ごと、日ごと)に、実際の応答の形で、結果なしを返し、`GetCostForecast` は `InternalFailure`(「The get_cost_forecast action has not been implemented」)を返しました。テストは、LocalStack では費用が空なことを確認し、金額は moto とスタブで確認します。
+- **moto:** トークンがないときです。moto は、API で前もって渡した結果(`/moto-api/static/ce/cost-and-usage-results`)で `GetCostAndUsage` に答えるので、テストは金額を確認します。`GetCostForecast` はありません(500 を返す)。
+- **モックする呼び出し:** `GetCostForecast` だけです。どちらのバックエンドも実装していないためです。結合テストは、クライアントのこの呼び出しだけを、`test/fixtures/cost_explorer/forecast.json`(合計 15.0。ドキュメントの形)を返す SDK のスタブに置き換え、ほかの呼び出しはバックエンドに送ります。LocalStack のテストが、LocalStack がまだ実装していないことを確認するので、実装されたらモックを外せます。
 
 `bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインを入れた状態で Redmine のすべてのテストを動かします。プラグインのテストは、プラグインのファイルのカバレッジ(SimpleCov。Cobertura の XML を `coverage/coverage.xml` に)も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer) に送ります。
 
@@ -105,7 +107,7 @@ bin/rake redmine_serverless_costexplorer:refresh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト
 bin/test --redmine  # Redmine のすべてのテストも
 bin/lint            # RuboCop
-bin/services --down # PostgreSQL、moto、LocalStack を止める
+bin/services --down # PostgreSQL と、moto か LocalStack を止める
 ```
 
 <a id="to-verify"></a>

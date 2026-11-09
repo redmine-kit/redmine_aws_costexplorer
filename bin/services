@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Starts PostgreSQL 16 and moto for the tests, or stops them with --down.
-# With LOCALSTACK_AUTH_TOKEN it also starts LocalStack. LocalStack is an extra
-# check (its Cost Explorer has no billing data), so when it does not start
-# (for example, an expired license) the logs are shown and the tests run on
-# moto only; bin/test says which.
+# Starts the services for the tests, or stops them with --down: PostgreSQL 16,
+# and LocalStack when LOCALSTACK_AUTH_TOKEN is set (as in CI), moto otherwise.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 compose=(docker compose -f test/compose.yml -p redmine-serverless-costexplorer-test --profile localstack)
@@ -11,15 +8,13 @@ if [[ "${1:-}" == "--down" ]]; then
   "${compose[@]}" down -v
   exit 0
 fi
-show_logs() {
-  "${compose[@]}" ps -a >&2
-  "${compose[@]}" logs --tail 80 "$@" >&2
-}
-if ! "${compose[@]}" up -d --wait postgres moto; then
-  show_logs
-  exit 1
+if [[ -n "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
+  services=(postgres localstack)
+else
+  services=(postgres moto)
 fi
-if [[ -n "${LOCALSTACK_AUTH_TOKEN:-}" ]] && ! "${compose[@]}" up -d --wait localstack; then
-  show_logs localstack
-  echo "::warning::LocalStack did not start; the tests run on moto only" >&2
+if ! "${compose[@]}" up -d --wait "${services[@]}"; then
+  "${compose[@]}" ps -a >&2
+  "${compose[@]}" logs --tail 80 >&2
+  exit 1
 fi

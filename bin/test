@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The plugin's tests in Redmine 7.0.3 on PostgreSQL 16, with Cost Explorer on
-# moto, and also on LocalStack when LOCALSTACK_AUTH_TOKEN is set, in Docker.
+# LocalStack (when LOCALSTACK_AUTH_TOKEN is set) or moto, in Docker.
 #   bin/test                 # the plugin's tests, then the Redmine tests around administration and jobs
 #   bin/test --redmine       # also every Redmine test, with the plugin installed
 #   bin/test <files>         # some files of the plugin's tests
@@ -10,16 +10,15 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 image=redmine-serverless-costexplorer-test
 network=redmine-serverless-costexplorer-test_default
-bin/services >/dev/null
-# The LocalStack tests (test/integration/localstack_test.rb) run only when
-# LocalStack started (bin/services starts it with LOCALSTACK_AUTH_TOKEN).
-if [[ -n "$(docker compose -f test/compose.yml -p redmine-serverless-costexplorer-test --profile localstack \
-  ps -q --status running localstack)" ]]; then
+# The same tests run on LocalStack (with LOCALSTACK_AUTH_TOKEN) or moto;
+# TEST_AWS_BACKEND names it.
+if [[ -n "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
   backend=localstack
 else
   backend=moto
 fi
-echo "AWS backends: moto$([[ $backend == localstack ]] && echo ' and LocalStack')"
+echo "AWS backend: $backend"
+bin/services >/dev/null
 docker buildx build --load -q -t "$image" -f test/Dockerfile . >/dev/null
 setup='bin/rails db:drop db:create db:migrate redmine:plugins:migrate db:schema:dump >/dev/null'
 run() {

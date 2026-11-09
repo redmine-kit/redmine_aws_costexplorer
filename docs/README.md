@@ -76,4 +76,4 @@ For an AWS account that holds several Redmine instances, the costs can be split 
 
 ## License
 
-Redmine Serverless Cost Explorer is released under the GNU General Public License, version 2 or (at your option) any later version. See [LICENSE](../LICENSE). Not affiliated with the Redmine project.
+Redmine Serverless Cost Explorer is released under the GNU General Public License, version 2 or (at your option) any later version. See [LICENSE](../LICENSE). An unofficial Redmine plugin.

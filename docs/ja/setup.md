@@ -1,10 +1,10 @@
-# 準備
+# 導入
 
 Redmine Serverless Cost Explorer を使うために、Redmine に必要なものです。インストール、設定、スケジュール、IAM の権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを足したイメージ(派生のイメージ)のために、Serverless は、デプロイの設定ファイル(`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。既定は無効)から、これらを CloudFormation ですべて用意します。このページは、手で用意するときや、Serverless が作るものを確認するときのためのものです。
 
 <a id="requirements"></a>
 
-## 必要なもの
+## 動作環境
 
 - Redmine 7.0 以降。
 - AWS の gem `aws-sdk-costexplorer`(gem の依存です。チェックアウトでは、プラグインの `Gemfile` が足します)。
@@ -133,7 +133,7 @@ bin/services --down # PostgreSQL と、moto か LocalStack を止める
 
 <a id="to-verify"></a>
 
-## 確認すること
+## 未確認の事項
 
 - 実際のアカウントでの要求と応答(テストはスタブと moto)。サービスごとの `GetCostAndUsage` のページの数も
 - 予測を、コンソールの月末の予測と比べる

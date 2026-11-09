@@ -19,9 +19,11 @@ module RedmineServerlessCostexplorer
 
       assert_response :success
       assert_select 'h3', text: 'Costs of this AWS account'
-      assert_select '#serverless-costexplorer-summary tr', text: /This month so far\s*7\.51 USD/
-      assert_select '#serverless-costexplorer-summary tr', text: /Forecast for this month\s*22\.20 USD/
-      assert_select '#serverless-costexplorer-summary tr', text: /Previous month\s*22\.48 USD/
+      assert_select '#serverless-costexplorer-summary p', text: /This month so far\s*7\.51 USD/
+      assert_select '#serverless-costexplorer-summary.box.tabular p label', text: 'This month so far'
+      assert_select 'table#serverless-costexplorer-summary', 0
+      assert_select '#serverless-costexplorer-summary p', text: /Forecast for this month\s*22\.20 USD/
+      assert_select '#serverless-costexplorer-summary p', text: /Previous month\s*22\.48 USD/
       assert_select '#serverless-costexplorer-services tbody tr', 4
       assert_select '#serverless-costexplorer-services tbody tr:first-child',
                     text: /Amazon Relational Database Service\s*7\.10 USD\s*20\.50 USD/
@@ -60,7 +62,7 @@ module RedmineServerlessCostexplorer
       snapshot.update!(data: snapshot.data.merge('forecast' => { 'error' => 'DataUnavailableException: x' }))
       with_enabled { get :index }
 
-      assert_select '#serverless-costexplorer-summary tr',
+      assert_select '#serverless-costexplorer-summary p',
                     text: /Cost Explorer has no forecast\.\s*DataUnavailableException/
     end
 
@@ -87,7 +89,9 @@ module RedmineServerlessCostexplorer
 
       assert_select '#serverless-costexplorer-error', text: /The daily fetch started at .* failed/
       assert_select '#serverless-costexplorer-error', text: /NetworkingError/
+      assert_select 'div.flash.error#serverless-costexplorer-error'
       assert_select '#serverless-costexplorer-error', text: /could not be reached/
+      assert_not_includes response.body, 'execution expired', 'the message stays in the log'
       assert_select '#serverless-costexplorer-summary'
     end
 
@@ -95,7 +99,7 @@ module RedmineServerlessCostexplorer
       ServerlessCostexplorerSnapshot.request!(ServerlessCostexplorerSnapshot::SCHEDULE)
       with_enabled { get :index }
 
-      assert_select 'p.flash.notice', text: /The daily fetch started at .* is running/
+      assert_select 'div.flash.notice', text: /The daily fetch started at .* is running/
     end
 
     def test_no_refresh_route

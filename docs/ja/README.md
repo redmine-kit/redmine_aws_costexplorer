@@ -25,6 +25,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 主な表示は、アカウント全体です。見出しは「この AWS アカウントの費用」です。
 
+![「Cost Explorer」のタブ。今月これまで、今月の予測、先月の費用と、サービスごと、日ごと、タグ redmine:instance ごとの費用](./images/costexplorer.png)
 
 | 欄 | 内容 | Cost Explorer への要求 |
 | --- | --- | --- |

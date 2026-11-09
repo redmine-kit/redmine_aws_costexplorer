@@ -21,6 +21,8 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 
 The main view is the whole account, titled "Costs of this AWS account".
 
+![The Cost Explorer tab: this month so far, the forecast and the previous month, costs by service, by day and by the tag redmine:instance](./images/costexplorer.png)
+
 | Section | Contents | Cost Explorer request |
 | --- | --- | --- |
 | This month so far | The month's costs until today, including today's costs so far | `GetCostAndUsage`, monthly, by service, from the first day of the previous month to tomorrow (the sum of the services) |

@@ -60,11 +60,14 @@ bundle install
 
 設定の画面はありません。設定は 2 つとも環境変数で、デプロイが設定します(Serverless では `redmine.json` から)。
 
-| 設定 | 場所 | 内容 |
+| キー | 説明 | パラメーター |
 | --- | --- | --- |
-| `REDMINE_COSTEXPLORER_ENABLED` | web のプロセスと、rake のタスクを実行するプロセスの環境変数 | `true` でプラグインが有効になる。ほかの値や、ないときは無効のまま。rake のタスクは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する |
-| `REDMINE_COSTEXPLORER_TAG_KEY` | 同じ | オプション。コスト配分タグのキー(ふつうは `redmine:instance`)。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional))。空かないとき: 無効(既定)で、タグの要求も送らない。Serverless では、`redmine.json` の `costExplorer.allocationTag` が設定する |
-| AWS の認証情報とリージョン | SDK のいつもの取得元(Lambda のロール、インスタンスプロファイル、`AWS_*` の変数) | プラグインは、Redmine のリージョンにかかわらず、いつも `us-east-1` の Cost Explorer を呼ぶ |
+| `REDMINE_COSTEXPLORER_ENABLED` | プラグインを有効にする。無効のときは、rake のタスクは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する | 必須。`true` で有効。ほかの値やないときは無効。web のプロセスと、rake のタスクを実行するプロセスに設定する |
+| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空かないときは無効(既定)で、タグの要求も送らない。設定するプロセスは `REDMINE_COSTEXPLORER_ENABLED` と同じ。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
+
+| 項目 | 説明 | 変える場所 |
+| --- | --- | --- |
+| AWS の認証情報とリージョン | プラグインは、Redmine のリージョンにかかわらず、いつも `us-east-1` の Cost Explorer を呼ぶ | SDK のいつもの取得元(Lambda のロール、インスタンスプロファイル、`AWS_*` の変数) |
 
 - **タグを有効にする:** Billing and Cost Management のコンソール(コスト配分タグ)で、タグのキーをコスト配分タグとして有効にします。`REDMINE_COSTEXPLORER_TAG_KEY` を使うときだけ必要です。有効になるまで、最大で 24 時間かかります。
 

@@ -18,7 +18,7 @@ AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画�
 - Web サイト: https://redmine-kit.github.io/redmine_serverless_costexplorer/ja/ (English: https://redmine-kit.github.io/redmine_serverless_costexplorer/)
 - Markdown: [docs/ja/README.md](docs/ja/README.md) (English: [docs/README.md](docs/README.md))。[準備](docs/ja/setup.md)と [IAM の権限](docs/ja/iam.md)があります。
 
-<a id="license"></a>
+<a id="sponsors"></a>
 
 ## スポンサー
 
@@ -29,6 +29,8 @@ AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画�
   </picture>
 </a>
 
+<a id="license"></a>
+
 ## ライセンス
 
-Redmine Serverless Cost Explorer は、GNU General Public License バージョン 2 またはそれ以降のバージョンで公開しています。[LICENSE](LICENSE) を参照してください。Redmine project とは関係ありません。
+Redmine Serverless Cost Explorer は、GNU General Public License バージョン 2 またはそれ以降のバージョンで公開しています。[LICENSE](LICENSE) を参照してください。Redmine projectとは関係ありません。

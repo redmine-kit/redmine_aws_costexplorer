@@ -77,11 +77,11 @@ The permissions the plugin needs, with an example policy, are in [iam.md](iam.md
 
 ## Tests
 
-The tests are in `test/` and run with Redmine's standard mechanism, in Redmine 7.0.3 on PostgreSQL 16 and moto in Docker.
+The tests are in `test/` and run with Redmine's standard mechanism, in Redmine 7.0.3 on PostgreSQL 16 and moto in Docker, and also on LocalStack when `LOCALSTACK_AUTH_TOKEN` is set.
 
 - **Unit and functional tests:** SDK response stubs. The answers are JSON bodies in `test/fixtures/cost_explorer/`, which the SDK parses as real answers. They follow the response syntax of the API reference; they are not recorded from an account, because the tests have no AWS account.
 - **Integration tests on moto:** moto answers `GetCostAndUsage` with results given in advance through its API (`/moto-api/static/ce/cost-and-usage-results`), so the requests and the parsing run through the SDK and HTTP. moto has no `GetCostForecast` (it answers 500), which also tests a fetch without a forecast. The rake task runs against moto too.
-- **No LocalStack:** LocalStack implements `GetCostAndUsage` only in its Ultimate plan and without cost data, and has no `GetCostForecast` (LocalStack's Cost Explorer page, checked on 2026-11-10), so the tests do not use it.
+- **LocalStack:** With `LOCALSTACK_AUTH_TOKEN` (in CI, the organization's secret), `bin/services` also starts LocalStack, and `test/integration/localstack_test.rb` sends the plugin's requests to it (`GetCostAndUsage` monthly by service, monthly by tag and daily, `GetCostForecast`, and a whole fetch with the tag) and prints the answers in the log. LocalStack's Cost Explorer is in its Ultimate plan, and its page lists `GetCostAndUsage` but not `GetCostForecast`, and says that it has no cost data (LocalStack's Cost Explorer page, checked on 2026-11-10). What it returns has not been checked yet: on 2026-11-10 the license in CI was expired, and LocalStack did not start. LocalStack is an extra check, so when it does not start, `bin/services` shows its logs and the tests run on moto only; the log says which (`AWS backends: ...`).
 
 `bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer).
 
@@ -89,11 +89,12 @@ The tests are in `test/` and run with Redmine's standard mechanism, in Redmine 7
 bin/test            # the plugin's tests and Redmine's tests around administration
 bin/test --redmine  # with every Redmine test
 bin/lint            # RuboCop
-bin/services --down # stops PostgreSQL and moto
+bin/services --down # stops PostgreSQL, moto and LocalStack
 ```
 
 ## To verify
 
+- What LocalStack's Cost Explorer returns for the plugin's requests
 - The requests and the answers in a real account (the tests use stubs and moto), including the number of pages of `GetCostAndUsage` by service
 - The forecast against the console's month-end forecast
 - The access error in a member account without "Linked account access"

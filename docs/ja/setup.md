@@ -93,11 +93,11 @@ bin/rake redmine_serverless_costexplorer:refresh
 
 ## テスト
 
-テストは `test/` にあり、Redmine の標準のしくみで、Docker の Redmine 7.0.3、PostgreSQL 16、moto で動かします。
+テストは `test/` にあり、Redmine の標準のしくみで、Docker の Redmine 7.0.3、PostgreSQL 16、moto で動かします。`LOCALSTACK_AUTH_TOKEN` があれば、LocalStack でも動かします。
 
 - **単体テストと機能テスト:** SDK の応答のスタブを使います。応答は `test/fixtures/cost_explorer/` の JSON の本文で、SDK が、実際の応答と同じように解析します。API リファレンスの応答の構文に合わせたもので、アカウントから記録したものではありません。テストには AWS のアカウントがないためです。
 - **moto での結合テスト:** moto は、API で前もって渡した結果(`/moto-api/static/ce/cost-and-usage-results`)で `GetCostAndUsage` に答えます。要求と解析は、SDK と HTTP を通ります。moto には `GetCostForecast` がない(500 を返す)ので、予測のない取得のテストにもなります。rake のタスクも moto に対して動かします。
-- **LocalStack は使わない:** LocalStack は、`GetCostAndUsage` を Ultimate のプランでだけ実装し、費用のデータはなく、`GetCostForecast` はありません(LocalStack の Cost Explorer のページ。2026-11-10 に確認)。そのため、テストでは使いません。
+- **LocalStack:** `LOCALSTACK_AUTH_TOKEN`(CI では組織のシークレット)があると、`bin/services` が LocalStack も起動し、`test/integration/localstack_test.rb` が、プラグインの要求(サービスごとの月ごと、タグごとの月ごと、日ごとの `GetCostAndUsage`、`GetCostForecast`、タグありの取得の全体)を送って、応答をログに出します。LocalStack の Cost Explorer は Ultimate のプランのもので、そのページには `GetCostAndUsage` はあり、`GetCostForecast` はなく、費用のデータはないと書かれています(LocalStack の Cost Explorer のページ。2026-11-10 に確認)。実際に何を返すかは、まだ確認していません。2026-11-10 には、CI のライセンスが期限切れで、LocalStack が起動しませんでした。LocalStack は追加の確認なので、起動しないときは、`bin/services` がログを出し、テストは moto だけで動きます。どちらで動いたかはログに出ます(`AWS backends: ...`)。
 
 `bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインを入れた状態で Redmine のすべてのテストを動かします。プラグインのテストは、プラグインのファイルのカバレッジ(SimpleCov。Cobertura の XML を `coverage/coverage.xml` に)も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer) に送ります。
 
@@ -105,13 +105,14 @@ bin/rake redmine_serverless_costexplorer:refresh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト
 bin/test --redmine  # Redmine のすべてのテストも
 bin/lint            # RuboCop
-bin/services --down # PostgreSQL と moto を止める
+bin/services --down # PostgreSQL、moto、LocalStack を止める
 ```
 
 <a id="to-verify"></a>
 
 ## 確認すること
 
+- プラグインの要求に、LocalStack の Cost Explorer が何を返すか
 - 実際のアカウントでの要求と応答(テストはスタブと moto)。サービスごとの `GetCostAndUsage` のページの数も
 - 予測を、コンソールの月末の予測と比べる
 - 「Linked account access」のないメンバーアカウントでのアクセスのエラー

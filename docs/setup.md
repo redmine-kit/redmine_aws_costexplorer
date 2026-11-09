@@ -52,8 +52,8 @@ The plugin has no settings page; both settings are environment variables, which 
 
 | Key | Description | Parameter |
 | --- | --- | --- |
-| `REDMINE_COSTEXPLORER_ENABLED` | Turns the plugin on. When it is off, the rake task makes no requests, and the "Cost Explorer" tab says that the plugin is off | Required. `true` turns it on; any other value, or none, leaves it off. Set it in the web process and in the process that runs the rake task |
-| `REDMINE_COSTEXPLORER_TAG_KEY` | The key of a cost allocation tag, to also show the costs by its values ([README.md](README.md#costs-by-tag-optional)) | Optional. Example: `redmine:instance`. Empty or unset: off (the default), and no tag request is made. Set it in the same processes as `REDMINE_COSTEXPLORER_ENABLED`. In Serverless, `costExplorer.allocationTag` in `redmine.json` sets it |
+| `REDMINE_COSTEXPLORER_ENABLED` | Turns the plugin on. When it is off, the rake task makes no requests, and the "Cost Explorer" tab says that the plugin is off | Required. `true` turns it on; any other value, or none, leaves it off. Set it in the process that runs the rake task (to fetch) and in the web process (the tab says whether the plugin is on) |
+| `REDMINE_COSTEXPLORER_TAG_KEY` | The key of a cost allocation tag, to also show the costs by its values ([README.md](README.md#costs-by-tag-optional)) | Optional. Example: `redmine:instance`. Empty or unset: off (the default), and no tag request is made. Set it only in the process that runs the rake task; the tab takes the tag from the stored data. In Serverless, `costExplorer.allocationTag` in `redmine.json` sets it |
 
 | Item | Description | Where to change |
 | --- | --- | --- |

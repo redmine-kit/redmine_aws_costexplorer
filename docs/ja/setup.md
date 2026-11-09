@@ -62,8 +62,8 @@ bundle install
 
 | キー | 説明 | パラメーター |
 | --- | --- | --- |
-| `REDMINE_COSTEXPLORER_ENABLED` | プラグインを有効にする。無効のときは、rake のタスクは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する | 必須。`true` で有効。ほかの値やないときは無効。web のプロセスと、rake のタスクを実行するプロセスに設定する |
-| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空かないときは無効(既定)で、タグの要求も送らない。設定するプロセスは `REDMINE_COSTEXPLORER_ENABLED` と同じ。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
+| `REDMINE_COSTEXPLORER_ENABLED` | プラグインを有効にする。無効のときは、rake のタスクは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する | 必須。`true` で有効。ほかの値やないときは無効。rake のタスクを実行するプロセス(取得のため)と、web のプロセス(タブが、プラグインが有効かを表示するため)に設定する |
+| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空かないときは無効(既定)で、タグの要求も送らない。rake のタスクを実行するプロセスにだけ設定する。タブは、保存したデータからタグを読む。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
 
 | 項目 | 説明 | 変える場所 |
 | --- | --- | --- |

@@ -1,0 +1,28 @@
+en:
+  label_serverless_admin: Serverless
+  label_serverless_costs: Costs
+  label_serverless_costs_account: Costs of this AWS account
+  label_serverless_costs_month_to_date: This month so far
+  label_serverless_costs_forecast: Forecast for this month
+  label_serverless_costs_previous_month: Previous month
+  label_serverless_costs_this_month: This month
+  label_serverless_costs_by_service: By service
+  label_serverless_costs_service: Service
+  label_serverless_costs_daily: Daily, last 30 days
+  label_serverless_costs_amount: Cost
+  label_serverless_costs_by_tag: "By the cost allocation tag %{tag}"
+  label_serverless_costs_untagged: (no tag)
+  label_serverless_costs_estimated: estimated
+  label_serverless_costs_refresh: Refresh
+  button_serverless_costs_refresh: Refresh
+  notice_serverless_costs_refresh_started: The refresh has been queued.
+  error_serverless_costs_refresh_too_soon: "Refreshing is allowed once per hour. The next refresh is possible at %{time}."
+  text_serverless_costs_disabled: REDMINE_COST_ENABLED is not true, so the plugin does not fetch the costs.
+  text_serverless_costs_about: "Unblended costs from AWS Cost Explorer, fetched at %{time}. Cost Explorer updates its data about once a day."
+  text_serverless_costs_no_forecast: Cost Explorer has no forecast.
+  text_serverless_costs_no_tag_data: "No costs carry the tag %{tag} yet. Activate it as a cost allocation tag in the Billing and Cost Management console. AWS takes up to a day to activate it."
+  text_serverless_costs_pending: "A refresh requested at %{time} is waiting or running."
+  text_serverless_costs_failed: "The refresh requested at %{time} failed:"
+  text_serverless_costs_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) could not be reached. A network without internet access needs a route to it, such as a NAT.
+  text_serverless_costs_refresh: "Fetches the costs from Cost Explorer again now. A refresh makes %{count} requests, and AWS charges each request. A scheduled refresh runs daily, and this button may be used once per hour."
+  text_serverless_costs_refresh_after: "Possible again at %{time}."

@@ -1,0 +1,28 @@
+ja:
+  label_serverless_admin: Serverless
+  label_serverless_costs: 費用
+  label_serverless_costs_account: この AWS アカウントの費用
+  label_serverless_costs_month_to_date: 今月これまで
+  label_serverless_costs_forecast: 今月の予測
+  label_serverless_costs_previous_month: 先月
+  label_serverless_costs_this_month: 今月
+  label_serverless_costs_by_service: サービスごと
+  label_serverless_costs_service: サービス
+  label_serverless_costs_daily: 日ごと(過去 30 日)
+  label_serverless_costs_amount: 費用
+  label_serverless_costs_by_tag: "コスト配分タグ %{tag} ごと"
+  label_serverless_costs_untagged: (タグなし)
+  label_serverless_costs_estimated: 見込み
+  label_serverless_costs_refresh: 更新
+  button_serverless_costs_refresh: 更新
+  notice_serverless_costs_refresh_started: 更新をキューに入れました。
+  error_serverless_costs_refresh_too_soon: "更新は 1 時間に 1 回までです。次は %{time} から更新できます。"
+  text_serverless_costs_disabled: REDMINE_COST_ENABLED が true ではないので、プラグインは費用を取得しません。
+  text_serverless_costs_about: "AWS Cost Explorer の非ブレンドコストです。%{time} に取得しました。Cost Explorer のデータは、およそ 1 日に 1 回更新されます。"
+  text_serverless_costs_no_forecast: Cost Explorer に予測がありません。
+  text_serverless_costs_no_tag_data: "タグ %{tag} の付いた費用は、まだありません。Billing and Cost Management のコンソールで、コスト配分タグとして有効にしてください。有効になるまで、最大で 1 日かかります。"
+  text_serverless_costs_pending: "%{time} に依頼した更新が、待ちか実行中です。"
+  text_serverless_costs_failed: "%{time} に依頼した更新が失敗しました:"
+  text_serverless_costs_unreachable: Cost Explorer(ce.us-east-1.amazonaws.com)につながりませんでした。インターネットにつながらないネットワークでは、NAT などの経路が必要です。
+  text_serverless_costs_refresh: "今すぐ Cost Explorer から費用を取得し直します。1 回の更新で %{count} 件の要求を送り、AWS は要求ごとに課金します。毎日の定期の更新とは別に、このボタンは 1 時間に 1 回まで使えます。"
+  text_serverless_costs_refresh_after: "%{time} から使えます。"

@@ -1,0 +1,26 @@
+{
+  "GroupDefinitions": [{ "Type": "DIMENSION", "Key": "SERVICE" }],
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-10-01", "End": "2026-11-01" },
+      "Total": {},
+      "Groups": [
+        { "Keys": ["AWS Lambda"], "Metrics": { "UnblendedCost": { "Amount": "1.2345678901", "Unit": "USD" } } },
+        { "Keys": ["Amazon Relational Database Service"], "Metrics": { "UnblendedCost": { "Amount": "20.5", "Unit": "USD" } } },
+        { "Keys": ["Amazon Simple Storage Service"], "Metrics": { "UnblendedCost": { "Amount": "0.75", "Unit": "USD" } } }
+      ],
+      "Estimated": false
+    },
+    {
+      "TimePeriod": { "Start": "2026-11-01", "End": "2026-11-11" },
+      "Total": {},
+      "Groups": [
+        { "Keys": ["AWS Lambda"], "Metrics": { "UnblendedCost": { "Amount": "0.4", "Unit": "USD" } } },
+        { "Keys": ["Amazon Relational Database Service"], "Metrics": { "UnblendedCost": { "Amount": "7.1", "Unit": "USD" } } },
+        { "Keys": ["Amazon CloudFront"], "Metrics": { "UnblendedCost": { "Amount": "0.01", "Unit": "USD" } } }
+      ],
+      "Estimated": true
+    }
+  ],
+  "DimensionValueAttributes": []
+}

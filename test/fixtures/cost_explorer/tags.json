@@ -1,0 +1,24 @@
+{
+  "GroupDefinitions": [{ "Type": "TAG", "Key": "redmine:instance" }],
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-10-01", "End": "2026-11-01" },
+      "Total": {},
+      "Groups": [
+        { "Keys": ["redmine:instance$"], "Metrics": { "UnblendedCost": { "Amount": "2.5", "Unit": "USD" } } },
+        { "Keys": ["redmine:instance$prod"], "Metrics": { "UnblendedCost": { "Amount": "19.98", "Unit": "USD" } } }
+      ],
+      "Estimated": false
+    },
+    {
+      "TimePeriod": { "Start": "2026-11-01", "End": "2026-11-11" },
+      "Total": {},
+      "Groups": [
+        { "Keys": ["redmine:instance$prod"], "Metrics": { "UnblendedCost": { "Amount": "6.0", "Unit": "USD" } } },
+        { "Keys": ["redmine:instance$staging"], "Metrics": { "UnblendedCost": { "Amount": "1.51", "Unit": "USD" } } }
+      ],
+      "Estimated": true
+    }
+  ],
+  "DimensionValueAttributes": []
+}

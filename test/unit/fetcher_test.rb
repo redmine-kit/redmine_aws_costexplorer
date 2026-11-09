@@ -2,9 +2,9 @@
 
 require_relative '../test_helper'
 
-module RedmineServerlessCost
+module RedmineServerlessCostexplorer
   class FetcherTest < ActiveSupport::TestCase
-    include RedmineServerlessCost::TestHelper
+    include RedmineServerlessCostexplorer::TestHelper
 
     def test_the_account_costs
       data = fetcher.fetch

@@ -1,13 +1,13 @@
 # Setup
 
-What a Redmine needs to use Redmine Serverless Cost: installation, configuration, the schedule, IAM permissions and network access. [Serverless](https://redmine-kit.github.io/serverless/) sets all of this up with CloudFormation from its deployment configuration file (`cost.enabled` and `cost.allocationTag` in `redmine.json`); this page is for setting it up by hand, or for checking what Serverless creates.
+What a Redmine needs to use Redmine Serverless Cost Explorer: installation, configuration, the schedule, IAM permissions and network access. [Serverless](https://redmine-kit.github.io/serverless/)'s image does not include the plugin. For an image that adds it (a derived image), Serverless sets all of this up with CloudFormation from its deployment configuration file (`costExplorer.enabled` and `costExplorer.allocationTag` in `redmine.json`, off by default); this page is for setting it up by hand, or for checking what Serverless creates.
 
 ## Requirements
 
 - Redmine 7.0 or later.
 - AWS's gem `aws-sdk-costexplorer` (a dependency of the gem; with a checkout, the plugin's `Gemfile` adds it).
 - An AWS account where Cost Explorer is enabled ([README.md](README.md#notes)). In a member account of AWS Organizations, the management account must allow member accounts to use Cost Explorer.
-- Something that runs the rake task daily, and something that runs Redmine's jobs (for the "Refresh" button).
+- Something that runs the rake task daily, and something that runs Redmine's jobs (for the fetches when the tab is opened and the "Refresh" button).
 
 ## Installation
 
@@ -16,20 +16,20 @@ What a Redmine needs to use Redmine Serverless Cost: installation, configuration
 ```ruby
 # Redmine's Gemfile.local
 source 'https://rubygems.pkg.github.com/redmine-kit' do
-  gem 'redmine_serverless_cost'
+  gem 'redmine_serverless_costexplorer'
 end
 ```
 
 ```sh
 bundle config set --global rubygems.pkg.github.com <user>:<token>   # or the variable BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 bundle install
-ln -s "$(bundle info --path redmine_serverless_cost)" plugins/redmine_serverless_cost
+ln -s "$(bundle info --path redmine_serverless_costexplorer)" plugins/redmine_serverless_costexplorer
 ```
 
-Without the gem, clone the repository into `plugins/redmine_serverless_cost` (`git clone https://github.com/redmine-kit/redmine_serverless_cost.git plugins/redmine_serverless_cost`) and run `bundle install` (Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`).
+Without the gem, clone the repository into `plugins/redmine_serverless_costexplorer` (`git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer`) and run `bundle install` (Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`).
 
-1. Put the plugin in `plugins/redmine_serverless_cost` as above.
-2. Run `bin/rake redmine:plugins:migrate`. It creates the table of snapshots (`serverless_cost_snapshots`).
+1. Put the plugin in `plugins/redmine_serverless_costexplorer` as above.
+2. Run `bin/rake redmine:plugins:migrate`. It creates the table of snapshots (`serverless_costexplorer_snapshots`).
 3. Set the environment variables (below) and the schedule ([Schedule](#schedule)).
 
 ## Configuration
@@ -38,11 +38,11 @@ The plugin has no settings page; both settings are environment variables, which 
 
 | Setting | Where | Contents |
 | --- | --- | --- |
-| `REDMINE_COST_ENABLED` | Environment variable of every process (web, jobs, rake) | `true` turns the plugin on. Any other value, or none, leaves it off: the rake task and the job make no requests, and the "Costs" tab says that the plugin is off |
-| `REDMINE_COST_TAG_KEY` | Same | Optional. The key of a cost allocation tag, normally `redmine:instance`, to also show the costs by its values ([README.md](README.md#costs-by-tag-optional)). Empty or unset: off (the default), and no tag request is made. In Serverless, `cost.allocationTag` in `redmine.json` sets it |
+| `REDMINE_COSTEXPLORER_ENABLED` | Environment variable of every process (web, jobs, rake) | `true` turns the plugin on. Any other value, or none, leaves it off: the rake task and the job make no requests, and the "Cost Explorer" tab says that the plugin is off |
+| `REDMINE_COSTEXPLORER_TAG_KEY` | Same | Optional. The key of a cost allocation tag, normally `redmine:instance`, to also show the costs by its values ([README.md](README.md#costs-by-tag-optional)). Empty or unset: off (the default), and no tag request is made. In Serverless, `costExplorer.allocationTag` in `redmine.json` sets it |
 | AWS credentials and region | The SDK's usual sources (the Lambda role, an instance profile, `AWS_*` variables) | The plugin always calls Cost Explorer in `us-east-1`, whatever the region of Redmine |
 
-- **Turning on the tag:** Activate the tag key as a cost allocation tag in the Billing and Cost Management console (Cost allocation tags). This is needed only with `REDMINE_COST_TAG_KEY`. AWS takes up to 24 hours to activate it.
+- **Turning on the tag:** Activate the tag key as a cost allocation tag in the Billing and Cost Management console (Cost allocation tags). This is needed only with `REDMINE_COSTEXPLORER_TAG_KEY`. AWS takes up to 24 hours to activate it.
 
 ## AWS resources
 
@@ -50,15 +50,15 @@ The plugin creates no AWS resources and needs none of its own. Cost Explorer's A
 
 ### Schedule
 
-Run the rake task `redmine_serverless_cost:refresh` once a day:
+Run the rake task `redmine_serverless_costexplorer:refresh` once a day:
 
 ```sh
-bin/rake redmine_serverless_cost:refresh
+bin/rake redmine_serverless_costexplorer:refresh
 ```
 
 - **Time:** Any time of day; Cost Explorer updates its data about once a day. Once a day costs 3 or 4 requests ([README.md](README.md#fetching-the-costs)).
 - **Exit status:** The task fails (non-zero exit, with the error on standard error) when the fetch fails, so that the scheduler records the failure. With the plugin off, it prints that nothing was fetched and succeeds.
-- **In Serverless:** An EventBridge rule (`<instance>-cost-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_serverless_cost:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)).
+- **In Serverless:** An EventBridge rule (`<instance>-costexplorer-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_serverless_costexplorer:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)).
 - **Elsewhere:** cron, a systemd timer or a scheduled container task that runs the command in Redmine's directory with the environment of Redmine.
 
 ## IAM permissions
@@ -73,7 +73,7 @@ The permissions the plugin needs, with an example policy, are in [iam.md](iam.md
 
 - **Which processes:** Only the processes that fetch: the one running the rake task, and the one running Redmine's jobs. The web process does not call Cost Explorer when jobs run elsewhere (with Rails's default adapter, jobs run inside the web process, which then calls it).
 - **Interface endpoint:** The AWS PrivateLink Guide lists "AWS Cost Explorer" with the service name `com.amazonaws.<region>.ce` ("AWS services that integrate with AWS PrivateLink", checked on 2026-11-10). Cost Explorer's API is in `us-east-1`. Whether the endpoint is offered in other regions, and whether it serves `ce.us-east-1.amazonaws.com` to a VPC in another region, has not been checked; Serverless's `network.mode` `endpoints` does not create it.
-- **Unreachable:** With no route, the requests time out (the plugin opens connections with a 5-second timeout and retries twice). The "Costs" tab shows the error and says that a route is needed.
+- **Unreachable:** With no route, the requests time out (the plugin opens connections with a 5-second timeout and retries twice). The "Cost Explorer" tab shows the error and says that a route is needed.
 
 ## Tests
 
@@ -83,7 +83,7 @@ The tests are in `test/` and run with Redmine's standard mechanism, in Redmine 7
 - **Integration tests on moto:** moto answers `GetCostAndUsage` with results given in advance through its API (`/moto-api/static/ce/cost-and-usage-results`), so the requests and the parsing run through the SDK and HTTP. moto has no `GetCostForecast` (it answers 500), which also tests a fetch without a forecast. The rake task runs against moto too.
 - **No LocalStack:** LocalStack implements `GetCostAndUsage` only in its Ultimate plan and without cost data, and has no `GetCostForecast` (LocalStack's Cost Explorer page, checked on 2026-11-10), so the tests do not use it.
 
-`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_cost).
+`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer).
 
 ```sh
 bin/test            # the plugin's tests and Redmine's tests around administration

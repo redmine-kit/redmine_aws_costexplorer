@@ -16,7 +16,7 @@ end
 
 require File.expand_path('../../../test/test_helper', __dir__)
 
-module RedmineServerlessCost
+module RedmineServerlessCostexplorer
   module TestHelper
     TODAY = Date.new(2026, 11, 10)
     FIXTURES = File.expand_path('fixtures/cost_explorer', __dir__)
@@ -60,7 +60,7 @@ module RedmineServerlessCost
     end
 
     def fetcher(client = stub_cost_explorer, tag_key: nil)
-      RedmineServerlessCost::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
+      RedmineServerlessCostexplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
     end
 
     # Runs the block with the environment variables set (nil unsets one).
@@ -73,22 +73,22 @@ module RedmineServerlessCost
     end
 
     def with_enabled(tag_key: nil, &)
-      with_env({ 'REDMINE_COST_ENABLED' => 'true', 'REDMINE_COST_TAG_KEY' => tag_key }, &)
+      with_env({ 'REDMINE_COSTEXPLORER_ENABLED' => 'true', 'REDMINE_COSTEXPLORER_TAG_KEY' => tag_key }, &)
     end
 
     # A snapshot fetched from the fixtures.
     def fetched_snapshot(tag_key: nil, requested_at: 2.hours.ago)
-      snapshot = ServerlessCostSnapshot.create!(requested_at: requested_at, requested_by: 'schedule')
+      snapshot = ServerlessCostexplorerSnapshot.create!(requested_at: requested_at, requested_by: 'schedule')
       snapshot.fetch!(fetcher(tag_key: tag_key))
       snapshot
     end
 
     # Makes every new Fetcher use the given client.
     def with_fetcher_client(client)
-      RedmineServerlessCost::Fetcher.any_instance.stubs(:client).returns(client)
+      RedmineServerlessCostexplorer::Fetcher.any_instance.stubs(:client).returns(client)
       yield
     ensure
-      RedmineServerlessCost::Fetcher.any_instance.unstub(:client)
+      RedmineServerlessCostexplorer::Fetcher.any_instance.unstub(:client)
     end
   end
 end

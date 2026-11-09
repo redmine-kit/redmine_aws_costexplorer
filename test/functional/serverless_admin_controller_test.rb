@@ -2,7 +2,7 @@
 
 require_relative '../test_helper'
 
-module RedmineServerlessCost
+module RedmineServerlessCostexplorer
   # The shared Serverless menu, with only this plugin installed.
   class ServerlessAdminControllerTest < Redmine::ControllerTest
     tests ServerlessAdminController
@@ -11,7 +11,7 @@ module RedmineServerlessCost
       @request.session[:user_id] = 1
       get :index
 
-      assert_redirected_to '/admin/serverless/costs'
+      assert_redirected_to '/admin/serverless/costexplorer'
     end
 
     def test_one_menu_item

@@ -4,12 +4,12 @@ require_relative '../test_helper'
 require 'net/http'
 require 'rake'
 
-module RedmineServerlessCost
+module RedmineServerlessCostexplorer
   # On moto, through the SDK's real requests and parsing. moto answers
   # GetCostAndUsage with results given in advance through its API, in the
   # order of the requests; it has no GetCostForecast (docs/setup.md#tests).
   class CostExplorerTest < ActiveSupport::TestCase
-    include RedmineServerlessCost::TestHelper
+    include RedmineServerlessCostexplorer::TestHelper
 
     ENDPOINT = ENV.fetch('MOTO_ENDPOINT_URL', 'http://moto:5000')
 
@@ -52,12 +52,12 @@ module RedmineServerlessCost
 
     def test_the_rake_task_keeps_a_snapshot
       give_results('services', 'daily')
-      Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_serverless_cost:refresh')
-      task = Rake::Task['redmine_serverless_cost:refresh']
+      Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_serverless_costexplorer:refresh')
+      task = Rake::Task['redmine_serverless_costexplorer:refresh']
       task.reenable
       with_enabled { with_fetcher_client(@client) { capture_io { task.invoke } } }
 
-      snapshot = ServerlessCostSnapshot.latest
+      snapshot = ServerlessCostexplorerSnapshot.latest
 
       assert_equal 'schedule', snapshot.requested_by
       assert_equal 30, snapshot.data['daily'].size

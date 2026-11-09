@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-# Redmine Serverless Cost: the AWS account's costs from Cost Explorer on the
-# "Costs" tab of the Serverless administration page (docs/README.md).
+# Redmine Serverless Cost Explorer: the AWS account's costs from Cost Explorer on the
+# "Cost Explorer" tab of the Serverless administration page (docs/README.md).
 #
-# The plugin is on only when REDMINE_COST_ENABLED is true. The page never
-# calls Cost Explorer: the rake task redmine_serverless_cost:refresh (daily)
+# The plugin is on only when REDMINE_COSTEXPLORER_ENABLED is true. The page never
+# calls Cost Explorer: the rake task redmine_serverless_costexplorer:refresh (daily)
 # and the "Refresh" button fetch the costs and keep them in
-# serverless_cost_snapshots.
-module RedmineServerlessCost
+# serverless_costexplorer_snapshots.
+module RedmineServerlessCostexplorer
   VERSION = '0.1.0'
 
   # Environment variables (docs/setup.md#configuration).
-  ENV_ENABLED = 'REDMINE_COST_ENABLED'
-  ENV_TAG_KEY = 'REDMINE_COST_TAG_KEY'
+  ENV_ENABLED = 'REDMINE_COSTEXPLORER_ENABLED'
+  ENV_TAG_KEY = 'REDMINE_COSTEXPLORER_TAG_KEY'
 
   # The "Refresh" button may start a fetch once in this many seconds.
   REFRESH_INTERVAL = 3600
@@ -33,12 +33,13 @@ module RedmineServerlessCost
 
     # Called from init.rb, on every code reload.
     def setup
-      RedmineServerlessAdmin.register_tab(:costs, label: :label_serverless_costs,
-                                                  url: { controller: 'serverless_costs', action: 'index' },
-                                                  position: 60)
+      RedmineServerlessAdmin.register_tab(
+        :costexplorer, label: :label_serverless_costexplorer,
+                       url: { controller: 'serverless_costexplorer', action: 'index' }, position: 60
+      )
       # With Redmine Serverless SQS, only the allowed job classes run from the
       # queue.
-      RedmineServerlessSqsBoot.allow_job('ServerlessCostRefreshJob') if defined?(RedmineServerlessSqsBoot)
+      RedmineServerlessSqsBoot.allow_job('ServerlessCostexplorerRefreshJob') if defined?(RedmineServerlessSqsBoot)
     end
   end
 end

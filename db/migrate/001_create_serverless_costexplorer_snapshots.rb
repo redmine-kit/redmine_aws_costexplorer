@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class CreateServerlessCostSnapshots < ActiveRecord::Migration[7.2]
+class CreateServerlessCostexplorerSnapshots < ActiveRecord::Migration[7.2]
   def change
-    create_table :serverless_cost_snapshots do |t|
+    create_table :serverless_costexplorer_snapshots do |t|
       t.datetime :requested_at, null: false
       t.string :requested_by, null: false
       t.datetime :fetched_at
@@ -10,6 +10,6 @@ class CreateServerlessCostSnapshots < ActiveRecord::Migration[7.2]
       t.text :error
       t.integer :requests, null: false, default: 0
     end
-    add_index :serverless_cost_snapshots, :requested_at
+    add_index :serverless_costexplorer_snapshots, :requested_at
   end
 end

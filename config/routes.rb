@@ -4,5 +4,6 @@
 # Serverless plugin draws it; the first one matches).
 get 'admin/serverless', to: 'serverless_admin#index'
 
-get 'admin/serverless/costs', to: 'serverless_costs#index', as: 'serverless_costs'
-post 'admin/serverless/costs/refresh', to: 'serverless_costs#refresh', as: 'serverless_costs_refresh'
+get 'admin/serverless/costexplorer', to: 'serverless_costexplorer#index', as: 'serverless_costexplorer'
+post 'admin/serverless/costexplorer/refresh', to: 'serverless_costexplorer#refresh',
+                                              as: 'serverless_costexplorer_refresh'

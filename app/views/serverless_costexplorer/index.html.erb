@@ -127,15 +127,3 @@
 <% end %>
 <% end %>
 
-<% if @enabled %>
-<h3><%= l(:label_serverless_costexplorer_refresh) %></h3>
-<p><%= l(:text_serverless_costexplorer_refresh, count: @tag_key ? 4 : 3) %></p>
-<%= form_tag({ action: 'refresh' }, method: :post) do %>
-  <% if ServerlessCostexplorerSnapshot.refresh_allowed? %>
-    <p><%= submit_tag l(:button_serverless_costexplorer_refresh) %></p>
-  <% else %>
-    <p><%= submit_tag l(:button_serverless_costexplorer_refresh), disabled: true %>
-      <em class="info"><%= l(:text_serverless_costexplorer_refresh_after, time: format_time(ServerlessCostexplorerSnapshot.refresh_allowed_at)) %></em></p>
-  <% end %>
-<% end %>
-<% end %>

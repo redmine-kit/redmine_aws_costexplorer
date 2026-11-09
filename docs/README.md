@@ -14,8 +14,7 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 | Feature | Contents | Enabled when | Page |
 | --- | --- | --- | --- |
 | The "Cost Explorer" tab | The costs of the AWS account: this month so far, the forecast for this month, the previous month, by service, and daily for the last 30 days | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
-| Daily fetch | The rake task `redmine_serverless_costexplorer:refresh` fetches the costs and keeps them in the database, so that data is ready on the first view | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
-| Fetch on view, "Refresh" button | Opening the tab when the data is older than an hour, or the button, queues a fetch, at most once per hour | Same as above | [Fetching the costs](#fetching-the-costs) |
+| Daily fetch | The rake task `redmine_serverless_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
 
 ## What the tab shows
@@ -39,19 +38,17 @@ The main view is the whole account, titled "Costs of this AWS account".
 
 ## Fetching the costs
 
-The page never calls Cost Explorer itself. AWS charges each Cost Explorer API request (USD 0.01 per request, AWS Cost Explorer pricing page, checked on 2026-11-10), so the plugin fetches the costs in the background, keeps them, and fetches again at most once per hour.
+The page never calls Cost Explorer. AWS charges each Cost Explorer API request (USD 0.01 per request, AWS Cost Explorer pricing page, checked on 2026-11-10), and Cost Explorer updates its data about once a day, so the plugin fetches the costs once a day and keeps them.
 
 | How | When | Runs in |
 | --- | --- | --- |
-| Rake task `redmine_serverless_costexplorer:refresh` | Daily, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
-| Opening the tab | When an administrator opens the tab and the latest data is older than an hour. The page shows the stored data at once, with a note that newer data is being fetched; reloading the page shows it | The job `ServerlessCostexplorerRefreshJob`, as below |
-| "Refresh" button | When an administrator asks | The job `ServerlessCostexplorerRefreshJob`, wherever Redmine runs its jobs (with [Redmine Serverless SQS](https://redmine-kit.github.io/redmine_serverless_sqs/), from the job queue; the plugin adds the job to the allowed classes) |
+| Rake task `redmine_serverless_costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
 
-- **At most once per hour:** A fetch from the tab or the button starts only when there was no fetch request of any kind (scheduled, from the tab or from the button) within the last hour. So a request that is still queued or running is not repeated, a failed fetch is not retried within the hour, and a request that never finished stops blocking after an hour. The web process only queues the job; it never calls Cost Explorer.
-- **Requests per fetch:** 3 (`GetCostAndUsage` twice, `GetCostForecast` once), or 4 with the tag. A long answer of `GetCostAndUsage` comes in pages, and each further page is one more request. The page states the count next to the button.
-- **Requests in a month:** The schedule makes 3 or 4 requests a day: about 90 to 120 a month, about USD 0.9 to 1.2. Opening the tab adds at most one fetch per hour. In the worst case, with the tab opened every hour of every business day (8 hours, 22 days) and the tag on: 8 × 22 × 4 = 704 requests, about USD 7 a month (3 requests a fetch without the tag: 528, about USD 5.3). Typical use, a few views a week, makes far fewer.
-- **No retries of a failed fetch:** A failed fetch is recorded with its error and not retried by the job, so that errors do not multiply the requests. The next scheduled run, or a view after the hour, fetches again.
-- **Snapshots:** Each fetch is a row in `serverless_costexplorer_snapshots`: when it was requested and by whom (`schedule`, `view` for the tab, or the administrator's login for the button), when it was fetched, the data (JSON), the error, and the number of requests. The rake task deletes rows older than 90 days after each successful fetch, keeping the latest successful one.
+- **The only fetch:** There is no fetch from the page and no button: the daily run is the only one, so the cost of the requests stays fixed.
+- **Requests per fetch:** 3 (`GetCostAndUsage` twice, `GetCostForecast` once), or 4 with the tag. A long answer of `GetCostAndUsage` comes in pages, and each further page is one more request.
+- **Requests in a month:** 3 or 4 a day: about 90 to 120 a month, about USD 0.9 to 1.2.
+- **A failed fetch:** It is recorded with its error, shown on the tab above the last successful data, and the task fails. The next day's run fetches again.
+- **Snapshots:** Each fetch is a row in `serverless_costexplorer_snapshots`: when it was started and by whom (`schedule`), when it was fetched, the data (JSON), the error, and the number of requests. The rake task deletes rows older than 90 days after each successful fetch, keeping the latest successful one.
 
 ## Costs by tag (optional)
 
@@ -67,7 +64,7 @@ For an AWS account that holds several Redmine instances, the costs can be split 
 - **AWS Organizations:** In a member account, the management account decides whether member accounts may use Cost Explorer (Cost Management preferences › "Linked account access"; AWS Cost Management User Guide, "Controlling access to Cost Explorer", checked on 2026-11-10). Without it, the requests fail with an access error. A member account sees only its own costs.
 - **Enabling Cost Explorer:** Cost Explorer is enabled for an account by opening it once in the console; AWS then prepares the data, which can take up to 24 hours (AWS Cost Management User Guide, "Enabling Cost Explorer", checked on 2026-11-10).
 - **No connection check:** The plugin does not add a check to Redmine Serverless's "Status and connections": each check would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
-- **Code structure:** `lib/redmine_serverless_costexplorer/fetcher.rb` makes the requests, `app/models/serverless_costexplorer_snapshot.rb` keeps the fetches, `app/jobs/serverless_costexplorer_refresh_job.rb` and `lib/tasks/redmine_serverless_costexplorer.rake` run them, and `app/controllers/serverless_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
+- **Code structure:** `lib/redmine_serverless_costexplorer/fetcher.rb` makes the requests, `app/models/serverless_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_serverless_costexplorer.rake` runs them, and `app/controllers/serverless_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
 - **Migrations:** A table for the snapshots (`serverless_costexplorer_snapshots`). Run `redmine:plugins:migrate`.
 
 ## Sponsors

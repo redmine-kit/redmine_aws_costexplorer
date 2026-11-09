@@ -13,16 +13,10 @@ en:
   label_serverless_costexplorer_by_tag: "By the cost allocation tag %{tag}"
   label_serverless_costexplorer_untagged: (no tag)
   label_serverless_costexplorer_estimated: estimated
-  label_serverless_costexplorer_refresh: Refresh
-  button_serverless_costexplorer_refresh: Refresh
-  notice_serverless_costexplorer_refresh_started: The refresh has been queued.
-  error_serverless_costexplorer_refresh_too_soon: "Refreshing is allowed once per hour. The next refresh is possible at %{time}."
   text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED is not true, so the plugin does not fetch the costs.
-  text_serverless_costexplorer_about: "Unblended costs from AWS Cost Explorer, fetched at %{time}. Cost Explorer updates its data about once a day."
+  text_serverless_costexplorer_about: "Unblended costs from AWS Cost Explorer, fetched at %{time}. The costs are fetched once a day."
   text_serverless_costexplorer_no_forecast: Cost Explorer has no forecast.
   text_serverless_costexplorer_no_tag_data: "No costs carry the tag %{tag} yet. Activate it as a cost allocation tag in the Billing and Cost Management console. AWS takes up to a day to activate it."
-  text_serverless_costexplorer_pending: "Newer data is being fetched (requested at %{time}). Reload the page in a minute to see it."
-  text_serverless_costexplorer_failed: "The refresh requested at %{time} failed:"
+  text_serverless_costexplorer_pending: "The daily fetch started at %{time} is running."
+  text_serverless_costexplorer_failed: "The daily fetch started at %{time} failed:"
   text_serverless_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) could not be reached. A network without internet access needs a route to it, such as a NAT.
-  text_serverless_costexplorer_refresh: "A scheduled fetch runs daily. Opening this page, or this button, fetches the costs again when the data is older than an hour; fetches start at most once per hour. A fetch makes %{count} requests to Cost Explorer, and AWS charges each request."
-  text_serverless_costexplorer_refresh_after: "Possible again at %{time}."

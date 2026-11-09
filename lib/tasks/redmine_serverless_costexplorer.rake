@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 namespace :redmine_serverless_costexplorer do
-  desc 'Fetches the costs from Cost Explorer for the "Cost Explorer" tab (daily; 3 requests, 4 with the tag key)'
+  desc 'Fetches the costs from Cost Explorer for the "Cost Explorer" tab (once a day; 3 requests, 4 with the tag key)'
   task refresh: :environment do
     unless RedmineServerlessCostexplorer.enabled?
       puts 'REDMINE_COSTEXPLORER_ENABLED is not true; nothing fetched'
@@ -9,8 +9,7 @@ namespace :redmine_serverless_costexplorer do
     end
 
     snapshot = ServerlessCostexplorerSnapshot.request!(ServerlessCostexplorerSnapshot::SCHEDULE)
-    ServerlessCostexplorerRefreshJob.perform_now(snapshot.id)
-    snapshot.reload
+    snapshot.fetch!
     abort "Cost Explorer: #{snapshot.error} (#{snapshot.requests} request(s))" if snapshot.error
 
     pruned = ServerlessCostexplorerSnapshot.prune

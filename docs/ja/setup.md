@@ -9,7 +9,7 @@ Redmine Serverless Cost Explorer を使うために、Redmine に必要なもの
 - Redmine 7.0 以降。
 - AWS の gem `aws-sdk-costexplorer`(gem の依存です。チェックアウトでは、プラグインの `Gemfile` が足します)。
 - Cost Explorer が有効な AWS アカウント([README.md](README.md#notes))。AWS Organizations のメンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許している必要があります。
-- rake のタスクを毎日実行するものと、Redmine のジョブを実行するもの(タブを開いたときと「更新」のボタンの取得のため)。
+- rake のタスクを 1 日に 1 回実行するもの。
 
 <a id="installation"></a>
 
@@ -62,7 +62,7 @@ bundle install
 
 | 設定 | 場所 | 内容 |
 | --- | --- | --- |
-| `REDMINE_COSTEXPLORER_ENABLED` | すべてのプロセス(web、ジョブ、rake)の環境変数 | `true` でプラグインが有効になる。ほかの値や、ないときは無効のまま。rake のタスクとジョブは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する |
+| `REDMINE_COSTEXPLORER_ENABLED` | web のプロセスと、rake のタスクを実行するプロセスの環境変数 | `true` でプラグインが有効になる。ほかの値や、ないときは無効のまま。rake のタスクは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する |
 | `REDMINE_COSTEXPLORER_TAG_KEY` | 同じ | オプション。コスト配分タグのキー(ふつうは `redmine:instance`)。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional))。空かないとき: 無効(既定)で、タグの要求も送らない。Serverless では、`redmine.json` の `costExplorer.allocationTag` が設定する |
 | AWS の認証情報とリージョン | SDK のいつもの取得元(Lambda のロール、インスタンスプロファイル、`AWS_*` の変数) | プラグインは、Redmine のリージョンにかかわらず、いつも `us-east-1` の Cost Explorer を呼ぶ |
 
@@ -103,7 +103,7 @@ bin/rake redmine_serverless_costexplorer:refresh
 | --- | --- | --- |
 | Cost Explorer(`ce.us-east-1.amazonaws.com`) | `GetCostAndUsage`、`GetCostForecast` | NAT などの、インターネットへの経路。Serverless では `network.mode` を `nat` にする |
 
-- **どのプロセスか:** 取得するプロセスだけです。rake のタスクを実行するプロセスと、Redmine のジョブを実行するプロセスです。ジョブを別の場所で実行するなら、web のプロセスは Cost Explorer を呼びません(Rails の既定のアダプターでは、ジョブは web のプロセスの中で動くので、web のプロセスが呼びます)。
+- **どのプロセスか:** rake のタスクを実行するプロセスだけです。web のプロセスは Cost Explorer を呼びません。
 - **インターフェイスエンドポイント:** AWS PrivateLink のガイドは、「AWS Cost Explorer」のサービス名として `com.amazonaws.<region>.ce` を挙げています(「AWS services that integrate with AWS PrivateLink」。2026-11-10 に確認)。Cost Explorer の API は `us-east-1` にあります。ほかのリージョンでこのエンドポイントを作れるか、ほかのリージョンの VPC に `ce.us-east-1.amazonaws.com` を提供できるかは、まだ確認していません。Serverless の `network.mode` `endpoints` は、このエンドポイントを作りません。
 - **つながらないとき:** 経路がないと、要求はタイムアウトします(プラグインは、接続のタイムアウトを 5 秒にし、2 回再試行します)。「Cost Explorer」のタブにエラーを表示し、経路が必要なことを示します。
 

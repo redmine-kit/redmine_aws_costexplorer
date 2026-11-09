@@ -13,16 +13,10 @@ ja:
   label_serverless_costexplorer_by_tag: "コスト配分タグ %{tag} ごと"
   label_serverless_costexplorer_untagged: (タグなし)
   label_serverless_costexplorer_estimated: 見込み
-  label_serverless_costexplorer_refresh: 更新
-  button_serverless_costexplorer_refresh: 更新
-  notice_serverless_costexplorer_refresh_started: 更新をキューに入れました。
-  error_serverless_costexplorer_refresh_too_soon: "更新は 1 時間に 1 回までです。次は %{time} から更新できます。"
   text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED が true ではないので、プラグインは費用を取得しません。
-  text_serverless_costexplorer_about: "AWS Cost Explorer の非ブレンドコストです。%{time} に取得しました。Cost Explorer のデータは、およそ 1 日に 1 回更新されます。"
+  text_serverless_costexplorer_about: "AWS Cost Explorer の非ブレンドコストです。%{time} に取得しました。費用は 1 日に 1 回取得します。"
   text_serverless_costexplorer_no_forecast: Cost Explorer に予測がありません。
   text_serverless_costexplorer_no_tag_data: "タグ %{tag} の付いた費用は、まだありません。Billing and Cost Management のコンソールで、コスト配分タグとして有効にしてください。有効になるまで、最大で 1 日かかります。"
-  text_serverless_costexplorer_pending: "新しいデータを取得しています(%{time} に依頼)。少しあとにページを再読み込みすると表示されます。"
-  text_serverless_costexplorer_failed: "%{time} に依頼した更新が失敗しました:"
+  text_serverless_costexplorer_pending: "%{time} に始まった毎日の取得を実行しています。"
+  text_serverless_costexplorer_failed: "%{time} に始まった毎日の取得が失敗しました:"
   text_serverless_costexplorer_unreachable: Cost Explorer(ce.us-east-1.amazonaws.com)につながりませんでした。インターネットにつながらないネットワークでは、NAT などの経路が必要です。
-  text_serverless_costexplorer_refresh: "定期の取得は毎日動きます。データが 1 時間より古いときは、このページを開くか、このボタンで、費用を取得し直します。取得は 1 時間に 1 回までです。1 回の取得で Cost Explorer に %{count} 件の要求を送り、AWS は要求ごとに課金します。"
-  text_serverless_costexplorer_refresh_after: "%{time} から使えます。"

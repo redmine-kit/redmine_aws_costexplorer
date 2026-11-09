@@ -3,19 +3,17 @@
 # Redmine Serverless Cost Explorer: the AWS account's costs from Cost Explorer on the
 # "Cost Explorer" tab of the Serverless administration page (docs/README.md).
 #
-# The plugin is on only when REDMINE_COSTEXPLORER_ENABLED is true. The page never
-# calls Cost Explorer: the rake task redmine_serverless_costexplorer:refresh (daily)
-# and the "Refresh" button fetch the costs and keep them in
+# The plugin is on only when REDMINE_COSTEXPLORER_ENABLED is true. The page
+# never calls Cost Explorer: the rake task redmine_serverless_costexplorer:refresh,
+# run once a day, fetches the costs and keeps them in
 # serverless_costexplorer_snapshots.
 module RedmineServerlessCostexplorer
-  VERSION = '0.1.0'
+  VERSION = '0.1.1'
 
   # Environment variables (docs/setup.md#configuration).
   ENV_ENABLED = 'REDMINE_COSTEXPLORER_ENABLED'
   ENV_TAG_KEY = 'REDMINE_COSTEXPLORER_TAG_KEY'
 
-  # The "Refresh" button may start a fetch once in this many seconds.
-  REFRESH_INTERVAL = 3600
   # Snapshots older than this are deleted after each scheduled fetch.
   KEEP_DAYS = 90
 
@@ -37,9 +35,6 @@ module RedmineServerlessCostexplorer
         :costexplorer, label: :label_serverless_costexplorer,
                        url: { controller: 'serverless_costexplorer', action: 'index' }, position: 60
       )
-      # With Redmine Serverless SQS, only the allowed job classes run from the
-      # queue.
-      RedmineServerlessSqsBoot.allow_job('ServerlessCostexplorerRefreshJob') if defined?(RedmineServerlessSqsBoot)
     end
   end
 end

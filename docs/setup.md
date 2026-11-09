@@ -7,7 +7,7 @@ What a Redmine needs to use Redmine Serverless Cost Explorer: installation, conf
 - Redmine 7.0 or later.
 - AWS's gem `aws-sdk-costexplorer` (a dependency of the gem; with a checkout, the plugin's `Gemfile` adds it).
 - An AWS account where Cost Explorer is enabled ([README.md](README.md#notes)). In a member account of AWS Organizations, the management account must allow member accounts to use Cost Explorer.
-- Something that runs the rake task daily, and something that runs Redmine's jobs (for the fetches when the tab is opened and the "Refresh" button).
+- Something that runs the rake task once a day.
 
 ## Installation
 
@@ -52,7 +52,7 @@ The plugin has no settings page; both settings are environment variables, which 
 
 | Setting | Where | Contents |
 | --- | --- | --- |
-| `REDMINE_COSTEXPLORER_ENABLED` | Environment variable of every process (web, jobs, rake) | `true` turns the plugin on. Any other value, or none, leaves it off: the rake task and the job make no requests, and the "Cost Explorer" tab says that the plugin is off |
+| `REDMINE_COSTEXPLORER_ENABLED` | Environment variable of the web process and of the process that runs the rake task | `true` turns the plugin on. Any other value, or none, leaves it off: the rake task makes no requests, and the "Cost Explorer" tab says that the plugin is off |
 | `REDMINE_COSTEXPLORER_TAG_KEY` | Same | Optional. The key of a cost allocation tag, normally `redmine:instance`, to also show the costs by its values ([README.md](README.md#costs-by-tag-optional)). Empty or unset: off (the default), and no tag request is made. In Serverless, `costExplorer.allocationTag` in `redmine.json` sets it |
 | AWS credentials and region | The SDK's usual sources (the Lambda role, an instance profile, `AWS_*` variables) | The plugin always calls Cost Explorer in `us-east-1`, whatever the region of Redmine |
 
@@ -85,7 +85,7 @@ The permissions the plugin needs, with an example policy, are in [iam.md](iam.md
 | --- | --- | --- |
 | Cost Explorer (`ce.us-east-1.amazonaws.com`) | `GetCostAndUsage`, `GetCostForecast` | A route to the internet, such as a NAT. In Serverless, `network.mode` `nat` |
 
-- **Which processes:** Only the processes that fetch: the one running the rake task, and the one running Redmine's jobs. The web process does not call Cost Explorer when jobs run elsewhere (with Rails's default adapter, jobs run inside the web process, which then calls it).
+- **Which processes:** Only the process that runs the rake task. The web process never calls Cost Explorer.
 - **Interface endpoint:** The AWS PrivateLink Guide lists "AWS Cost Explorer" with the service name `com.amazonaws.<region>.ce` ("AWS services that integrate with AWS PrivateLink", checked on 2026-11-10). Cost Explorer's API is in `us-east-1`. Whether the endpoint is offered in other regions, and whether it serves `ce.us-east-1.amazonaws.com` to a VPC in another region, has not been checked; Serverless's `network.mode` `endpoints` does not create it.
 - **Unreachable:** With no route, the requests time out (the plugin opens connections with a 5-second timeout and retries twice). The "Cost Explorer" tab shows the error and says that a route is needed.
 

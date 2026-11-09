@@ -4,15 +4,15 @@ Guidelines for people and coding agents working in this repository. See [README.
 
 ## What this project does
 
-Redmine Serverless Cost Explorer (`redmine_serverless_costexplorer`) is a Redmine plugin that shows the costs of the AWS account from AWS Cost Explorer on the "Cost Explorer" tab of the shared "Serverless" administration menu. It fetches the costs daily (rake task `redmine_serverless_costexplorer:refresh`), and through a job when the tab is opened with data older than an hour or with the "Refresh" button (at most once per hour), and keeps them in the database. [Serverless](https://github.com/redmine-kit/serverless)'s image does not include it; its templates can set it up, off by default, for an image that adds the plugin (a derived image). It is in early development.
+Redmine Serverless Cost Explorer (`redmine_serverless_costexplorer`) is a Redmine plugin that shows the costs of the AWS account from AWS Cost Explorer on the "Cost Explorer" tab of the shared "Serverless" administration menu. It fetches the costs once a day (rake task `redmine_serverless_costexplorer:refresh`) and keeps them in the database. [Serverless](https://github.com/redmine-kit/serverless)'s image does not include it; its templates can set it up, off by default, for an image that adds the plugin (a derived image). It is in early development.
 
 ## Rules
 
 - **Redmine's extension points only:** do not edit Redmine's own files.
 - **Off without its settings:** without `REDMINE_COSTEXPLORER_ENABLED=true`, the plugin makes no requests to AWS. The tag split is off without `REDMINE_COSTEXPLORER_TAG_KEY`. Both settings are environment variables only; there is no settings page.
-- **No requests from the web process:** each Cost Explorer request is charged. Pages read the stored snapshots and at most queue a job, once per hour; only the rake task and the job call Cost Explorer. Keep the number of requests per fetch stated in the docs and on the page.
+- **No requests from the web process:** each Cost Explorer request is charged. Pages only read the stored snapshots; only the daily rake task calls Cost Explorer. Keep the number of requests per fetch stated in the docs and on the page.
 - **Tests:** added code has tests, run with Redmine's own mechanism (`bin/test` runs them in Docker with PostgreSQL and moto; [setup.md](docs/setup.md#tests)).
-- **Code layout:** `lib/redmine_serverless_costexplorer/` has the requests to Cost Explorer, `app/` the model, the job, the controller and the view, `db/` the migration, `lib/tasks/` the rake task. `init.rb` calls `RedmineServerlessCostexplorer.setup`.
+- **Code layout:** `lib/redmine_serverless_costexplorer/` has the requests to Cost Explorer, `app/` the model, the controller and the view, `db/` the migration, `lib/tasks/` the rake task. `init.rb` calls `RedmineServerlessCostexplorer.setup`.
 - **Shared files:** `lib/redmine_serverless_admin.rb`, `app/controllers/serverless_admin_controller.rb` and `app/views/serverless_admin/_tabs.html.erb` are the same in every Redmine Serverless plugin. Change them in all plugins together and raise `SHARED_VERSION`.
 - **No secrets in the repository.**
 

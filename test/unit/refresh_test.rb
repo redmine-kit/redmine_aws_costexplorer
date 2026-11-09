@@ -4,7 +4,7 @@ require_relative '../test_helper'
 require 'rake'
 
 module RedmineServerlessCostexplorer
-  # The job and the rake task redmine_serverless_costexplorer:refresh.
+  # The rake task redmine_serverless_costexplorer:refresh, the only fetch.
   class RefreshTest < ActiveSupport::TestCase
     include RedmineServerlessCostexplorer::TestHelper
 
@@ -16,26 +16,6 @@ module RedmineServerlessCostexplorer
       task = Rake::Task['redmine_serverless_costexplorer:refresh']
       task.reenable
       capture_io { task.invoke }
-    end
-
-    def test_the_job_fetches_the_snapshot
-      snapshot = ServerlessCostexplorerSnapshot.request!('admin')
-      with_enabled do
-        with_fetcher_client(stub_cost_explorer) { ServerlessCostexplorerRefreshJob.perform_now(snapshot.id) }
-      end
-
-      assert_not_nil snapshot.reload.fetched_at
-    end
-
-    def test_the_job_does_nothing_when_disabled
-      snapshot = ServerlessCostexplorerSnapshot.request!('admin')
-      client = stub_cost_explorer
-      with_env('REDMINE_COSTEXPLORER_ENABLED' => nil) do
-        with_fetcher_client(client) { ServerlessCostexplorerRefreshJob.perform_now(snapshot.id) }
-      end
-
-      assert_predicate snapshot.reload, :pending?
-      assert_empty client.api_requests
     end
 
     def test_the_task_fetches_and_prunes
@@ -68,19 +48,6 @@ module RedmineServerlessCostexplorer
 
       assert_match(/nothing fetched/, out)
       assert_equal 0, ServerlessCostexplorerSnapshot.count
-    end
-
-    def test_the_job_may_run_from_the_sqs_queue
-      boot = Module.new do
-        def self.allowed_jobs = @allowed_jobs ||= []
-        def self.allow_job(name) = allowed_jobs << name
-      end
-      Object.const_set(:RedmineServerlessSqsBoot, boot)
-      RedmineServerlessCostexplorer.setup
-
-      assert_equal ['ServerlessCostexplorerRefreshJob'], boot.allowed_jobs
-    ensure
-      Object.send(:remove_const, :RedmineServerlessSqsBoot)
     end
 
     def test_settings_from_the_environment

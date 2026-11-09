@@ -46,34 +46,6 @@ module RedmineServerlessCostexplorer
       assert_equal older, ServerlessCostexplorerSnapshot.latest
     end
 
-    def test_refresh_once_per_hour
-      assert_predicate ServerlessCostexplorerSnapshot, :refresh_allowed?
-      ServerlessCostexplorerSnapshot.create!(requested_at: 30.minutes.ago, requested_by: 'admin')
-
-      assert_not ServerlessCostexplorerSnapshot.refresh_allowed?
-      assert_in_delta 30.minutes.from_now, ServerlessCostexplorerSnapshot.refresh_allowed_at, 5
-      ServerlessCostexplorerSnapshot.update_all(requested_at: 61.minutes.ago)
-
-      assert_predicate ServerlessCostexplorerSnapshot, :refresh_allowed?
-    end
-
-    def test_stale_after_an_hour
-      assert_predicate ServerlessCostexplorerSnapshot, :stale?
-      snapshot = fetched_snapshot
-
-      assert_not ServerlessCostexplorerSnapshot.stale?
-      snapshot.update!(fetched_at: 61.minutes.ago)
-
-      assert_predicate ServerlessCostexplorerSnapshot, :stale?
-    end
-
-    def test_request_refresh_once_per_hour
-      first = ServerlessCostexplorerSnapshot.request_refresh!('view')
-
-      assert_equal 'view', first.requested_by
-      assert_nil ServerlessCostexplorerSnapshot.request_refresh!('admin')
-    end
-
     def test_prune_keeps_the_latest_successful_snapshot
       kept = fetched_snapshot(requested_at: 100.days.ago)
       ServerlessCostexplorerSnapshot.create!(requested_at: 95.days.ago, requested_by: 'admin', error: 'boom')

@@ -19,5 +19,6 @@ RUN printf "gem 'redmine_serverless_costexplorer', path: 'plugins/redmine_server
   && bundle config set --local without development \
   && bundle install --jobs 4
 ENV RAILS_ENV=test
-# Cost Explorer is moto (test/compose.yml), with test credentials.
-ENV MOTO_ENDPOINT_URL=http://moto:5000 AWS_REGION=us-east-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test
+# Cost Explorer is moto, or also LocalStack (test/compose.yml), with test
+# credentials.
+ENV MOTO_ENDPOINT_URL=http://moto:5000 LOCALSTACK_ENDPOINT_URL=http://localstack:4566 AWS_REGION=us-east-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test

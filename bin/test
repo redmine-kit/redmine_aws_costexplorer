@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The plugin's tests in Redmine 7.0.3 on PostgreSQL 16, with Cost Explorer on
-# moto, in Docker.
+# moto, and also on LocalStack when LOCALSTACK_AUTH_TOKEN is set, in Docker.
 #   bin/test                 # the plugin's tests, then the Redmine tests around administration and jobs
 #   bin/test --redmine       # also every Redmine test, with the plugin installed
 #   bin/test <files>         # some files of the plugin's tests
@@ -10,6 +10,13 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 image=redmine-serverless-costexplorer-test
 network=redmine-serverless-costexplorer-test_default
+# The LocalStack tests run only with the token (test/integration/localstack_test.rb).
+if [[ -n "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
+  backend=localstack
+else
+  backend=moto
+fi
+echo "AWS backends: moto$([[ $backend == localstack ]] && echo ' and LocalStack')"
 bin/services >/dev/null
 docker buildx build --load -q -t "$image" -f test/Dockerfile . >/dev/null
 setup='bin/rails db:drop db:create db:migrate redmine:plugins:migrate db:schema:dump >/dev/null'
@@ -20,7 +27,7 @@ run() {
 # The plugin's tests, with coverage written to coverage/coverage.xml.
 run_plugin() {
   mkdir -p coverage
-  docker run --rm --network "$network" -e PLUGIN_COVERAGE=1 -e PARALLEL_WORKERS=1 \
+  docker run --rm --network "$network" -e TEST_AWS_BACKEND="$backend" -e PLUGIN_COVERAGE=1 -e PARALLEL_WORKERS=1 \
     -v "$PWD/coverage:/redmine/plugins/redmine_serverless_costexplorer/coverage" "$image" \
     sh -c "$setup"' && "$@"' test "$@"
 }

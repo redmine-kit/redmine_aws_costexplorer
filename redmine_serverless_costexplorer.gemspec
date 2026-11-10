@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.license = 'GPL-2.0-or-later'
   spec.homepage = 'https://github.com/redmine-kit/redmine_serverless_costexplorer'
   spec.required_ruby_version = '>= 4.0'
-  spec.files = Dir['{init.rb,LICENSE}', '{app,config,db,lib,help}/**/*']
+  spec.files = Dir['{init.rb,LICENSE}', '{app,assets,config,db,lib,help}/**/*']
   spec.add_dependency 'aws-sdk-costexplorer', '~> 1.160'
   spec.metadata['github_repo'] = 'ssh://github.com/redmine-kit/redmine_serverless_costexplorer'
   spec.metadata['rubygems_mfa_required'] = 'true'

@@ -4,6 +4,7 @@
 !redmine_serverless_costexplorer.gemspec
 !LICENSE
 !app/
+!assets/
 !db/
 !config/
 !lib/

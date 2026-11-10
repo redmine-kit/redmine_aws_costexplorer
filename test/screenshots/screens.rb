@@ -57,6 +57,8 @@ class RedmineServerlessCostexplorerScreens < ScreenshotCase
       visit '/admin/serverless/costexplorer'
       assert_selector '#serverless-costexplorer-daily'
       find('#serverless-costexplorer-services tr.group span.expander', match: :first).click
+      # Away from the expander, so that its tooltip is not in the image.
+      find('h2', match: :first).hover
       # Chart.js sizes the canvas when it draws; then its animation ends.
       assert_selector '#serverless-costexplorer-daily-chart[style*="box-sizing"]'
       sleep 1.5

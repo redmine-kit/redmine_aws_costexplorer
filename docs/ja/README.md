@@ -1,9 +1,9 @@
 # Redmine Serverless Cost Explorer
 
-Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。共通の「Serverless」の管理メニューに、「Cost Explorer」のタブを足します。Redmine そのもののファイルは変えません。開発の初期です(バージョン 0.1.2)。
+Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。共通の「Serverless」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine そのもののファイルは変えません。開発の初期です(バージョン 0.1.2)。
 
-- [準備](setup.md): 必要なもの、インストール、設定、AWS のリソース、ネットワーク、テスト
-- [IAM の権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
+- [準備](setup.md): 必要なもの、インストール、設定、AWS リソース、ネットワーク、テスト
+- [IAM 権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
 
 このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントの費用が、そのまま Redmine の費用です。複数の Redmine を置くアカウントのために、コスト配分タグごとにも分けられます(オプション。既定は無効)。
 
@@ -38,7 +38,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 - **金額:** 非ブレンドコスト(`UnblendedCost`)です。通貨は Cost Explorer が返すもの(USD)で、「8.22 USD」のように小数 2 桁で、右寄せで表示します。Redmine が右寄せにするのは時間の列だけなので、プラグインの小さな CSS で金額の列を右寄せにします。
 - **推定:** Cost Explorer は、確定していない期間に `Estimated` を付けます。画面では、終わった期間(先月、今日より前の日)に付いているときだけ「推定」のバッジを出します。今月と今日は、まだ終わっていないので、いつも確定していません。バッジは付けません。
-- **グラフ:** Redmine の Chart.js(importmap の `chart.js`)を、Redmine のグラフ(リポジトリの統計など)と同じく、Stimulus のコントローラーから必要なときに読み込みます。新しい JavaScript のライブラリは足しません。グラフの値は、下の表と同じです。
+- **グラフ:** Redmine の Chart.js(importmap の `chart.js`)を、Redmine のグラフ(リポジトリの統計など)と同じく、Stimulus のコントローラーから必要なときに読み込みます。新しい JavaScript のライブラリは追加しません。グラフの値は、下の表と同じです。
 - **日付:** Cost Explorer の日付は UTC です。「今日」は UTC の今日です。
 - **取得の日時:** 右上に、データを取得した日時を表示します。Cost Explorer のデータは、およそ 1 日に 1 回更新されるので、1 日前のデータはふつうです。
 - **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: <日時>(<エラーのクラス>)」を表示します。Cost Explorer につながらなかったとき(ネットワークの経路がない、DNS、タイムアウト)は、インターネットにつながらないネットワークには経路が必要なことも表示します([setup.md](setup.md#network))。
@@ -92,7 +92,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 - **AWS Organizations:** メンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許すかを決めます(コスト管理の設定 ›「Linked account access」。AWS Cost Management ユーザーガイドの「Controlling access to Cost Explorer」。2026-11-10 に確認)。許していなければ、要求はアクセスのエラーで失敗します。メンバーアカウントで見えるのは、そのアカウントの費用だけです。
 - **Cost Explorer を有効にする:** Cost Explorer は、コンソールで一度開くと、そのアカウントで有効になります。そのあと AWS がデータを準備し、最大で 24 時間かかります(AWS Cost Management ユーザーガイドの「Enabling Cost Explorer」。2026-11-10 に確認)。
-- **接続の確認はない:** Redmine Serverless の「状態と接続」には、確認を足しません。確認のたびに、課金される要求になるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
+- **接続テストはない:** Redmine Serverless の「ステータス」のタブには、接続テストを追加しません。テストのたびに、課金される要求になるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
 - **コードの構成:** `lib/redmine_serverless_costexplorer/fetcher.rb` が要求を送り、`app/models/serverless_costexplorer_snapshot.rb` が取得を保存し、`lib/tasks/redmine_serverless_costexplorer.rake` が取得を実行し、`app/controllers/serverless_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。
 - **マイグレーション:** スナップショットの表(`serverless_costexplorer_snapshots`)を作ります。`redmine:plugins:migrate` を実行します。
 

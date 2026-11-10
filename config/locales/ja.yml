@@ -9,18 +9,18 @@ ja:
   label_serverless_costexplorer_by_service: サービス別
   label_serverless_costexplorer_service: サービス
   label_serverless_costexplorer_usage_types: 使用タイプ
-  label_serverless_costexplorer_daily: 日別(直近30日間)
+  label_serverless_costexplorer_daily: 日別 (直近 30 日間)
   label_serverless_costexplorer_daily_chart: 日別の非ブレンドコスト
   label_serverless_costexplorer_unblended_cost: 非ブレンドコスト
   label_serverless_costexplorer_amount: コスト
-  label_serverless_costexplorer_by_tag: "コスト配分タグ別(%{tag})"
+  label_serverless_costexplorer_by_tag: "コスト配分タグ別 (%{tag})"
   label_serverless_costexplorer_untagged: (タグなし)
   label_serverless_costexplorer_estimated: 推定
-  label_serverless_costexplorer_updated: "更新: %{time}(1 日 1 回)"
+  label_serverless_costexplorer_updated: "更新: %{time} (1 日 1 回)"
   text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED が true でないため、コストを取得しません。
   text_serverless_costexplorer_about: AWS Cost Explorer の非ブレンドコストです。
-  text_serverless_costexplorer_no_forecast: "予測なし(%{error})"
-  text_serverless_costexplorer_no_tag_data: "タグ %{tag} のコストはまだありません。Billing and Cost Management コンソールで、コスト配分タグとして有効化してください(反映に最大 24 時間)。"
-  text_serverless_costexplorer_pending: "更新: 実行中(%{time} から)"
-  text_serverless_costexplorer_failed: "取得エラー: %{time}(%{error})"
-  text_serverless_costexplorer_unreachable: Cost Explorer(ce.us-east-1.amazonaws.com)につながりませんでした。インターネットにつながらないネットワークでは、NAT などの経路が必要です。
+  text_serverless_costexplorer_no_forecast: "予測なし (%{error})"
+  text_serverless_costexplorer_no_tag_data: "タグ %{tag} のコストはまだありません。Billing and Cost Management コンソールで、コスト配分タグとして有効化してください (反映に最大 24 時間)。"
+  text_serverless_costexplorer_pending: "更新: 実行中 (%{time} から)"
+  text_serverless_costexplorer_failed: "取得エラー: %{time} (%{error})"
+  text_serverless_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) につながりませんでした。インターネットにつながらないネットワークでは、NAT などの経路が必要です。

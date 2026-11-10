@@ -28,7 +28,7 @@ Redmine Serverless Cost Explorer を使うために、Redmine に必要なもの
 
 ### gem
 
-バージョンのタグ(`v*`)ごとに、プラグインを gem として GitHub Packages(`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`)に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル(`init.rb`、`lib/`、`app/`、`config/`、`db/`、`LICENSE`)が入っていて、プラグインの `Gemfile` は入っていません。Redmine は `plugins/` からだけプラグインを読むので、インストールした gem をそこにリンクします。
+バージョンのタグ(`v*`)ごとに、プラグインを gem として GitHub Packages(`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`)に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル(`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`LICENSE`)が入っていて、プラグインの `Gemfile` は入っていません。Redmine は `plugins/` からだけプラグインを読むので、インストールした gem をそこにリンクします。
 
 ```ruby
 # Redmine の Gemfile.local
@@ -73,7 +73,7 @@ bundle install
 
 <a id="aws-resources"></a>
 
-## AWS のリソース
+## AWS リソース
 
 プラグインは AWS のリソースを作らず、専用のリソースも要りません。Cost Explorer の API は、アカウントのグローバルのサービスです。
 
@@ -96,7 +96,7 @@ bin/rake redmine_serverless_costexplorer:refresh
 
 <a id="iam-permissions"></a>
 
-## IAM の権限
+## IAM 権限
 
 プラグインに必要な権限と、ポリシーの例は [iam.md](iam.md) にあります。
 

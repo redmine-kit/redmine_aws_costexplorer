@@ -1,6 +1,6 @@
 # 導入
 
-Redmine Serverless Cost Explorer を使うために、Redmine に必要なものです。インストール、設定、スケジュール、IAM の権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ(派生のイメージ)のために、Serverless は、デプロイの設定ファイル(`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。既定は無効)から、これらを CloudFormation ですべて用意します。このページは、手で用意するときや、Serverless が作るものを確認するときのためのものです。
+Redmine Serverless Cost Explorer を使うために、Redmine に必要なものです。インストール、設定、スケジュール、IAM の権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ(派生のイメージ)のために、Serverless は、デプロイの設定ファイル(`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効)から、これらを CloudFormation ですべて用意します。このページは、手で用意するときや、Serverless が作るものを確認するときのためのものです。
 
 <a id="requirements"></a>
 
@@ -63,7 +63,7 @@ bundle install
 | キー | 説明 | パラメーター |
 | --- | --- | --- |
 | `REDMINE_COSTEXPLORER_ENABLED` | プラグインを有効にする。無効のときは、rake のタスクは要求を送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する | 必須。`true` で有効。ほかの値やないときは無効。rake のタスクを実行するプロセス(取得のため)と、web のプロセス(タブが、プラグインが有効かを表示するため)に設定する |
-| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空かないときは無効(既定)で、タグの要求も送らない。rake のタスクを実行するプロセスにだけ設定する。タブは、保存したデータからタグを読む。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
+| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値ごとの費用も表示する([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空かないときは無効(デフォルト)で、タグの要求も送らない。rake のタスクを実行するプロセスにだけ設定する。タブは、保存したデータからタグを読む。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
 
 | 項目 | 説明 | 変える場所 |
 | --- | --- | --- |

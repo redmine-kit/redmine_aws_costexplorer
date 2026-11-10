@@ -5,7 +5,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 - [準備](setup.md): 必要なもの、インストール、設定、AWS リソース、ネットワーク、テスト
 - [IAM 権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
 
-このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントの費用が、そのまま Redmine の費用です。複数の Redmine を置くアカウントのために、コスト配分タグごとにも分けられます(オプション。既定は無効)。
+このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントの費用が、そのまま Redmine の費用です。複数の Redmine を置くアカウントのために、コスト配分タグごとにも分けられます(オプション。デフォルトは無効)。
 
 <a id="features"></a>
 
@@ -15,23 +15,23 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 | 機能 | 内容 | 有効になる条件 | ページ |
 | --- | --- | --- | --- |
-| 「Cost Explorer」のタブ | AWS アカウントのコスト。今月のコスト、月末の予測コスト、先月のコスト、サービス別(使用タイプの明細)、日別(直近30日間のグラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。管理者 | [タブに表示するもの](#what-the-tab-shows) |
+| 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別(使用タイプの明細)、日別(直近30日間のグラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。管理者 | [タブに表示するもの](#what-the-tab-shows) |
 | 毎日の取得 | rake のタスク `redmine_serverless_costexplorer:refresh` が、1 日に 1 回費用を取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
-| タグ別の費用 | コスト配分タグ(ふつうは `redmine:instance`)の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある(既定は無効) | [タグ別の費用](#costs-by-tag-optional) |
+| タグ別の費用 | コスト配分タグ(ふつうは `redmine:instance`)の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある(デフォルトは無効) | [タグ別の費用](#costs-by-tag-optional) |
 
 <a id="what-the-tab-shows"></a>
 
 ## タブに表示するもの
 
-アカウント全体のコストです。見出しは置かず、説明の行と、右側の「更新: `<日時>` (1 日 1 回)」から始めます。
+アカウント全体のコストです。金額はすべて、AWS Cost Explorer の非ブレンドコスト (`UnblendedCost`) です。右上に「更新: `<日時>` (1 日 1 回)」を出し、ほかの欄と同じく見出しと一覧が続きます。最初の欄は「合計」で、「今月」「月末の予測」「先月」の 3 列の一覧です。
 
-![「Cost Explorer」のタブ。今月のコスト、月末の予測コスト、先月のコストと、サービス別(使用タイプの明細を開ける)、日別のグラフと表、コスト配分タグ別 (redmine:instance)](./images/costexplorer.png)
+![「Cost Explorer」のタブ。合計 (今月、月末の予測、先月) と、サービス別(使用タイプの明細を開ける)、日別のグラフと表、コスト配分タグ別 (redmine:instance)](./images/costexplorer.png)
 
 | 欄 | 内容 | Cost Explorer への要求 |
 | --- | --- | --- |
-| 今月のコスト | 今月の、今日までのコスト。今日のこれまでのコストを含む | `GetCostAndUsage`。月別、サービスと使用タイプ別。先月の 1 日から明日まで(合計) |
-| 月末の予測コスト | 昨日までのコストと、Cost Explorer の今日から月末までの予測の合計。Cost Explorer に予測がないとき(たとえば、履歴の短いアカウント)は「予測なし (`<理由>`)」 | `GetCostForecast`。今日から来月の 1 日まで |
-| 先月のコスト | 先月のコスト。Cost Explorer が確定していないときは「推定」のバッジ | 「今月のコスト」と同じ要求 |
+| 合計の「今月」 | 今月の、今日までのコスト。今日のこれまでのコストを含む | `GetCostAndUsage`。月別、サービスと使用タイプ別。先月の 1 日から明日まで(合計) |
+| 合計の「月末の予測」 | 昨日までのコストと、Cost Explorer の今日から月末までの予測の合計。Cost Explorer に予測がないとき(たとえば、履歴の短いアカウント)はそのセルに「予測なし (`<理由>`)」 | `GetCostForecast`。今日から来月の 1 日まで |
+| 合計の「先月」 | 先月のコスト。Cost Explorer が確定していないときは、金額の前に「推定」のバッジ | 「今月」と同じ要求 |
 | サービス別 | サービス別の今月と先月のコスト。今月の多い順。各サービスの行は、使用タイプ(`USAGE_TYPE`)の明細を開ける。明細は最初は閉じていて、Redmine のグループ表示と同じく、行の左の矢印で開く(キーボードでも開ける) | 同じ要求(`GroupBy` に `SERVICE` と `USAGE_TYPE`) |
 | 日別 (直近 30 日間) | 日別の非ブレンドコストの棒グラフと、その下に同じ値の表。Cost Explorer が確定していない過去の日には「推定」のバッジ(グラフでは薄い色) | `GetCostAndUsage`。日別。29 日前(月の 1 日のほうが前なら、その日)から明日まで |
 | コスト配分タグ別 (`<タグ>`) | `REDMINE_COSTEXPLORER_TAG_KEY` があるときだけ。タグの値別の今月と先月のコスト。タグのないコストは「(タグなし)」 | `GetCostAndUsage`。月別、タグ別 |
@@ -53,8 +53,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 | --- | --- | --- |
 | 非ブレンドコスト / Unblended cost | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
 | 日別の非ブレンドコスト / Daily unblended costs | 同上 | 同上 |
-| 月末の予測コスト / Forecasted month-end costs | 同上(「月末の予測コスト」) | 同上 |
-| 今月のコスト / This month's costs | 同上の「今月の初めから今日までのコスト」を短くしたもの | 同上 |
+| 月末の予測 / Month-end forecast | 同上の「月末の予測コスト」を短くしたもの | 同上 |
 | 推定 / Estimated | 同上の「過去 1 か月の推定コスト」 | 同上 |
 | サービス、使用タイプ、コスト配分タグ / Service, Usage types, Cost allocation tag | `SERVICE`、`USAGE_TYPE`、タグ | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |
 | (タグなし) / (no tag) | タグのないコスト | 当プラグインの語。コンソールの表示は要確認 |
@@ -79,7 +78,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 ## タグ別の費用(オプション)
 
-複数の Redmine を置く AWS アカウントでは、コスト配分タグで費用を分けられます。既定は無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとの要求を送らず、画面にもタグの欄を出しません。
+複数の Redmine を置く AWS アカウントでは、コスト配分タグで費用を分けられます。デフォルトは無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとの要求を送らず、画面にもタグの欄を出しません。
 
 - **有効にする:** `REDMINE_COSTEXPLORER_TAG_KEY` に、タグのキーを設定します。ふつうは `redmine:instance` です([Serverless](https://redmine-kit.github.io/serverless/ja/) が、Redmine ごとのリソースに付けるタグです)。Serverless では、デプロイの設定ファイルで設定します。
 - **タグを有効にする:** Billing and Cost Management のコンソール(コスト配分タグ)で、タグのキーをコスト配分タグとして有効にします。有効になるまで、最大で 24 時間かかります。タグの付いた費用がまだないあいだは、画面にそう表示し、有効にする方法を示します。

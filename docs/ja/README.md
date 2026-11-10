@@ -1,6 +1,6 @@
 # Redmine Serverless Cost Explorer
 
-Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。共通の「Serverless」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine そのもののファイルは変えません。開発の初期です(バージョン 0.1.2)。
+Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。共通の「Serverless」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine そのもののファイルは変えません。開発の初期です(バージョン 0.1.3)。
 
 - [準備](setup.md): 必要なもの、インストール、設定、AWS リソース、ネットワーク、テスト
 - [IAM 権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー

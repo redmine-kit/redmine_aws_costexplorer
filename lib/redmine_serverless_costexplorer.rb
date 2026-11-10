@@ -8,7 +8,7 @@
 # run once a day, fetches the costs and keeps them in
 # serverless_costexplorer_snapshots.
 module RedmineServerlessCostexplorer
-  VERSION = '0.1.2'
+  VERSION = '0.1.3'
 
   # Environment variables (docs/setup.md#configuration).
   ENV_ENABLED = 'REDMINE_COSTEXPLORER_ENABLED'

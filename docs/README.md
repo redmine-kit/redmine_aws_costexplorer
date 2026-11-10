@@ -5,7 +5,7 @@ Redmine Serverless Cost Explorer (`redmine_serverless_costexplorer`) is a Redmin
 - [Setup](setup.md): requirements, installation, configuration, AWS resources, network, tests
 - [IAM permissions](iam.md): permissions, example policy, resource-based policies
 
-The plugin assumes that the AWS account is used only for the Redmine, so the account's costs are the Redmine's costs. For an account that holds several Redmine instances, the costs can also be split by a cost allocation tag (an option, off by default).
+The plugin assumes that the AWS account is used only for the Redmine, so the account's costs are the Redmine's costs. For an account that holds several Redmine servers, the costs can also be split by a cost allocation tag (an option, off by default).
 
 ## Features
 
@@ -72,7 +72,7 @@ The page never calls Cost Explorer. AWS charges each Cost Explorer API request (
 
 ## Costs by tag (optional)
 
-For an AWS account that holds several Redmine instances, the costs can be split by a cost allocation tag. It is off by default: without `REDMINE_COSTEXPLORER_TAG_KEY`, the plugin does not request the tag grouping and the page has no tag section.
+For an AWS account that holds several Redmine servers, the costs can be split by a cost allocation tag. It is off by default: without `REDMINE_COSTEXPLORER_TAG_KEY`, the plugin does not request the tag grouping and the page has no tag section.
 
 - **Turning it on:** Set `REDMINE_COSTEXPLORER_TAG_KEY` to the tag key, normally `redmine:instance` (the tag that [Serverless](https://redmine-kit.github.io/serverless/) puts on each instance's resources). In Serverless, the deployment configuration file sets it.
 - **Activating the tag:** In the Billing and Cost Management console, activate the tag key as a cost allocation tag (Cost allocation tags). AWS takes up to 24 hours to activate it. Until costs carry the tag, the page says so and shows how to activate it.

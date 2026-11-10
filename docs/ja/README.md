@@ -5,7 +5,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 - [準備](setup.md): 必要なもの、インストール、設定、AWS リソース、ネットワーク、テスト
 - [IAM 権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
 
-このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントの費用が、そのまま Redmine の費用です。複数の Redmine を置くアカウントのために、コスト配分タグごとにも分けられます(オプション。デフォルトは無効)。
+このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントの費用が、そのまま Redmine の費用です。複数の Redmine サーバーを置くアカウントのために、コスト配分タグごとにも分けられます(オプション。デフォルトは無効)。
 
 <a id="features"></a>
 
@@ -78,7 +78,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 ## タグ別の費用(オプション)
 
-複数の Redmine を置く AWS アカウントでは、コスト配分タグで費用を分けられます。デフォルトは無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとの要求を送らず、画面にもタグの欄を出しません。
+複数の Redmine サーバーを置く AWS アカウントでは、コスト配分タグで費用を分けられます。デフォルトは無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとの要求を送らず、画面にもタグの欄を出しません。
 
 - **有効にする:** `REDMINE_COSTEXPLORER_TAG_KEY` に、タグのキーを設定します。ふつうは `redmine:instance` です([Serverless](https://redmine-kit.github.io/serverless/ja/) が、Redmine ごとのリソースに付けるタグです)。Serverless では、デプロイの設定ファイルで設定します。
 - **タグを有効にする:** Billing and Cost Management のコンソール(コスト配分タグ)で、タグのキーをコスト配分タグとして有効にします。有効になるまで、最大で 24 時間かかります。タグの付いた費用がまだないあいだは、画面にそう表示し、有効にする方法を示します。

@@ -22,7 +22,7 @@ module RedmineServerlessCostexplorer
       ENV.fetch(ENV_ENABLED, '').strip.casecmp?('true')
     end
 
-    # The cost allocation tag that splits the costs per Redmine instance, or
+    # The cost allocation tag that splits the costs per Redmine server, or
     # nil when the split is off (the default).
     def tag_key
       value = ENV.fetch(ENV_TAG_KEY, '').strip

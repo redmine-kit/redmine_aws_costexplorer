@@ -32,6 +32,7 @@ module RedmineServerlessCostexplorer
       # Today is always estimated: no badge.
       assert_select '#serverless-costexplorer-daily span.badge', 0
       assert_select 'div[data-controller="serverless-costexplorer--daily"] canvas[role=img]'
+      assert_select 'div[data-serverless-costexplorer--daily-title-value]', 0
       assert_select 'script[type=module][src*="serverless_costexplorer"]'
       assert_select '#serverless-costexplorer-tags', 0
       assert_select 'p', text: 'Unblended costs from AWS Cost Explorer.'
@@ -85,7 +86,9 @@ module RedmineServerlessCostexplorer
       with_settings(date_format: '%Y-%m-%d') { with_enabled { get :index } }
 
       assert_select '#serverless-costexplorer-daily span.badge', 1
-      assert_select '#serverless-costexplorer-daily tbody tr', text: /2026-11-08\s*0\.80 USD\s*Estimated/
+      # The badge is in the amount's cell, before the amount; the table has two columns.
+      assert_select '#serverless-costexplorer-daily tbody tr td.amount', text: /\AEstimated\s*0\.80 USD\z/
+      assert_select '#serverless-costexplorer-daily thead th', 2
       chart = daily_chart
       final, estimated = chart[:datasets]
       assert_equal ['Unblended cost', 'Estimated'], [final['label'], estimated['label']]

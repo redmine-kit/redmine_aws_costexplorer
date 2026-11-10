@@ -59,8 +59,8 @@
 <table class="list services" id="serverless-costexplorer-services"><thead>
 <tr>
     <th><%= l(:label_serverless_costexplorer_service) %></th>
-    <th><%= l(:label_serverless_costexplorer_this_month) %></th>
-    <th><%= l(:label_serverless_costexplorer_previous_month) %></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_this_month) %></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_previous_month) %></th>
 </tr></thead>
 <tbody>
 <%# Each service is a group of its usage types, collapsed, as Redmine's grouped issue list (toggleRowGroup) %>
@@ -102,7 +102,6 @@
 <%# As Redmine's charts (repositories/stats); the table under it has the same values %>
 <div class="serverless-costexplorer-graph hide-when-print"
      data-controller="serverless-costexplorer--daily"
-     data-serverless-costexplorer--daily-title-value="<%= l(:label_serverless_costexplorer_daily_chart) %>"
      data-serverless-costexplorer--daily-currency-value="<%= currency %>">
   <template data-serverless-costexplorer--daily-target="labels">
     <%= chart['labels'].to_json %>
@@ -118,15 +117,14 @@
 <table class="list days" id="serverless-costexplorer-daily"><thead>
 <tr>
     <th><%= l(:label_date) %></th>
-    <th><%= l(:label_serverless_costexplorer_amount) %></th>
-    <th></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_amount) %></th>
 </tr></thead>
 <tbody>
 <% days.reverse_each do |day| %>
 <tr>
     <td><%= format_date(Date.parse(day['date'])) %></td>
-    <td class="amount"><%= serverless_costexplorer_amount(day['amount'], currency) %></td>
-    <td><%= serverless_costexplorer_estimated(serverless_costexplorer_estimated_day?(day, today)) %></td>
+    <%# The badge before the amount, so that the amounts stay aligned on the right %>
+    <td class="amount"><%= serverless_costexplorer_estimated(serverless_costexplorer_estimated_day?(day, today)) %> <%= serverless_costexplorer_amount(day['amount'], currency) %></td>
 </tr>
 <% end %>
 </tbody>
@@ -148,8 +146,8 @@
 <table class="list tags" id="serverless-costexplorer-tags"><thead>
 <tr>
     <th><%= costs['tag_key'] %></th>
-    <th><%= l(:label_serverless_costexplorer_this_month) %></th>
-    <th><%= l(:label_serverless_costexplorer_previous_month) %></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_this_month) %></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_previous_month) %></th>
 </tr></thead>
 <tbody>
 <% costs['tags'].each do |row| %>

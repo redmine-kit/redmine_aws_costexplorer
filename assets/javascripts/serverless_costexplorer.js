@@ -7,7 +7,7 @@ import { application } from "controllers/application"
 // Connects to data-controller="serverless-costexplorer--daily"
 class DailyController extends Controller {
   static targets = ['labels', 'datasets', 'canvas']
-  static values = { title: String, currency: String }
+  static values = { currency: String }
 
   connect() {
     const chartData = {
@@ -37,11 +37,8 @@ class DailyController extends Controller {
       options: {
         responsive: true,
         plugins: {
+          // No title: the section's heading names the chart
           legend: {position: 'right'},
-          title: {
-            display: true,
-            text: this.titleValue
-          },
           tooltip: {
             callbacks: {
               label: (context) => `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${currency}`

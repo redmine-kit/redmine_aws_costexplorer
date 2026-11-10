@@ -30,21 +30,23 @@ module RedmineServerlessCostexplorer
                                                 retry_limit: 2)
     end
 
-    # The costs as a hash of plain values, kept as JSON in a snapshot.
+    # The costs as a hash of plain values, kept as JSON in a snapshot. The
+    # services come with their usage types (the details of a service), from
+    # the same request grouped by both.
     def fetch
-      months = monthly(group_by: { type: 'DIMENSION', key: 'SERVICE' })
+      months = monthly(group_by: [{ type: 'DIMENSION', key: 'SERVICE' }, { type: 'DIMENSION', key: 'USAGE_TYPE' }])
       daily = daily_costs
       data = {
         'currency' => @currency || 'USD',
         'today' => @today.iso8601,
         'this_month' => month_summary(months[:this]),
         'previous_month' => month_summary(months[:previous]),
-        'services' => rows(months),
+        'services' => Groups.service_rows(months),
         'daily' => daily
       }
       data['forecast'] = forecast(daily)
       data['tag_key'] = @tag_key
-      data['tags'] = rows(monthly(group_by: { type: 'TAG', key: @tag_key })) if @tag_key
+      data['tags'] = Groups.rows(Groups.by_first_key(monthly(group_by: [{ type: 'TAG', key: @tag_key }]))) if @tag_key
       data
     end
 
@@ -59,15 +61,15 @@ module RedmineServerlessCostexplorer
     def tomorrow = @today + 1
 
     # One request for the previous month and this month, by the given
-    # grouping: { previous: { estimated:, groups: { key => amount } }, this: ... }.
+    # groupings (up to two): { previous: { estimated:, groups: { [keys] => amount } }, this: ... }.
     def monthly(group_by:)
       periods = { previous: { estimated: false, groups: Hash.new(BigDecimal(0)) },
                   this: { estimated: false, groups: Hash.new(BigDecimal(0)) } }
       each_page(time_period: period(this_month_start.prev_month, tomorrow), granularity: 'MONTHLY',
-                metrics: [METRIC], group_by: [group_by]) do |result|
+                metrics: [METRIC], group_by: group_by) do |result|
         key = Date.parse(result.time_period.start) < this_month_start ? :previous : :this
         periods[key][:estimated] ||= result.estimated
-        result.groups.each { |group| periods[key][:groups][group.keys.first] += amount(group.metrics) }
+        result.groups.each { |group| periods[key][:groups][group.keys] += amount(group.metrics) }
       end
       periods
     end
@@ -97,16 +99,6 @@ module RedmineServerlessCostexplorer
 
     def month_summary(month)
       { 'total' => month[:groups].values.sum(BigDecimal(0)).to_s('F'), 'estimated' => month[:estimated] }
-    end
-
-    # [{ 'name', 'this_month', 'previous_month' }], the largest this month first.
-    def rows(months)
-      names = months[:this][:groups].keys | months[:previous][:groups].keys
-      names.sort_by! { |name| [-months[:this][:groups][name], -months[:previous][:groups][name], name] }
-      names.map do |name|
-        { 'name' => name, 'this_month' => months[:this][:groups][name].to_s('F'),
-          'previous_month' => months[:previous][:groups][name].to_s('F') }
-      end
     end
 
     def each_page(**params, &)

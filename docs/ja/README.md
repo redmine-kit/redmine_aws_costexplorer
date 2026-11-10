@@ -1,6 +1,6 @@
 # Redmine Serverless Cost Explorer
 
-Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。共通の「Serverless」の管理メニューに、「Cost Explorer」のタブを足します。Redmine そのもののファイルは変えません。開発の初期です(バージョン 0.1.0)。
+Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。共通の「Serverless」の管理メニューに、「Cost Explorer」のタブを足します。Redmine そのもののファイルは変えません。開発の初期です(バージョン 0.1.2)。
 
 - [準備](setup.md): 必要なもの、インストール、設定、AWS のリソース、ネットワーク、テスト
 - [IAM の権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
@@ -15,32 +15,49 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 | 機能 | 内容 | 有効になる条件 | ページ |
 | --- | --- | --- | --- |
-| 「Cost Explorer」のタブ | AWS アカウントの費用。今月これまで、今月の予測、先月、サービスごと、過去 30 日の日ごと | `REDMINE_COSTEXPLORER_ENABLED=true`。管理者 | [タブに表示するもの](#what-the-tab-shows) |
+| 「Cost Explorer」のタブ | AWS アカウントのコスト。今月のコスト、月末の予測コスト、先月のコスト、サービス別(使用タイプの明細)、日別(直近30日間のグラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。管理者 | [タブに表示するもの](#what-the-tab-shows) |
 | 毎日の取得 | rake のタスク `redmine_serverless_costexplorer:refresh` が、1 日に 1 回費用を取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
-| タグごとの費用 | コスト配分タグ(ふつうは `redmine:instance`)の値ごとの、今月と先月の費用 | `REDMINE_COSTEXPLORER_TAG_KEY` がある(既定は無効) | [タグごとの費用](#costs-by-tag-optional) |
+| タグ別の費用 | コスト配分タグ(ふつうは `redmine:instance`)の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある(既定は無効) | [タグ別の費用](#costs-by-tag-optional) |
 
 <a id="what-the-tab-shows"></a>
 
 ## タブに表示するもの
 
-主な表示は、アカウント全体です。見出しは「この AWS アカウントの費用」です。
+アカウント全体のコストです。見出しは置かず、説明の行と、右側の「更新: <日時>(1 日 1 回)」から始めます。
 
-![「Cost Explorer」のタブ。今月これまで、今月の予測、先月の費用と、サービスごと、日ごと、タグ redmine:instance ごとの費用](./images/costexplorer.png)
+![「Cost Explorer」のタブ。今月のコスト、月末の予測コスト、先月のコストと、サービス別(使用タイプの明細を開ける)、日別のグラフと表、コスト配分タグ別(redmine:instance)](./images/costexplorer.png)
 
 | 欄 | 内容 | Cost Explorer への要求 |
 | --- | --- | --- |
-| 今月これまで | 今月の、今日までの費用。今日のこれまでの費用を含む | `GetCostAndUsage`。月ごと、サービスごと。先月の 1 日から明日まで(サービスの合計) |
-| 今月の予測 | 昨日までの費用と、Cost Explorer の今日から月末までの予測の合計。Cost Explorer に予測がないとき(たとえば、履歴の短いアカウント)は、そう表示する | `GetCostForecast`。今日から来月の 1 日まで |
-| 先月 | 先月の費用 | 「今月これまで」と同じ要求 |
-| サービスごと | サービスごとの今月と先月の費用。今月の多い順 | 同じ要求 |
-| 日ごと(過去 30 日) | 日ごとの費用と、いちばん多い日に対する割合の棒。棒は Redmine の進捗のバー(HTML と CSS。JavaScript なし) | `GetCostAndUsage`。日ごと。29 日前(月の 1 日のほうが前なら、その日)から明日まで |
-| コスト配分タグごと | `REDMINE_COSTEXPLORER_TAG_KEY` があるときだけ。タグの値ごとの今月と先月の費用。タグのない費用は「(タグなし)」 | `GetCostAndUsage`。月ごと、タグごと |
+| 今月のコスト | 今月の、今日までのコスト。今日のこれまでのコストを含む | `GetCostAndUsage`。月別、サービスと使用タイプ別。先月の 1 日から明日まで(合計) |
+| 月末の予測コスト | 昨日までのコストと、Cost Explorer の今日から月末までの予測の合計。Cost Explorer に予測がないとき(たとえば、履歴の短いアカウント)は「予測なし(<理由>)」 | `GetCostForecast`。今日から来月の 1 日まで |
+| 先月のコスト | 先月のコスト。Cost Explorer が確定していないときは「推定」のバッジ | 「今月のコスト」と同じ要求 |
+| サービス別 | サービス別の今月と先月のコスト。今月の多い順。各サービスの行は、使用タイプ(`USAGE_TYPE`)の明細を開ける。明細は最初は閉じていて、Redmine のグループ表示と同じく、行の左の矢印で開く(キーボードでも開ける) | 同じ要求(`GroupBy` に `SERVICE` と `USAGE_TYPE`) |
+| 日別(直近30日間) | 日別の非ブレンドコストの棒グラフと、その下に同じ値の表。Cost Explorer が確定していない過去の日には「推定」のバッジ(グラフでは薄い色) | `GetCostAndUsage`。日別。29 日前(月の 1 日のほうが前なら、その日)から明日まで |
+| コスト配分タグ別(<タグ>) | `REDMINE_COSTEXPLORER_TAG_KEY` があるときだけ。タグの値別の今月と先月のコスト。タグのないコストは「(タグなし)」 | `GetCostAndUsage`。月別、タグ別 |
 
-- **金額:** 非ブレンドコスト(`UnblendedCost`)です。通貨は Cost Explorer が返すもの(USD)で、小数 2 桁で表示します。
-- **見込み:** Cost Explorer は、最近の期間を見込み(estimated)とします。画面では、その横に「見込み」と表示します。
+- **金額:** 非ブレンドコスト(`UnblendedCost`)です。通貨は Cost Explorer が返すもの(USD)で、「8.22 USD」のように小数 2 桁で、右寄せで表示します。Redmine が右寄せにするのは時間の列だけなので、プラグインの小さな CSS で金額の列を右寄せにします。
+- **推定:** Cost Explorer は、確定していない期間に `Estimated` を付けます。画面では、終わった期間(先月、今日より前の日)に付いているときだけ「推定」のバッジを出します。今月と今日は、まだ終わっていないので、いつも確定していません。バッジは付けません。
+- **グラフ:** Redmine の Chart.js(importmap の `chart.js`)を、Redmine のグラフ(リポジトリの統計など)と同じく、Stimulus のコントローラーから必要なときに読み込みます。新しい JavaScript のライブラリは足しません。グラフの値は、下の表と同じです。
 - **日付:** Cost Explorer の日付は UTC です。「今日」は UTC の今日です。
-- **取得の日時:** 画面に、データを取得した日時を表示します。Cost Explorer のデータは、およそ 1 日に 1 回更新されるので、1 日前のデータはふつうです。
-- **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に、そのエラーを表示します。Cost Explorer につながらなかったとき(ネットワークの経路がない、DNS、タイムアウト)は、インターネットにつながらないネットワークには経路が必要なことも表示します([setup.md](setup.md#network))。
+- **取得の日時:** 右上に、データを取得した日時を表示します。Cost Explorer のデータは、およそ 1 日に 1 回更新されるので、1 日前のデータはふつうです。
+- **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: <日時>(<エラーのクラス>)」を表示します。Cost Explorer につながらなかったとき(ネットワークの経路がない、DNS、タイムアウト)は、インターネットにつながらないネットワークには経路が必要なことも表示します([setup.md](setup.md#network))。
+
+<a id="terms"></a>
+
+### 用語
+
+画面の語は、Cost Explorer の AWS のドキュメントの日本語に合わせています(2026-11-10 に確認)。
+
+| 画面(ja / en) | AWS の語 | 出典 |
+| --- | --- | --- |
+| 非ブレンドコスト / Unblended cost | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
+| 日別の非ブレンドコスト / Daily unblended costs | 同上 | 同上 |
+| 月末の予測コスト / Forecasted month-end costs | 同上(「月末の予測コスト」) | 同上 |
+| 今月のコスト / This month's costs | 同上の「今月の初めから今日までのコスト」を短くしたもの | 同上 |
+| 推定 / Estimated | 同上の「過去 1 か月の推定コスト」 | 同上 |
+| サービス、使用タイプ、コスト配分タグ / Service, Usage types, Cost allocation tag | `SERVICE`、`USAGE_TYPE`、タグ | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |
+| (タグなし) / (no tag) | タグのないコスト | 当プラグインの語。コンソールの表示は要確認 |
 
 <a id="fetching-the-costs"></a>
 
@@ -60,7 +77,7 @@ Redmine Serverless Cost Explorer(`redmine_serverless_costexplorer`)は、AWS ア
 
 <a id="costs-by-tag-optional"></a>
 
-## タグごとの費用(オプション)
+## タグ別の費用(オプション)
 
 複数の Redmine を置く AWS アカウントでは、コスト配分タグで費用を分けられます。既定は無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとの要求を送らず、画面にもタグの欄を出しません。
 

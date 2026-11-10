@@ -1,22 +1,26 @@
 en:
   label_serverless_admin: Serverless
   label_serverless_costexplorer: Cost Explorer
-  label_serverless_costexplorer_account: Costs of this AWS account
-  label_serverless_costexplorer_month_to_date: This month so far
-  label_serverless_costexplorer_forecast: Forecast for this month
-  label_serverless_costexplorer_previous_month: Previous month
+  label_serverless_costexplorer_month_to_date: This month's costs
+  label_serverless_costexplorer_forecast: Forecasted month-end costs
+  label_serverless_costexplorer_previous_month_total: Last month's costs
+  label_serverless_costexplorer_previous_month: Last month
   label_serverless_costexplorer_this_month: This month
   label_serverless_costexplorer_by_service: By service
   label_serverless_costexplorer_service: Service
-  label_serverless_costexplorer_daily: Daily, last 30 days
+  label_serverless_costexplorer_usage_types: Usage types
+  label_serverless_costexplorer_daily: Daily (last 30 days)
+  label_serverless_costexplorer_daily_chart: Daily unblended costs
+  label_serverless_costexplorer_unblended_cost: Unblended cost
   label_serverless_costexplorer_amount: Cost
-  label_serverless_costexplorer_by_tag: "By the cost allocation tag %{tag}"
+  label_serverless_costexplorer_by_tag: "By cost allocation tag (%{tag})"
   label_serverless_costexplorer_untagged: (no tag)
-  label_serverless_costexplorer_estimated: estimated
-  text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED is not true, so the plugin does not fetch the costs.
-  text_serverless_costexplorer_about: "Unblended costs from AWS Cost Explorer, fetched at %{time}. The costs are fetched once a day."
-  text_serverless_costexplorer_no_forecast: Cost Explorer has no forecast.
-  text_serverless_costexplorer_no_tag_data: "No costs carry the tag %{tag} yet. Activate it as a cost allocation tag in the Billing and Cost Management console. AWS takes up to a day to activate it."
-  text_serverless_costexplorer_pending: "The daily fetch started at %{time} is running."
-  text_serverless_costexplorer_failed: "The daily fetch started at %{time} failed:"
+  label_serverless_costexplorer_estimated: Estimated
+  label_serverless_costexplorer_updated: "Updated: %{time} (daily)"
+  text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED is not true, so costs are not fetched.
+  text_serverless_costexplorer_about: Unblended costs from AWS Cost Explorer.
+  text_serverless_costexplorer_no_forecast: "No forecast (%{error})"
+  text_serverless_costexplorer_no_tag_data: "No costs carry the tag %{tag} yet. Activate it as a cost allocation tag in the Billing and Cost Management console (it can take up to 24 hours)."
+  text_serverless_costexplorer_pending: "Updated: running (since %{time})"
+  text_serverless_costexplorer_failed: "Fetch error: %{time} (%{error})"
   text_serverless_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) could not be reached. A network without internet access needs a route to it, such as a NAT.

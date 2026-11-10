@@ -1,13 +1,14 @@
 {
-  "GroupDefinitions": [{ "Type": "DIMENSION", "Key": "SERVICE" }],
+  "GroupDefinitions": [{ "Type": "DIMENSION", "Key": "SERVICE" }, { "Type": "DIMENSION", "Key": "USAGE_TYPE" }],
   "ResultsByTime": [
     {
       "TimePeriod": { "Start": "2026-10-01", "End": "2026-11-01" },
       "Total": {},
       "Groups": [
-        { "Keys": ["AWS Lambda"], "Metrics": { "UnblendedCost": { "Amount": "1.2345678901", "Unit": "USD" } } },
-        { "Keys": ["Amazon Relational Database Service"], "Metrics": { "UnblendedCost": { "Amount": "20.5", "Unit": "USD" } } },
-        { "Keys": ["Amazon Simple Storage Service"], "Metrics": { "UnblendedCost": { "Amount": "0.75", "Unit": "USD" } } }
+        { "Keys": ["AWS Lambda", "APN1-Lambda-GB-Second-ARM"], "Metrics": { "UnblendedCost": { "Amount": "1.2345678901", "Unit": "USD" } } },
+        { "Keys": ["Amazon Relational Database Service", "APN1-InstanceUsage:db.t4g.micro"], "Metrics": { "UnblendedCost": { "Amount": "18.5", "Unit": "USD" } } },
+        { "Keys": ["Amazon Relational Database Service", "APN1-RDS:GP3-Storage"], "Metrics": { "UnblendedCost": { "Amount": "2.0", "Unit": "USD" } } },
+        { "Keys": ["Amazon Simple Storage Service", "APN1-TimedStorage-ByteHrs"], "Metrics": { "UnblendedCost": { "Amount": "0.75", "Unit": "USD" } } }
       ],
       "Estimated": false
     },
@@ -15,9 +16,10 @@
       "TimePeriod": { "Start": "2026-11-01", "End": "2026-11-11" },
       "Total": {},
       "Groups": [
-        { "Keys": ["AWS Lambda"], "Metrics": { "UnblendedCost": { "Amount": "0.4", "Unit": "USD" } } },
-        { "Keys": ["Amazon Relational Database Service"], "Metrics": { "UnblendedCost": { "Amount": "7.1", "Unit": "USD" } } },
-        { "Keys": ["Amazon CloudFront"], "Metrics": { "UnblendedCost": { "Amount": "0.01", "Unit": "USD" } } }
+        { "Keys": ["AWS Lambda", "APN1-Lambda-GB-Second-ARM"], "Metrics": { "UnblendedCost": { "Amount": "0.4", "Unit": "USD" } } },
+        { "Keys": ["Amazon Relational Database Service", "APN1-InstanceUsage:db.t4g.micro"], "Metrics": { "UnblendedCost": { "Amount": "6.4", "Unit": "USD" } } },
+        { "Keys": ["Amazon Relational Database Service", "APN1-RDS:GP3-Storage"], "Metrics": { "UnblendedCost": { "Amount": "0.7", "Unit": "USD" } } },
+        { "Keys": ["Amazon CloudFront", "JP-DataTransfer-Out-Bytes"], "Metrics": { "UnblendedCost": { "Amount": "0.01", "Unit": "USD" } } }
       ],
       "Estimated": true
     }

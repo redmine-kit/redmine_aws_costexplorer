@@ -1,45 +1,55 @@
 <%= render partial: 'serverless_admin/tabs', locals: { selected: 'costexplorer' } %>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'serverless_costexplorer', plugin: 'redmine_serverless_costexplorer' %>
+  <%= javascript_include_tag 'serverless_costexplorer', plugin: 'redmine_serverless_costexplorer', type: 'module' %>
+<% end %>
 
 <% unless @enabled %>
 <p class="warning"><%= l(:text_serverless_costexplorer_disabled) %></p>
 <% end %>
 
-<% if @last_request&.pending? %>
-<div class="flash notice"><%= l(:text_serverless_costexplorer_pending, time: format_time(@last_request.requested_at)) %></div>
-<% elsif @last_request&.error %>
+<% if @last_request&.error && !@last_request.pending? %>
 <%# Only the error's class here; the daily task logs the whole message %>
 <div class="flash error" id="serverless-costexplorer-error">
-  <p><%= l(:text_serverless_costexplorer_failed, time: format_time(@last_request.requested_at)) %> (<%= @last_request.error.sub(/: .*/m, '') %>)</p>
-  <% if @last_request.unreachable? %><p><%= l(:text_serverless_costexplorer_unreachable) %></p><% end %>
+  <%= l(:text_serverless_costexplorer_failed, time: format_time(@last_request.requested_at), error: @last_request.error.sub(/: .*/m, '')) %>
+  <% if @last_request.unreachable? %><br><%= l(:text_serverless_costexplorer_unreachable) %><% end %>
 </div>
 <% end %>
 
-<h3><%= l(:label_serverless_costexplorer_account) %></h3>
+<div class="contextual" id="serverless-costexplorer-updated">
+  <% if @last_request&.pending? %>
+  <%= l(:text_serverless_costexplorer_pending, time: format_time(@last_request.requested_at)) %>
+  <% elsif @snapshot %>
+  <%= l(:label_serverless_costexplorer_updated, time: format_time(@snapshot.fetched_at)) %>
+  <% end %>
+</div>
 
 <% if @snapshot %>
 <% costs = @snapshot.data %>
 <% currency = costs['currency'] %>
-<p><%= l(:text_serverless_costexplorer_about, time: format_time(@snapshot.fetched_at)) %></p>
+<% today = costs['today'] ? Date.parse(costs['today']) : @snapshot.fetched_at.utc.to_date %>
+<p><%= l(:text_serverless_costexplorer_about) %></p>
 
-<div class="box tabular settings" id="serverless-costexplorer-summary">
-  <p>
-    <label><%= l(:label_serverless_costexplorer_month_to_date) %></label>
-    <%= serverless_costexplorer_amount(costs.dig('this_month', 'total'), currency) %>
-    <%= serverless_costexplorer_estimated(costs.dig('this_month', 'estimated')) %>
-  </p>
-  <p>
-    <label><%= l(:label_serverless_costexplorer_forecast) %></label>
-    <% if costs.dig('forecast', 'total') %>
-    <%= serverless_costexplorer_amount(costs.dig('forecast', 'total'), currency) %>
-    <% else %>
-    - <em class="info"><%= l(:text_serverless_costexplorer_no_forecast) %> <%= costs.dig('forecast', 'error').to_s.sub(/: .*/m, '') %></em>
-    <% end %>
-  </p>
-  <p>
-    <label><%= l(:label_serverless_costexplorer_previous_month) %></label>
-    <%= serverless_costexplorer_amount(costs.dig('previous_month', 'total'), currency) %>
-    <%= serverless_costexplorer_estimated(costs.dig('previous_month', 'estimated')) %>
-  </p>
+<div class="autoscroll">
+<table class="list totals" id="serverless-costexplorer-summary">
+<tbody>
+<tr>
+    <td class="name"><%= l(:label_serverless_costexplorer_month_to_date) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(costs.dig('this_month', 'total'), currency) %></td>
+    <td></td>
+</tr>
+<tr>
+    <td class="name"><%= l(:label_serverless_costexplorer_forecast) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(costs.dig('forecast', 'total'), currency) %></td>
+    <td><% unless costs.dig('forecast', 'total') %><%= l(:text_serverless_costexplorer_no_forecast, error: costs.dig('forecast', 'error').to_s.sub(/: .*/m, '')) %><% end %></td>
+</tr>
+<tr>
+    <td class="name"><%= l(:label_serverless_costexplorer_previous_month_total) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(costs.dig('previous_month', 'total'), currency) %></td>
+    <td><%= serverless_costexplorer_estimated(costs.dig('previous_month', 'estimated')) %></td>
+</tr>
+</tbody>
+</table>
 </div>
 
 <h3><%= l(:label_serverless_costexplorer_by_service) %></h3>
@@ -53,12 +63,29 @@
     <th><%= l(:label_serverless_costexplorer_previous_month) %></th>
 </tr></thead>
 <tbody>
+<%# Each service is a group of its usage types, collapsed, as Redmine's grouped issue list (toggleRowGroup) %>
 <% costs['services'].each do |row| %>
-<tr>
-    <td class="name"><%= row['name'] %></td>
-    <td><%= serverless_costexplorer_amount(row['this_month'], currency) %></td>
-    <td><%= serverless_costexplorer_amount(row['previous_month'], currency) %></td>
+<% details = Array(row['details']) %>
+<tr class="<%= 'group' if details.any? %>">
+    <td class="name">
+      <% if details.any? %>
+      <span class="expander icon icon-collapsed" role="button" tabindex="0" aria-expanded="false"
+            title="<%= l(:label_serverless_costexplorer_usage_types) %>"
+            onclick="toggleRowGroup(this); this.setAttribute('aria-expanded', $(this).closest('tr').hasClass('open'));"
+            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"><%= sprite_icon('angle-right') %></span>
+      <% end %>
+      <span class="name"><%= row['name'] %></span>
+    </td>
+    <td class="amount"><%= serverless_costexplorer_amount(row['this_month'], currency) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(row['previous_month'], currency) %></td>
 </tr>
+<% details.each do |detail| %>
+<tr class="idnt idnt-1" style="display: none;">
+    <td class="name"><%= detail['name'] %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(detail['this_month'], currency) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(detail['previous_month'], currency) %></td>
+</tr>
+<% end %>
 <% end %>
 </tbody>
 </table>
@@ -71,7 +98,22 @@
 
 <% days = costs['daily'].to_a.last(RedmineServerlessCostexplorer::Fetcher::DAYS) %>
 <% if days.any? %>
-<% max = days.map { |day| BigDecimal(day['amount']) }.max %>
+<% chart = serverless_costexplorer_daily_chart(days, today) %>
+<%# As Redmine's charts (repositories/stats); the table under it has the same values %>
+<div class="serverless-costexplorer-graph hide-when-print"
+     data-controller="serverless-costexplorer--daily"
+     data-serverless-costexplorer--daily-title-value="<%= l(:label_serverless_costexplorer_daily_chart) %>"
+     data-serverless-costexplorer--daily-currency-value="<%= currency %>">
+  <template data-serverless-costexplorer--daily-target="labels">
+    <%= chart['labels'].to_json %>
+  </template>
+  <template data-serverless-costexplorer--daily-target="datasets">
+    <%= chart['datasets'].to_json %>
+  </template>
+  <canvas id="serverless-costexplorer-daily-chart" data-serverless-costexplorer--daily-target="canvas"
+          role="img" aria-label="<%= l(:label_serverless_costexplorer_daily_chart) %>"></canvas>
+</div>
+
 <div class="autoscroll">
 <table class="list days" id="serverless-costexplorer-daily"><thead>
 <tr>
@@ -81,11 +123,10 @@
 </tr></thead>
 <tbody>
 <% days.reverse_each do |day| %>
-<% amount = serverless_costexplorer_amount(day['amount'], currency) %>
 <tr>
     <td><%= format_date(Date.parse(day['date'])) %></td>
-    <td><%= amount %> <%= serverless_costexplorer_estimated(day['estimated']) %></td>
-    <td><%= serverless_costexplorer_bar(day['amount'], max, amount) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(day['amount'], currency) %></td>
+    <td><%= serverless_costexplorer_estimated(serverless_costexplorer_estimated_day?(day, today)) %></td>
 </tr>
 <% end %>
 </tbody>
@@ -114,8 +155,8 @@
 <% costs['tags'].each do |row| %>
 <tr>
     <td class="name"><%= serverless_costexplorer_tag_value(row['name'], costs['tag_key']) %></td>
-    <td><%= serverless_costexplorer_amount(row['this_month'], currency) %></td>
-    <td><%= serverless_costexplorer_amount(row['previous_month'], currency) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(row['this_month'], currency) %></td>
+    <td class="amount"><%= serverless_costexplorer_amount(row['previous_month'], currency) %></td>
 </tr>
 <% end %>
 </tbody>

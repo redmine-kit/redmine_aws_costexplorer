@@ -1,22 +1,26 @@
 ja:
   label_serverless_admin: Serverless
   label_serverless_costexplorer: Cost Explorer
-  label_serverless_costexplorer_account: この AWS アカウントの費用
-  label_serverless_costexplorer_month_to_date: 今月これまで
-  label_serverless_costexplorer_forecast: 今月の予測
+  label_serverless_costexplorer_month_to_date: 今月のコスト
+  label_serverless_costexplorer_forecast: 月末の予測コスト
+  label_serverless_costexplorer_previous_month_total: 先月のコスト
   label_serverless_costexplorer_previous_month: 先月
   label_serverless_costexplorer_this_month: 今月
-  label_serverless_costexplorer_by_service: サービスごと
+  label_serverless_costexplorer_by_service: サービス別
   label_serverless_costexplorer_service: サービス
-  label_serverless_costexplorer_daily: 日ごと(過去 30 日)
-  label_serverless_costexplorer_amount: 費用
-  label_serverless_costexplorer_by_tag: "コスト配分タグ %{tag} ごと"
+  label_serverless_costexplorer_usage_types: 使用タイプ
+  label_serverless_costexplorer_daily: 日別(直近30日間)
+  label_serverless_costexplorer_daily_chart: 日別の非ブレンドコスト
+  label_serverless_costexplorer_unblended_cost: 非ブレンドコスト
+  label_serverless_costexplorer_amount: コスト
+  label_serverless_costexplorer_by_tag: "コスト配分タグ別(%{tag})"
   label_serverless_costexplorer_untagged: (タグなし)
-  label_serverless_costexplorer_estimated: 見込み
-  text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED が true ではないので、プラグインは費用を取得しません。
-  text_serverless_costexplorer_about: "AWS Cost Explorer の非ブレンドコストです。%{time} に取得しました。費用は 1 日に 1 回取得します。"
-  text_serverless_costexplorer_no_forecast: Cost Explorer に予測がありません。
-  text_serverless_costexplorer_no_tag_data: "タグ %{tag} の付いた費用は、まだありません。Billing and Cost Management のコンソールで、コスト配分タグとして有効にしてください。有効になるまで、最大で 1 日かかります。"
-  text_serverless_costexplorer_pending: "%{time} に始まった毎日の取得を実行しています。"
-  text_serverless_costexplorer_failed: "%{time} に始まった毎日の取得が失敗しました:"
+  label_serverless_costexplorer_estimated: 推定
+  label_serverless_costexplorer_updated: "更新: %{time}(1 日 1 回)"
+  text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED が true でないため、コストを取得しません。
+  text_serverless_costexplorer_about: AWS Cost Explorer の非ブレンドコストです。
+  text_serverless_costexplorer_no_forecast: "予測なし(%{error})"
+  text_serverless_costexplorer_no_tag_data: "タグ %{tag} のコストはまだありません。Billing and Cost Management コンソールで、コスト配分タグとして有効化してください(反映に最大 24 時間)。"
+  text_serverless_costexplorer_pending: "更新: 実行中(%{time} から)"
+  text_serverless_costexplorer_failed: "取得エラー: %{time}(%{error})"
   text_serverless_costexplorer_unreachable: Cost Explorer(ce.us-east-1.amazonaws.com)につながりませんでした。インターネットにつながらないネットワークでは、NAT などの経路が必要です。

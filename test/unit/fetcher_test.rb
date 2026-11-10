@@ -21,8 +21,19 @@ module RedmineServerlessCostexplorer
 
       assert_equal ['Amazon Relational Database Service', 'AWS Lambda', 'Amazon CloudFront',
                     'Amazon Simple Storage Service'], services.pluck('name')
-      assert_equal({ 'name' => 'Amazon Simple Storage Service', 'this_month' => '0.0', 'previous_month' => '0.75' },
-                   services.last)
+      assert_equal 'Amazon Simple Storage Service', services.last['name']
+      assert_equal ['0.0', '0.75'], services.last.values_at('this_month', 'previous_month')
+    end
+
+    # One request grouped by service and usage type: the service is the sum of
+    # its usage types, which are kept as its details.
+    def test_the_usage_types_of_a_service
+      rds = fetcher.fetch['services'].first
+
+      assert_equal ['7.1', '20.5'], rds.values_at('this_month', 'previous_month')
+      assert_equal [{ 'name' => 'APN1-InstanceUsage:db.t4g.micro', 'this_month' => '6.4', 'previous_month' => '18.5' },
+                    { 'name' => 'APN1-RDS:GP3-Storage', 'this_month' => '0.7', 'previous_month' => '2.0' }],
+                   rds['details']
     end
 
     def test_thirty_days
@@ -57,7 +68,8 @@ module RedmineServerlessCostexplorer
       assert_equal({ start: '2026-10-01', end: '2026-11-11' }, services[:time_period])
       assert_equal 'MONTHLY', services[:granularity]
       assert_equal ['UnblendedCost'], services[:metrics]
-      assert_equal [{ type: 'DIMENSION', key: 'SERVICE' }], services[:group_by]
+      assert_equal [{ type: 'DIMENSION', key: 'SERVICE' }, { type: 'DIMENSION', key: 'USAGE_TYPE' }],
+                   services[:group_by]
       assert_equal({ start: '2026-10-12', end: '2026-11-11' }, daily[:time_period])
       assert_equal 'DAILY', daily[:granularity]
       assert_nil daily[:group_by]

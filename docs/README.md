@@ -19,25 +19,25 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 
 ## What the tab shows
 
-The costs of the whole account. The tab has no heading first: it starts with a description line and, on the right, "Updated: <time> (daily)".
+The costs of the whole account. The tab has no heading first: it starts with a description line and, on the right, "Updated: `<time>` (daily)".
 
 ![The Cost Explorer tab: this month's costs, the forecasted month-end costs, last month's costs, costs by service (with usage types to expand), the daily chart and table, and by the cost allocation tag (redmine:instance)](./images/costexplorer.png)
 
 | Section | Contents | Cost Explorer request |
 | --- | --- | --- |
 | This month's costs | The month's costs until today, including today's costs so far | `GetCostAndUsage`, monthly, by service and usage type, from the first day of the previous month to tomorrow (the total) |
-| Forecasted month-end costs | The costs until yesterday plus Cost Explorer's forecast from today to the end of the month. When Cost Explorer has no forecast (for example, in an account with too little history), "No forecast (<reason>)" | `GetCostForecast`, from today to the first day of next month |
+| Forecasted month-end costs | The costs until yesterday plus Cost Explorer's forecast from today to the end of the month. When Cost Explorer has no forecast (for example, in an account with too little history), "No forecast (`<reason>`)" | `GetCostForecast`, from today to the first day of next month |
 | Last month's costs | The previous month's costs, with an "Estimated" badge while Cost Explorer has not finalized them | Same request as "This month's costs" |
 | By service | Each service's costs this month and last month, the largest this month first. Each service row expands to its usage types (`USAGE_TYPE`); the rows start collapsed and open with the arrow on the left, like Redmine's grouped lists (also with the keyboard) | Same request (`GroupBy` `SERVICE` and `USAGE_TYPE`) |
 | Daily (last 30 days) | A bar chart of the daily unblended costs, and a table of the same values under it. Past days that Cost Explorer has not finalized have an "Estimated" badge (a lighter bar in the chart) | `GetCostAndUsage`, daily, from 29 days ago (or the first day of the month, if earlier) to tomorrow |
-| By cost allocation tag (<tag>) | Only with `REDMINE_COSTEXPLORER_TAG_KEY`: each tag value's costs this month and last month, with "(no tag)" for the costs without it | `GetCostAndUsage`, monthly, by the tag |
+| By cost allocation tag (`<tag>`) | Only with `REDMINE_COSTEXPLORER_TAG_KEY`: each tag value's costs this month and last month, with "(no tag)" for the costs without it | `GetCostAndUsage`, monthly, by the tag |
 
 - **Amounts:** Unblended costs (`UnblendedCost`), in the currency that Cost Explorer returns (USD), with two decimals ("8.22 USD"), right-aligned. Redmine right-aligns only hour columns, so a small CSS file of the plugin right-aligns the amount columns.
 - **Estimated:** Cost Explorer marks periods it has not finalized as `Estimated`. The page shows the "Estimated" badge only on closed periods (last month, days before today). This month and today are never final yet, so they have no badge.
 - **Chart:** Redmine's own Chart.js (`chart.js` in its importmap), loaded lazily from a Stimulus controller as Redmine's charts (such as the repository statistics) do. No JavaScript library is added. The chart shows the same values as the table under it.
 - **Dates:** Cost Explorer's dates are in UTC, so "today" is today in UTC.
 - **The fetch time:** The top right shows when the data was fetched. Cost Explorer updates its data about once a day, so data a day old is normal.
-- **Errors:** When the last fetch failed, the page shows "Fetch error: <time> (<error class>)" above the last successful data. When Cost Explorer could not be reached (no route from the network, DNS or a timeout), it also says that a network without internet access needs a route to it ([setup.md](setup.md#network)).
+- **Errors:** When the last fetch failed, the page shows "Fetch error: `<time>` (`<error class>`)" above the last successful data. When Cost Explorer could not be reached (no route from the network, DNS or a timeout), it also says that a network without internet access needs a route to it ([setup.md](setup.md#network)).
 
 <a id="terms"></a>
 

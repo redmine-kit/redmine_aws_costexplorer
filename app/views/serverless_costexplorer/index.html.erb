@@ -28,25 +28,24 @@
 <% costs = @snapshot.data %>
 <% currency = costs['currency'] %>
 <% today = costs['today'] ? Date.parse(costs['today']) : @snapshot.fetched_at.utc.to_date %>
-<p><%= l(:text_serverless_costexplorer_about) %></p>
+<h3><%= l(:label_total) %></h3>
 
 <div class="autoscroll">
-<table class="list totals" id="serverless-costexplorer-summary">
+<table class="list totals" id="serverless-costexplorer-summary"><thead>
+<tr>
+    <th class="amount"><%= l(:label_serverless_costexplorer_this_month) %></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_forecast) %></th>
+    <th class="amount"><%= l(:label_serverless_costexplorer_previous_month) %></th>
+</tr></thead>
 <tbody>
 <tr>
-    <td class="name"><%= l(:label_serverless_costexplorer_month_to_date) %></td>
     <td class="amount"><%= serverless_costexplorer_amount(costs.dig('this_month', 'total'), currency) %></td>
-    <td></td>
-</tr>
-<tr>
-    <td class="name"><%= l(:label_serverless_costexplorer_forecast) %></td>
+    <% if costs.dig('forecast', 'total') %>
     <td class="amount"><%= serverless_costexplorer_amount(costs.dig('forecast', 'total'), currency) %></td>
-    <td><% unless costs.dig('forecast', 'total') %><%= l(:text_serverless_costexplorer_no_forecast, error: costs.dig('forecast', 'error').to_s.sub(/: .*/m, '')) %><% end %></td>
-</tr>
-<tr>
-    <td class="name"><%= l(:label_serverless_costexplorer_previous_month_total) %></td>
-    <td class="amount"><%= serverless_costexplorer_amount(costs.dig('previous_month', 'total'), currency) %></td>
-    <td><%= serverless_costexplorer_estimated(costs.dig('previous_month', 'estimated')) %></td>
+    <% else %>
+    <td class="amount"><%= l(:text_serverless_costexplorer_no_forecast, error: costs.dig('forecast', 'error').to_s.sub(/: .*/m, '')) %></td>
+    <% end %>
+    <td class="amount"><%= serverless_costexplorer_estimated(costs.dig('previous_month', 'estimated')) %> <%= serverless_costexplorer_amount(costs.dig('previous_month', 'total'), currency) %></td>
 </tr>
 </tbody>
 </table>

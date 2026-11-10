@@ -13,21 +13,21 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 
 | Feature | Contents | Enabled when | Page |
 | --- | --- | --- | --- |
-| The "Cost Explorer" tab | The costs of the AWS account: this month's costs, the forecasted month-end costs, last month's costs, by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
+| The "Cost Explorer" tab | The costs of the AWS account: the total (this month, month-end forecast, last month), by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
 | Daily fetch | The rake task `redmine_serverless_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
 
 ## What the tab shows
 
-The costs of the whole account. The tab has no heading first: it starts with a description line and, on the right, "Updated: `<time>` (daily)".
+The costs of the whole account. All amounts are AWS Cost Explorer's unblended costs (`UnblendedCost`). The top right shows "Updated: `<time>` (daily)", and each section is a heading and a list, as in the rest of the tab. The first section is "Total", a list with the columns "This month", "Month-end forecast" and "Last month".
 
-![The Cost Explorer tab: this month's costs, the forecasted month-end costs, last month's costs, costs by service (with usage types to expand), the daily chart and table, and by the cost allocation tag (redmine:instance)](./images/costexplorer.png)
+![The Cost Explorer tab: the total (this month, month-end forecast, last month), costs by service (with usage types to expand), the daily chart and table, and by the cost allocation tag (redmine:instance)](./images/costexplorer.png)
 
 | Section | Contents | Cost Explorer request |
 | --- | --- | --- |
-| This month's costs | The month's costs until today, including today's costs so far | `GetCostAndUsage`, monthly, by service and usage type, from the first day of the previous month to tomorrow (the total) |
-| Forecasted month-end costs | The costs until yesterday plus Cost Explorer's forecast from today to the end of the month. When Cost Explorer has no forecast (for example, in an account with too little history), "No forecast (`<reason>`)" | `GetCostForecast`, from today to the first day of next month |
-| Last month's costs | The previous month's costs, with an "Estimated" badge while Cost Explorer has not finalized them | Same request as "This month's costs" |
+| Total: "This month" | The month's costs until today, including today's costs so far | `GetCostAndUsage`, monthly, by service and usage type, from the first day of the previous month to tomorrow (the total) |
+| Total: "Month-end forecast" | The costs until yesterday plus Cost Explorer's forecast from today to the end of the month. When Cost Explorer has no forecast (for example, in an account with too little history), "No forecast (`<reason>`)" in its cell | `GetCostForecast`, from today to the first day of next month |
+| Total: "Last month" | The previous month's costs, with an "Estimated" badge before the amount while Cost Explorer has not finalized them | Same request as "This month" |
 | By service | Each service's costs this month and last month, the largest this month first. Each service row expands to its usage types (`USAGE_TYPE`); the rows start collapsed and open with the arrow on the left, like Redmine's grouped lists (also with the keyboard) | Same request (`GroupBy` `SERVICE` and `USAGE_TYPE`) |
 | Daily (last 30 days) | A bar chart of the daily unblended costs, and a table of the same values under it. Past days that Cost Explorer has not finalized have an "Estimated" badge (a lighter bar in the chart) | `GetCostAndUsage`, daily, from 29 days ago (or the first day of the month, if earlier) to tomorrow |
 | By cost allocation tag (`<tag>`) | Only with `REDMINE_COSTEXPLORER_TAG_KEY`: each tag value's costs this month and last month, with "(no tag)" for the costs without it | `GetCostAndUsage`, monthly, by the tag |
@@ -49,8 +49,7 @@ The screen uses the Japanese terms of the Cost Explorer documentation (checked o
 | --- | --- | --- |
 | Unblended cost / 非ブレンドコスト | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
 | Daily unblended costs / 日別の非ブレンドコスト | Same | Same |
-| Forecasted month-end costs / 月末の予測コスト | Same (「月末の予測コスト」) | Same |
-| This month's costs / 今月のコスト | A shorter form of 「今月の初めから今日までのコスト」 on the same page | Same |
+| Month-end forecast / 月末の予測 | A shorter form of 「月末の予測コスト」 on the same page | Same |
 | Estimated / 推定 | 「過去 1 か月の推定コスト」 on the same page | Same |
 | Service, Usage types, Cost allocation tag / サービス、使用タイプ、コスト配分タグ | `SERVICE`, `USAGE_TYPE`, tags | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |
 | (no tag) / (タグなし) | Costs without the tag | The plugin's own term; to recheck in the console |

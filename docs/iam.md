@@ -7,7 +7,7 @@ The plugin's own calls to AWS, by the role of the process. Lambda's own permissi
 | Action | Resource | Why |
 | --- | --- | --- |
 | `ce:GetCostAndUsage` | `*` | The costs by service, by day and, with `REDMINE_COSTEXPLORER_TAG_KEY`, by the tag |
-| `ce:GetCostForecast` | `*` | Forecasted month-end costs |
+| `ce:GetCostForecast` | `*` | The month-end forecast |
 
 Only the role of the process that runs the rake task `redmine_serverless_costexplorer:refresh` needs these permissions (in Serverless, `redmine-task`). Web requests and Redmine's jobs never call Cost Explorer. Both actions only read. The costs are those of the whole account (or, in a member account, of that account); the tag only splits what the page shows.
 

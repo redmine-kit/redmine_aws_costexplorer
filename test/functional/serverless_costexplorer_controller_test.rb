@@ -18,13 +18,6 @@ module RedmineServerlessCostexplorer
       with_settings(date_format: '%Y-%m-%d') { with_enabled { with_fetcher_client(client) { get :index } } }
 
       assert_response :success
-      # No heading first: the description line and the update time on the right.
-      assert_equal 'By service', css_select('#content h3').first.text
-      assert_select '#serverless-costexplorer-summary tr', text: /This month's costs\s*7\.51 USD/
-      assert_select '#serverless-costexplorer-summary td.name', text: "This month's costs"
-      assert_select '#serverless-costexplorer-summary td.amount', text: '7.51 USD'
-      assert_select '#serverless-costexplorer-summary tr', text: /Forecasted month-end costs\s*22\.20 USD/
-      assert_select '#serverless-costexplorer-summary tr', text: /Last month's costs\s*22\.48 USD/
       # This month is always estimated, and the last month is final.
       assert_select '#serverless-costexplorer-summary span.badge', 0
       assert_select '#serverless-costexplorer-daily > tbody > tr', 30
@@ -35,11 +28,23 @@ module RedmineServerlessCostexplorer
       assert_select 'div[data-serverless-costexplorer--daily-title-value]', 0
       assert_select 'script[type=module][src*="serverless_costexplorer"]'
       assert_select '#serverless-costexplorer-tags', 0
-      assert_select 'p', text: 'Unblended costs from AWS Cost Explorer.'
+      assert_not_includes response.body, 'Unblended costs from AWS Cost Explorer.'
       assert_select '#serverless-costexplorer-updated', text: /Updated: .* \(daily\)/
       assert_select 'input[type=submit][value=Refresh]', 0
       # The page never calls Cost Explorer.
       assert_empty client.api_requests
+    end
+
+    def test_the_totals
+      fetched_snapshot
+      with_enabled { get :index }
+
+      # The totals are a section like the others: a heading, then a list with a header row.
+      assert_equal 'Total', css_select('#content h3').first.text
+      assert_equal(['This month', 'Month-end forecast', 'Last month'],
+                   css_select('#serverless-costexplorer-summary thead th.amount').map { |th| th.text.strip })
+      assert_equal(['7.51 USD', '22.20 USD', '22.48 USD'],
+                   css_select('#serverless-costexplorer-summary tbody td.amount').map { |td| td.text.strip })
     end
 
     # Each service is a collapsed group of its usage types.
@@ -63,8 +68,9 @@ module RedmineServerlessCostexplorer
       with_enabled { get :index }
 
       assert_select '#serverless-costexplorer-summary span.badge', 1
-      assert_select '#serverless-costexplorer-summary tr', text: /Last month's costs\s*22\.48 USD\s*Estimated/
-      assert_select '#serverless-costexplorer-summary tr span.badge.badge-status-locked', text: 'Estimated'
+      # In the amount's cell, before the amount.
+      assert_select '#serverless-costexplorer-summary td.amount', text: /\AEstimated\s*22\.48 USD\z/
+      assert_select '#serverless-costexplorer-summary td.amount span.badge.badge-status-locked', text: 'Estimated'
     end
 
     def test_the_daily_chart
@@ -122,8 +128,8 @@ module RedmineServerlessCostexplorer
       snapshot.update!(data: snapshot.data.merge('forecast' => { 'error' => 'DataUnavailableException: x' }))
       with_enabled { get :index }
 
-      assert_select '#serverless-costexplorer-summary tr',
-                    text: /No forecast \(DataUnavailableException\)/
+      assert_select '#serverless-costexplorer-summary td.amount',
+                    text: 'No forecast (DataUnavailableException)'
     end
 
     def test_disabled

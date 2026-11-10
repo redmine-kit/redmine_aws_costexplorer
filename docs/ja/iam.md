@@ -9,7 +9,7 @@
 | 操作 | 対象 | 理由 |
 | --- | --- | --- |
 | `ce:GetCostAndUsage` | `*` | サービス別、日別、`REDMINE_COSTEXPLORER_TAG_KEY` があればタグ別の費用 |
-| `ce:GetCostForecast` | `*` | 月末の予測コスト |
+| `ce:GetCostForecast` | `*` | 月末の予測 |
 
 この権限が要るのは、rake のタスク `redmine_serverless_costexplorer:refresh` を実行するプロセスのロールだけです(Serverless では `redmine-task`)。web の要求と Redmine のジョブは Cost Explorer を呼びません。どちらの操作も読むだけです。費用はアカウント全体のもの(メンバーアカウントでは、そのアカウントのもの)で、タグは画面の表示を分けるだけです。
 

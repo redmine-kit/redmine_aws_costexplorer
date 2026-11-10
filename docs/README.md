@@ -1,6 +1,6 @@
 # Redmine Serverless Cost Explorer
 
-Redmine Serverless Cost Explorer (`redmine_serverless_costexplorer`) is a Redmine plugin that shows the costs of the AWS account in Redmine's administration, from AWS Cost Explorer. It adds the "Cost Explorer" tab to the shared "Serverless" administration menu. It does not modify Redmine's own files. The plugin is in early development (version 0.1.3).
+Redmine Serverless Cost Explorer (`redmine_serverless_costexplorer`) is a Redmine plugin that shows the costs of the AWS account in Redmine's administration, from AWS Cost Explorer. It adds the "Cost Explorer" tab to the shared "Serverless" administration menu. It does not modify Redmine's own files. The plugin is in early development.
 
 - [Setup](setup.md): requirements, installation, configuration, AWS resources, network, tests
 - [IAM permissions](iam.md): permissions, example policy, resource-based policies

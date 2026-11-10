@@ -9,7 +9,7 @@ AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画�
 
 [English](README.md)
 
-> **状態:** 開発の初期です。「Cost Explorer」のタブと毎日の取得を実装し、Redmine 7.0.3 で、SDK の応答のスタブと moto でテストしています。
+> **状態:** 開発の初期です。実装し、Redmine 7.0.3 でテストしています。
 
 <a id="documentation"></a>
 

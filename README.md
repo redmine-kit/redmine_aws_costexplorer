@@ -9,7 +9,7 @@ A Redmine plugin that shows the costs of the AWS account in Redmine's administra
 
 [日本語](README.ja.md)
 
-> **Status:** early development. The "Cost Explorer" tab and the daily fetch are implemented and tested on Redmine 7.0.3 with SDK response stubs and moto.
+> **Status:** early development. It is implemented and tested on Redmine 7.0.3.
 
 ## Documentation
 

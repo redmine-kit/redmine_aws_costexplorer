@@ -1,12 +1,13 @@
 # 導入
 
-Redmine Serverless Cost Explorer を使うために、Redmine に必要なものです。インストール、設定、スケジュール、IAM の権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ(派生のイメージ)のために、Serverless は、デプロイの設定ファイル(`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効)から、これらを CloudFormation ですべて用意します。このページは、手で用意するときや、Serverless が作るものを確認するときのためのものです。
+Redmine AWS Cost Explorer を使うために、Redmine に必要なものです。インストール、設定、スケジュール、IAM の権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ(派生のイメージ)のために、Serverless は、デプロイの設定ファイル(`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効)から、これらを CloudFormation ですべて用意します。このページは、手で用意するときや、Serverless が作るものを確認するときのためのものです。
 
 <a id="requirements"></a>
 
 ## 動作環境
 
 - Redmine 7.0 以降。
+- [Redmine AWS](https://redmine-kit.github.io/redmine_aws/ja/) (`redmine_aws`) 0.1 以降。「AWS」の管理メニューがあります (gem の依存です。チェックアウトでは、これもクローンします)。
 - AWS の gem `aws-sdk-costexplorer`(gem の依存です。チェックアウトでは、プラグインの `Gemfile` が追加します)。
 - Cost Explorer が有効な AWS アカウント([README.md](README.md#notes))。AWS Organizations のメンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許している必要があります。
 - rake のタスクを 1 日に 1 回実行するもの。
@@ -15,8 +16,8 @@ Redmine Serverless Cost Explorer を使うために、Redmine に必要なもの
 
 ## インストール
 
-1. プラグインを `plugins/redmine_serverless_costexplorer` に置きます。gem をインストールするか([gem](#gem))、リポジトリをクローンします([gem を使わないとき](#without-the-gem))。
-2. プラグインの migration を実行します。スナップショットの表(`serverless_costexplorer_snapshots`)を作ります。
+1. プラグインを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` に置きます。gem をインストールするか([gem](#gem))、リポジトリをクローンします([gem を使わないとき](#without-the-gem))。
+2. プラグインの migration を実行します。スナップショットの表(`aws_costexplorer_snapshots`)を作ります。
 
    ```sh
    bin/rake redmine:plugins:migrate
@@ -28,29 +29,31 @@ Redmine Serverless Cost Explorer を使うために、Redmine に必要なもの
 
 ### gem
 
-バージョンのタグ(`v*`)ごとに、プラグインを gem として GitHub Packages(`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`)に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル(`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`LICENSE`)が入っていて、プラグインの `Gemfile` は入っていません。Redmine は `plugins/` からだけプラグインを読むので、インストールした gem をそこにリンクします。
+バージョンのタグ(`v*`)ごとに、プラグインを gem として GitHub Packages(`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`)に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル(`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`LICENSE`)が入っていて、プラグインの `Gemfile` は入っていません。gem は `redmine_aws` に依存し、Bundler が同じソースからインストールします。Redmine は `plugins/` からだけプラグインを読むので、インストールした 2 つの gem をそこにリンクします。
 
 ```ruby
 # Redmine の Gemfile.local
 source 'https://rubygems.pkg.github.com/redmine-kit' do
-  gem 'redmine_serverless_costexplorer'
+  gem 'redmine_aws_costexplorer'
 end
 ```
 
 ```sh
 bundle config set --global rubygems.pkg.github.com <user>:<token>   # または変数 BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 bundle install
-ln -s "$(bundle info --path redmine_serverless_costexplorer)" plugins/redmine_serverless_costexplorer
+ln -s "$(bundle info --path redmine_aws)" plugins/redmine_aws
+ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_costexplorer
 ```
 
 <a id="without-the-gem"></a>
 
 ### gem を使わないとき
 
-リポジトリを `plugins/redmine_serverless_costexplorer` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。
+リポジトリを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。
 
 ```sh
-git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer
+git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_aws
+git clone https://github.com/redmine-kit/redmine_aws_costexplorer.git plugins/redmine_aws_costexplorer
 bundle install
 ```
 
@@ -81,17 +84,17 @@ bundle install
 
 ### スケジュール
 
-rake のタスク `redmine_serverless_costexplorer:refresh` を 1 日に 1 回実行します。
+rake のタスク `redmine_aws_costexplorer:refresh` を 1 日に 1 回実行します。
 
 ```sh
-bin/rake redmine_serverless_costexplorer:refresh
+bin/rake redmine_aws_costexplorer:refresh
 ```
 
 実行する時刻はいつでもかまいません。Cost Explorer のデータはおよそ 1 日に 1 回更新され、1 回の実行で要求は 3 件か 4 件です([README.md](README.md#fetching-the-costs))。取得が失敗するとタスクも失敗し(0 以外の終了コード。エラーは標準エラー出力)、スケジューラーが失敗を記録できます。プラグインが無効なら、何も取得しなかったことを出力して成功します。
 
 | 環境 | タスクを動かすもの |
 | --- | --- |
-| Serverless | EventBridge のルール(`<instance>-costexplorer-refresh`)が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_serverless_costexplorer:refresh"]}` で呼ぶ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
+| Serverless | EventBridge のルール(`<instance>-costexplorer-refresh`)が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_aws_costexplorer:refresh"]}` で呼ぶ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
 | ほかの環境 | cron、systemd のタイマー、スケジュールで動くコンテナのタスクなど。Redmine のディレクトリで、Redmine と同じ環境変数でコマンドを実行する |
 
 <a id="iam-permissions"></a>
@@ -144,7 +147,7 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 
 ### テストの実行
 
-`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインを入れた状態で Redmine のすべてのテストを動かします。プラグインのテストは、プラグインのファイルのカバレッジ(SimpleCov。Cobertura の XML を `coverage/coverage.xml` に)も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer) に送ります。
+`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインを入れた状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものを入れます。CI は `redmine-kit/redmine_aws` をチェックアウトします。プラグインのテストは、プラグインのファイルのカバレッジ(SimpleCov。Cobertura の XML を `coverage/coverage.xml` に)も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送ります。
 
 ```sh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト

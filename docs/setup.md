@@ -1,18 +1,19 @@
 # Setup
 
-What a Redmine needs to use Redmine Serverless Cost Explorer: installation, configuration, the schedule, IAM permissions and network access. [Serverless](https://redmine-kit.github.io/serverless/)'s image does not include the plugin. For an image that adds it (a derived image), Serverless sets all of this up with CloudFormation from its deployment configuration file (`costExplorer.enabled` and `costExplorer.allocationTag` in `redmine.json`, off by default); this page is for setting it up by hand, or for checking what Serverless creates.
+What a Redmine needs to use Redmine AWS Cost Explorer: installation, configuration, the schedule, IAM permissions and network access. [Serverless](https://redmine-kit.github.io/serverless/)'s image does not include the plugin. For an image that adds it (a derived image), Serverless sets all of this up with CloudFormation from its deployment configuration file (`costExplorer.enabled` and `costExplorer.allocationTag` in `redmine.json`, off by default); this page is for setting it up by hand, or for checking what Serverless creates.
 
 ## Requirements
 
 - Redmine 7.0 or later.
+- [Redmine AWS](https://redmine-kit.github.io/redmine_aws/) (`redmine_aws`) 0.1 or later, which has the "AWS" administration menu (a dependency of the gem; with a checkout, it is cloned too).
 - AWS's gem `aws-sdk-costexplorer` (a dependency of the gem; with a checkout, the plugin's `Gemfile` adds it).
 - An AWS account where Cost Explorer is enabled ([README.md](README.md#notes)). In a member account of AWS Organizations, the management account must allow member accounts to use Cost Explorer.
 - Something that runs the rake task once a day.
 
 ## Installation
 
-1. Put the plugin in `plugins/redmine_serverless_costexplorer`: install the gem ([Gem](#gem)) or clone the repository ([Without the gem](#without-the-gem)).
-2. Run the plugin's migrations. They create the table of snapshots (`serverless_costexplorer_snapshots`).
+1. Put the plugin in `plugins/redmine_aws_costexplorer` and Redmine AWS in `plugins/redmine_aws`: install the gem ([Gem](#gem)) or clone the repository ([Without the gem](#without-the-gem)).
+2. Run the plugin's migrations. They create the table of snapshots (`aws_costexplorer_snapshots`).
 
    ```sh
    bin/rake redmine:plugins:migrate
@@ -22,27 +23,29 @@ What a Redmine needs to use Redmine Serverless Cost Explorer: installation, conf
 
 ### Gem
 
-Each version tag (`v*`) publishes the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`; `.github/workflows/gem.yml`). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `assets/`, `config/`, `db/`, `LICENSE`); the plugin's `Gemfile` is not in it. Redmine loads plugins only from `plugins/`, so the installed gem is linked there:
+Each version tag (`v*`) publishes the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`; `.github/workflows/gem.yml`). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `assets/`, `config/`, `db/`, `LICENSE`); the plugin's `Gemfile` is not in it. The gem depends on `redmine_aws`, which Bundler installs from the same source. Redmine loads plugins only from `plugins/`, so both installed gems are linked there:
 
 ```ruby
 # Redmine's Gemfile.local
 source 'https://rubygems.pkg.github.com/redmine-kit' do
-  gem 'redmine_serverless_costexplorer'
+  gem 'redmine_aws_costexplorer'
 end
 ```
 
 ```sh
 bundle config set --global rubygems.pkg.github.com <user>:<token>   # or the variable BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 bundle install
-ln -s "$(bundle info --path redmine_serverless_costexplorer)" plugins/redmine_serverless_costexplorer
+ln -s "$(bundle info --path redmine_aws)" plugins/redmine_aws
+ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_costexplorer
 ```
 
 ### Without the gem
 
-Clone the repository into `plugins/redmine_serverless_costexplorer` and install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`.
+Clone the repository into `plugins/redmine_aws_costexplorer`, and Redmine AWS into `plugins/redmine_aws`, and install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`.
 
 ```sh
-git clone https://github.com/redmine-kit/redmine_serverless_costexplorer.git plugins/redmine_serverless_costexplorer
+git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_aws
+git clone https://github.com/redmine-kit/redmine_aws_costexplorer.git plugins/redmine_aws_costexplorer
 bundle install
 ```
 
@@ -67,17 +70,17 @@ The plugin creates no AWS resources and needs none of its own. Cost Explorer's A
 
 ### Schedule
 
-Run the rake task `redmine_serverless_costexplorer:refresh` once a day:
+Run the rake task `redmine_aws_costexplorer:refresh` once a day:
 
 ```sh
-bin/rake redmine_serverless_costexplorer:refresh
+bin/rake redmine_aws_costexplorer:refresh
 ```
 
 Any time of day works: Cost Explorer updates its data about once a day, and one run costs 3 or 4 requests ([README.md](README.md#fetching-the-costs)). When the fetch fails, the task fails too (a non-zero exit, with the error on standard error), so that the scheduler records the failure. With the plugin off, it prints that nothing was fetched and succeeds.
 
 | Where | What runs the task |
 | --- | --- |
-| Serverless | An EventBridge rule (`<instance>-costexplorer-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_serverless_costexplorer:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)) |
+| Serverless | An EventBridge rule (`<instance>-costexplorer-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_aws_costexplorer:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)) |
 | Elsewhere | cron, a systemd timer or a scheduled container task that runs the command in Redmine's directory, with Redmine's environment |
 
 ## IAM permissions
@@ -116,7 +119,7 @@ Only `GetCostForecast` is mocked, because neither backend implements it. The int
 
 ### Running the tests
 
-`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_serverless_costexplorer).
+`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The tests build Redmine with Redmine AWS from a checkout next to this one (`../redmine_aws`), or from the directory in `REDMINE_AWS_DIR`; CI checks out `redmine-kit/redmine_aws`. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer).
 
 ```sh
 bin/test            # the plugin's tests and Redmine's tests around administration

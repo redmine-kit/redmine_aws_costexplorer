@@ -1,6 +1,6 @@
-# Redmine Serverless Cost Explorer
+# Redmine AWS Cost Explorer
 
-Redmine Serverless Cost Explorer (`redmine_serverless_costexplorer`) is a Redmine plugin that shows the costs of the AWS account in Redmine's administration, from AWS Cost Explorer. It adds the "Cost Explorer" tab to the shared "Serverless" administration menu. It does not modify Redmine's own files. The plugin is in early development.
+Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) is a Redmine plugin that shows the costs of the AWS account in Redmine's administration, from AWS Cost Explorer. It adds the "Cost Explorer" tab to the "AWS" administration menu of [Redmine AWS](https://redmine-kit.github.io/redmine_aws/), which it requires. It does not modify Redmine's own files. The plugin is in early development.
 
 - [Setup](setup.md): requirements, installation, configuration, AWS resources, network, tests
 - [IAM permissions](iam.md): permissions, example policy, resource-based policies
@@ -14,7 +14,7 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 | Feature | Contents | Enabled when | Page |
 | --- | --- | --- | --- |
 | The "Cost Explorer" tab | The costs of the AWS account: the total (this month, month-end forecast, last month), by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
-| Daily fetch | The rake task `redmine_serverless_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
+| Daily fetch | The rake task `redmine_aws_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
 
 ## What the tab shows
@@ -62,13 +62,13 @@ The page never calls Cost Explorer. AWS charges each Cost Explorer API request (
 
 | How | When | Runs in |
 | --- | --- | --- |
-| Rake task `redmine_serverless_costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
+| Rake task `redmine_aws_costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
 
 - **The only fetch:** There is no fetch from the page and no button: the daily run is the only one, so the cost of the requests stays fixed.
 - **Requests per fetch:** 3 (`GetCostAndUsage` twice, `GetCostForecast` once), or 4 with the tag. A long answer of `GetCostAndUsage` comes in pages, and each further page is one more request.
 - **Requests in a month:** 3 or 4 a day: about 90 to 120 a month, about USD 0.9 to 1.2.
 - **A failed fetch:** It is recorded with its error, shown on the tab above the last successful data, and the task fails. The next day's run fetches again.
-- **Snapshots:** Each fetch is a row in `serverless_costexplorer_snapshots`: when it was started and by whom (`schedule`), when it was fetched, the data (JSON), the error, and the number of requests. The rake task deletes rows older than 90 days after each successful fetch, keeping the latest successful one.
+- **Snapshots:** Each fetch is a row in `aws_costexplorer_snapshots`: when it was started and by whom (`schedule`), when it was fetched, the data (JSON), the error, and the number of requests. The rake task deletes rows older than 90 days after each successful fetch, keeping the latest successful one.
 
 ## Costs by tag (optional)
 
@@ -83,9 +83,9 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 
 - **AWS Organizations:** In a member account, the management account decides whether member accounts may use Cost Explorer (Cost Management preferences › "Linked account access"; AWS Cost Management User Guide, "Controlling access to Cost Explorer", checked on 2026-11-10). Without it, the requests fail with an access error. A member account sees only its own costs.
 - **Enabling Cost Explorer:** Cost Explorer is enabled for an account by opening it once in the console; AWS then prepares the data, which can take up to 24 hours (AWS Cost Management User Guide, "Enabling Cost Explorer", checked on 2026-11-10).
-- **No connection test:** The plugin does not add a connection test to Redmine Serverless's "Status" tab: each test would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
-- **Code structure:** `lib/redmine_serverless_costexplorer/fetcher.rb` makes the requests, `app/models/serverless_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_serverless_costexplorer.rake` runs them, and `app/controllers/serverless_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
-- **Migrations:** A table for the snapshots (`serverless_costexplorer_snapshots`). Run `redmine:plugins:migrate`.
+- **No connection test:** The plugin does not add a connection test to Redmine AWS's "Status" tab: each test would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
+- **Code structure:** `lib/redmine_aws_costexplorer/fetcher.rb` makes the requests, `app/models/aws_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_aws_costexplorer.rake` runs them, and `app/controllers/aws_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
+- **Migrations:** A table for the snapshots (`aws_costexplorer_snapshots`). Run `redmine:plugins:migrate`.
 
 ## Sponsors
 
@@ -93,4 +93,4 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 
 ## License
 
-Redmine Serverless Cost Explorer is released under the GNU General Public License, version 2 or (at your option) any later version. See [LICENSE](../LICENSE). An unofficial Redmine plugin.
+Redmine AWS Cost Explorer is released under the GNU General Public License, version 2 or (at your option) any later version. See [LICENSE](../LICENSE). An unofficial Redmine plugin.

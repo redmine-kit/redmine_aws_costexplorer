@@ -68,13 +68,18 @@ module RedmineAws
           # Chart.js sizes the canvas when it draws; then its animation ends.
           assert_selector '#aws-costexplorer-daily-chart[style*="box-sizing"]'
           sleep 1.5
-          page.execute_script("document.querySelectorAll('#aws-costexplorer-daily > tbody > tr')" \
-                              ".forEach((row, index) => { if (index >= 7) row.style.display = 'none'; })")
+          hide_older_days
           shoot 'costexplorer', language
         end
       end
 
       private
+
+      # The first week of the daily table only, to keep the image short.
+      def hide_older_days
+        page.execute_script("document.querySelectorAll('#aws-costexplorer-daily > tbody > tr')" \
+                            ".forEach((row, index) => { if (index >= 7) row.style.display = 'none'; })")
+      end
 
       def today = Time.now.utc.to_date
 
@@ -85,15 +90,17 @@ module RedmineAws
 
       def client
         client = ::Aws::CostExplorer::Client.new(stub_responses: true, region: 'us-east-1')
-        client.stub_responses(:get_cost_and_usage, lambda { |context|
-          group = context.params[:group_by]&.first
-          if group.nil? then daily(context.params[:time_period])
-          elsif group[:type] == 'TAG' then monthly(TAGS.to_h { |value, share| ["#{TAG_KEY}$#{value}", share * total] })
-          else monthly(usage_types)
-          end
-        })
+        client.stub_responses(:get_cost_and_usage, ->(context) { cost_and_usage(context.params) })
         client.stub_responses(:get_cost_forecast, total: money(total * (1 - month_share)))
         client
+      end
+
+      def cost_and_usage(params)
+        group = params[:group_by]&.first
+        if group.nil? then daily(params[:time_period])
+        elsif group[:type] == 'TAG' then monthly(TAGS.to_h { |value, share| ["#{TAG_KEY}$#{value}", share * total] })
+        else monthly(usage_types)
+        end
       end
 
       def total = SERVICES.values.sum
@@ -121,12 +128,14 @@ module RedmineAws
       # About the same every day, a little more on weekdays; today is partial.
       def daily(time_period)
         days = (Date.parse(time_period[:start])...Date.parse(time_period[:end])).to_a
-        daily_total = total / 30.0
         { results_by_time: days.map do |day|
-          amount = daily_total * (day.on_weekday? ? 1.08 : 0.8) * (day == today ? 0.5 : 1)
           { time_period: { start: day.iso8601, end: (day + 1).iso8601 },
-            total: { 'UnblendedCost' => money(amount) }, groups: [], estimated: day >= today - 1 }
+            total: { 'UnblendedCost' => money(daily_amount(day)) }, groups: [], estimated: day >= today - 1 }
         end }
+      end
+
+      def daily_amount(day)
+        (total / 30.0) * (day.on_weekday? ? 1.08 : 0.8) * (day == today ? 0.5 : 1)
       end
     end
   end

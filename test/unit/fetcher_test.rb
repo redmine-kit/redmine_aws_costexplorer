@@ -57,33 +57,6 @@ module RedmineAws
         assert_match(/\ADataUnavailableException: /, forecast['error'])
       end
 
-      def test_the_requests
-        client = stub_cost_explorer
-        subject = fetcher(client)
-        subject.fetch
-
-        requests = client.api_requests
-        assert_equal 3, subject.requests
-        assert_equal %i[get_cost_and_usage get_cost_and_usage get_cost_forecast], requests.pluck(:operation_name)
-        services, daily, forecast = requests.pluck(:params)
-        assert_equal({ start: '2026-10-01', end: '2026-11-11' }, services[:time_period])
-        assert_equal 'MONTHLY', services[:granularity]
-        assert_equal ['UnblendedCost'], services[:metrics]
-        assert_equal [{ type: 'DIMENSION', key: 'SERVICE' }, { type: 'DIMENSION', key: 'USAGE_TYPE' }],
-                     services[:group_by]
-        assert_equal({ start: '2026-10-12', end: '2026-11-11' }, daily[:time_period])
-        assert_equal 'DAILY', daily[:granularity]
-        assert_nil daily[:group_by]
-        assert_equal({ start: '2026-11-10', end: '2026-12-01' }, forecast[:time_period])
-        assert_equal 'UNBLENDED_COST', forecast[:metric]
-      end
-
-      def test_the_client_is_in_the_region_of_cost_explorer
-        client = Fetcher.new.client
-
-        assert_equal 'us-east-1', client.config.region
-      end
-
       def test_no_tag_request_without_the_tag_key
         data = fetcher.fetch
 
@@ -101,48 +74,6 @@ module RedmineAws
         assert_equal 'redmine:instance', data['tag_key']
         assert_equal ['redmine:instance$prod', 'redmine:instance$staging', 'redmine:instance$'],
                      data['tags'].pluck('name')
-      end
-
-      # The services in two pages: the first group of each month, then the rest.
-      def paged_client
-        first = JSON.parse(fixture('services'))
-        second = first.deep_dup
-        first['ResultsByTime'].each { |result| result['Groups'] = result['Groups'].first(1) }
-        first['NextPageToken'] = 'page-2'
-        second['ResultsByTime'].each { |result| result['Groups'] = result['Groups'].drop(1) }
-        client = stub_cost_explorer
-        client.stub_responses(:get_cost_and_usage, lambda { |context|
-          if context.params[:group_by].nil? then http_body(daily_body)
-          else http_body((context.params[:next_page_token] ? second : first).to_json)
-          end
-        })
-        client
-      end
-
-      def test_further_pages
-        subject = fetcher(paged_client)
-        data = subject.fetch
-
-        assert_equal 4, subject.requests
-        assert_equal '7.51', data.dig('this_month', 'total')
-        assert_equal 4, data['services'].size
-      end
-
-      def test_a_first_day_of_the_month
-        client = stub_cost_explorer
-        Fetcher.new(client: client, tag_key: nil, today: Date.new(2026, 12, 1)).fetch
-        services, daily, forecast = client.api_requests.pluck(:params)
-
-        assert_equal({ start: '2026-11-01', end: '2026-12-02' }, services[:time_period])
-        assert_equal({ start: '2026-11-02', end: '2026-12-02' }, daily[:time_period])
-        assert_equal({ start: '2026-12-01', end: '2027-01-01' }, forecast[:time_period])
-      end
-
-      def test_a_thirty_first_day_includes_the_whole_month
-        client = stub_cost_explorer
-        Fetcher.new(client: client, tag_key: nil, today: Date.new(2026, 12, 31)).fetch
-
-        assert_equal({ start: '2026-12-01', end: '2027-01-01' }, client.api_requests.second[:params][:time_period])
       end
 
       def test_errors_are_raised

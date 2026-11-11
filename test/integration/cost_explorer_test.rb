@@ -54,18 +54,7 @@ module RedmineAws
         puts "\n[#{ENV.fetch('TEST_AWS_BACKEND', 'moto')} fetch] #{data.to_json.truncate(1500)}" if LOCALSTACK
 
         assert_equal 3, subject.requests
-        if LOCALSTACK
-          assert_equal({ 'total' => '0.0', 'estimated' => false }, data['this_month'])
-          assert_empty data['services']
-          assert_empty data['daily']
-          assert_equal({ 'total' => '15.0' }, data['forecast'])
-        else
-          assert_equal '7.51', data.dig('this_month', 'total')
-          assert_equal 'Amazon Relational Database Service', data['services'].first['name']
-          assert_equal 30, data['daily'].size
-          # 7.2 until yesterday and the mocked 15.0.
-          assert_equal({ 'total' => '22.2' }, data['forecast'])
-        end
+        LOCALSTACK ? assert_localstack_costs(data) : assert_moto_costs(data)
       end
 
       def test_the_costs_by_the_tag
@@ -83,10 +72,7 @@ module RedmineAws
 
       def test_the_rake_task_keeps_a_snapshot
         give_results('services', 'daily')
-        Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_aws_costexplorer:refresh')
-        task = Rake::Task['redmine_aws_costexplorer:refresh']
-        task.reenable
-        with_enabled { with_fetcher_client(@client) { capture_io { task.invoke } } }
+        with_enabled { with_fetcher_client(@client) { capture_io { refresh_task.invoke } } }
         snapshot = AwsCostexplorerSnapshot.latest
 
         assert_not_nil snapshot.fetched_at
@@ -107,6 +93,29 @@ module RedmineAws
         end
 
         assert_match(/not been implemented/, error.message)
+      end
+
+      private
+
+      # LocalStack has no billing data: empty results and its own forecast.
+      def assert_localstack_costs(data)
+        assert_equal({ 'total' => '0.0', 'estimated' => false }, data['this_month'])
+        assert_empty data['services']
+        assert_empty data['daily']
+        assert_equal({ 'total' => '15.0' }, data['forecast'])
+      end
+
+      def assert_moto_costs(data)
+        assert_equal '7.51', data.dig('this_month', 'total')
+        assert_equal 'Amazon Relational Database Service', data['services'].first['name']
+        assert_equal 30, data['daily'].size
+        # 7.2 until yesterday and the mocked 15.0.
+        assert_equal({ 'total' => '22.2' }, data['forecast'])
+      end
+
+      def refresh_task
+        Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_aws_costexplorer:refresh')
+        Rake::Task['redmine_aws_costexplorer:refresh'].tap(&:reenable)
       end
     end
   end

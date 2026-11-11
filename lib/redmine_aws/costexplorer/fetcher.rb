@@ -15,6 +15,9 @@ module RedmineAws
       # Cost Explorer's API is only in us-east-1 (ce.us-east-1.amazonaws.com).
       REGION = 'us-east-1'
       DAYS = 30
+      # The services with their usage types (the details of a service).
+      BY_SERVICE_AND_USAGE_TYPE = [{ type: 'DIMENSION', key: 'SERVICE' },
+                                   { type: 'DIMENSION', key: 'USAGE_TYPE' }].freeze
 
       attr_reader :requests
 
@@ -35,19 +38,14 @@ module RedmineAws
       # services come with their usage types (the details of a service), from
       # the same request grouped by both.
       def fetch
-        months = monthly(group_by: [{ type: 'DIMENSION', key: 'SERVICE' }, { type: 'DIMENSION', key: 'USAGE_TYPE' }])
+        months = monthly(group_by: BY_SERVICE_AND_USAGE_TYPE)
         daily = daily_costs
-        data = {
-          'currency' => @currency || 'USD',
-          'today' => @today.iso8601,
-          'this_month' => month_summary(months[:this]),
-          'previous_month' => month_summary(months[:previous]),
-          'services' => Groups.service_rows(months),
-          'daily' => daily
-        }
+        data = { 'currency' => @currency || 'USD', 'today' => @today.iso8601,
+                 'this_month' => month_summary(months[:this]), 'previous_month' => month_summary(months[:previous]),
+                 'services' => Groups.service_rows(months), 'daily' => daily }
         data['forecast'] = forecast(daily)
         data['tag_key'] = @tag_key
-        data['tags'] = Groups.rows(Groups.by_first_key(monthly(group_by: [{ type: 'TAG', key: @tag_key }]))) if @tag_key
+        data['tags'] = tag_rows if @tag_key
         data
       end
 
@@ -67,12 +65,20 @@ module RedmineAws
         periods = { previous: { estimated: false, groups: Hash.new(BigDecimal(0)) },
                     this: { estimated: false, groups: Hash.new(BigDecimal(0)) } }
         each_page(time_period: period(this_month_start.prev_month, tomorrow), granularity: 'MONTHLY',
-                  metrics: [METRIC], group_by: group_by) do |result|
-          key = Date.parse(result.time_period.start) < this_month_start ? :previous : :this
-          periods[key][:estimated] ||= result.estimated
-          result.groups.each { |group| periods[key][:groups][group.keys] += amount(group.metrics) }
-        end
+                  metrics: [METRIC], group_by: group_by) { |result| add_month(periods, result) }
         periods
+      end
+
+      # Adds one month of a monthly answer to its period.
+      def add_month(periods, result)
+        month = periods[Date.parse(result.time_period.start) < this_month_start ? :previous : :this]
+        month[:estimated] ||= result.estimated
+        result.groups.each { |group| month[:groups][group.keys] += amount(group.metrics) }
+      end
+
+      # The rows of the cost allocation tag's values.
+      def tag_rows
+        Groups.rows(Groups.by_first_key(monthly(group_by: [{ type: 'TAG', key: @tag_key }])))
       end
 
       def daily_costs
@@ -91,11 +97,14 @@ module RedmineAws
       def forecast(daily)
         response = request(:get_cost_forecast, time_period: period(@today, this_month_start.next_month),
                                                metric: FORECAST_METRIC, granularity: 'MONTHLY')
-        until_yesterday = daily.select { |day| Date.parse(day['date']).between?(this_month_start, @today - 1) }
-                               .sum(BigDecimal(0)) { |day| BigDecimal(day['amount']) }
-        { 'total' => (until_yesterday + BigDecimal(response.total.amount)).to_s('F') }
+        { 'total' => (until_yesterday(daily) + BigDecimal(response.total.amount)).to_s('F') }
       rescue ::Aws::Errors::ServiceError => e
         { 'error' => "#{e.class.name.demodulize}: #{e.message}" }
+      end
+
+      def until_yesterday(daily)
+        daily.select { |day| Date.parse(day['date']).between?(this_month_start, @today - 1) }
+             .sum(BigDecimal(0)) { |day| BigDecimal(day['amount']) }
       end
 
       def month_summary(month)

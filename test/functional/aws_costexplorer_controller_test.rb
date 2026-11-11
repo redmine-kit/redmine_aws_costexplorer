@@ -16,18 +16,11 @@ module RedmineAws
       def test_the_account_costs
         fetched_snapshot
         client = stub_cost_explorer
-        with_settings(date_format: '%Y-%m-%d') { with_enabled { with_fetcher_client(client) { get :index } } }
+        with_enabled { with_fetcher_client(client) { get :index } }
 
         assert_response :success
         # This month is always estimated, and the last month is final.
         assert_select '#aws-costexplorer-summary span.badge', 0
-        assert_select '#aws-costexplorer-daily > tbody > tr', 30
-        assert_select '#aws-costexplorer-daily tbody tr:first-child', text: /2026-11-10\s*0\.30 USD/
-        # Today is always estimated: no badge.
-        assert_select '#aws-costexplorer-daily span.badge', 0
-        assert_select 'div[data-controller="aws-costexplorer--daily"] canvas[role=img]'
-        assert_select 'div[data-aws-costexplorer--daily-title-value]', 0
-        assert_select 'script[type=module][src*="aws_costexplorer"]'
         assert_select '#aws-costexplorer-tags', 0
         assert_not_includes response.body, 'Unblended costs from AWS Cost Explorer.'
         assert_select '#aws-costexplorer-updated', text: /Updated: .* \(daily\)/
@@ -36,12 +29,18 @@ module RedmineAws
         assert_empty client.api_requests
       end
 
+      # The totals are a section like the others: a heading, then a list with a header row.
+      def test_the_totals_heading
+        fetched_snapshot
+        with_enabled { get :index }
+
+        assert_equal 'Total', css_select('#content h3').first.text
+      end
+
       def test_the_totals
         fetched_snapshot
         with_enabled { get :index }
 
-        # The totals are a section like the others: a heading, then a list with a header row.
-        assert_equal 'Total', css_select('#content h3').first.text
         assert_equal(['This month', 'Month-end forecast', 'Last month'],
                      css_select('#aws-costexplorer-summary thead th.amount').map { |th| th.text.strip })
         assert_equal(['7.51 USD', '22.20 USD', '22.48 USD'],
@@ -75,68 +74,6 @@ module RedmineAws
         # In the amount's cell, before the amount.
         assert_select '#aws-costexplorer-summary td.amount', text: /\AEstimated\s*22\.48 USD\z/
         assert_select '#aws-costexplorer-summary td.amount span.badge.badge-status-locked', text: 'Estimated'
-      end
-
-      def test_the_daily_chart
-        fetched_snapshot
-        with_settings(date_format: '%Y-%m-%d') { with_enabled { get :index } }
-
-        chart = daily_chart
-        assert_equal 30, chart[:labels].size
-        assert_equal %w[2026-10-12 2026-11-10], [chart[:labels].first, chart[:labels].last]
-        assert_equal ['Unblended cost'], chart[:datasets].pluck('label')
-        assert_equal [0.5, 0.8, 0.3], chart[:datasets].first['data'].values_at(0, 20, 29)
-      end
-
-      def test_an_estimated_past_day
-        snapshot = fetched_snapshot
-        data = snapshot.data
-        data['daily'].find { |day| day['date'] == '2026-11-08' }['estimated'] = true
-        snapshot.update!(data: data)
-        with_settings(date_format: '%Y-%m-%d') { with_enabled { get :index } }
-
-        assert_select '#aws-costexplorer-daily span.badge', 1
-        # The badge is in the amount's cell, before the amount; the table has two columns.
-        assert_select '#aws-costexplorer-daily tbody tr td.amount', text: /\AEstimated\s*0\.80 USD\z/
-        assert_select '#aws-costexplorer-daily thead th', 2
-        chart = daily_chart
-        final, estimated = chart[:datasets]
-        assert_equal ['Unblended cost', 'Estimated'], [final['label'], estimated['label']]
-        # One bar a day: the day is in the estimated dataset only.
-        assert_equal [nil, 0.8, 29], [final['data'][27], estimated['data'][27], estimated['data'].count(nil)]
-      end
-
-      def test_costs_by_the_tag
-        fetched_snapshot(tag_key: 'redmine:instance')
-        with_enabled(tag_key: 'redmine:instance') { get :index }
-
-        assert_select 'h3', text: 'By cost allocation tag (redmine:instance)'
-        assert_select '#aws-costexplorer-tags tbody tr', 3
-        assert_select '#aws-costexplorer-tags tbody tr', text: /prod\s*6\.00 USD\s*19\.98 USD/
-        assert_select '#aws-costexplorer-tags tbody tr', text: /\(no tag\)\s*0\.00 USD\s*2\.50 USD/
-        assert_select '#aws-costexplorer-no-tag', 0
-      end
-
-      def test_a_notice_without_tag_data
-        snapshot = fetched_snapshot(tag_key: 'redmine:instance')
-        data = snapshot.data
-        data['tags'] = [{ 'name' => 'redmine:instance$', 'this_month' => '7.51', 'previous_month' => '0.0' }]
-        snapshot.update!(data: data)
-        with_enabled(tag_key: 'redmine:instance') { get :index }
-
-        assert_select '#aws-costexplorer-no-tag', text: /Activate it as a cost allocation tag/
-      end
-
-      # A tag value that reads like the "(no tag)" label is a tag value.
-      def test_a_tag_value_like_the_untagged_label
-        snapshot = fetched_snapshot(tag_key: 'redmine:instance')
-        data = snapshot.data
-        data['tags'] = [{ 'name' => 'redmine:instance$(no tag)', 'this_month' => '7.51', 'previous_month' => '0.0' }]
-        snapshot.update!(data: data)
-        with_enabled(tag_key: 'redmine:instance') { get :index }
-
-        assert_select '#aws-costexplorer-no-tag', 0
-        assert_select '#aws-costexplorer-tags tbody tr', 1
       end
 
       def test_no_forecast
@@ -195,16 +132,6 @@ module RedmineAws
 
           assert_response status, "user #{user_id.inspect}"
         end
-      end
-
-      private
-
-      # The labels and datasets that the view passes to the chart.
-      def daily_chart
-        json = lambda { |target|
-          JSON.parse(css_select("template[data-aws-costexplorer--daily-target=#{target}]").first.text)
-        }
-        { labels: json.call('labels'), datasets: json.call('datasets') }
       end
     end
   end

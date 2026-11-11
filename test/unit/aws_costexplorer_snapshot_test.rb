@@ -18,14 +18,19 @@ module RedmineAws
       end
 
       def test_a_failed_fetch_keeps_the_error
-        client = ::Aws::CostExplorer::Client.new(stub_responses: { get_cost_and_usage: 'AccessDeniedException' })
         snapshot = AwsCostexplorerSnapshot.request!
 
-        assert_not snapshot.fetch!(fetcher(client))
+        assert_not snapshot.fetch!(fetcher(denied_client))
         assert_match(/\AAws::CostExplorer::Errors::AccessDeniedException: /, snapshot.error)
         assert_equal 1, snapshot.requests
-        assert_nil snapshot.fetched_at
         assert_not snapshot.unreachable?
+      end
+
+      def test_a_failed_fetch_is_the_last_request_but_not_the_latest_data
+        snapshot = AwsCostexplorerSnapshot.request!
+        snapshot.fetch!(fetcher(denied_client))
+
+        assert_nil snapshot.fetched_at
         assert_nil AwsCostexplorerSnapshot.latest
         assert_equal snapshot, AwsCostexplorerSnapshot.last_request
       end
@@ -54,6 +59,12 @@ module RedmineAws
 
         assert_equal 1, AwsCostexplorerSnapshot.prune
         assert_equal [kept, recent].map(&:id).sort, AwsCostexplorerSnapshot.pluck(:id).sort
+      end
+
+      private
+
+      def denied_client
+        ::Aws::CostExplorer::Client.new(stub_responses: { get_cost_and_usage: 'AccessDeniedException' })
       end
     end
   end

@@ -34,12 +34,15 @@ module RedmineAws
 
       # [{ 'name', 'this_month', 'previous_month' }], the largest this month first.
       def rows(months)
-        names = months[:this][:groups].keys | months[:previous][:groups].keys
-        names.sort_by! { |name| [-months[:this][:groups][name], -months[:previous][:groups][name], name] }
-        names.map do |name|
-          { 'name' => name, 'this_month' => months[:this][:groups][name].to_s('F'),
-            'previous_month' => months[:previous][:groups][name].to_s('F') }
+        this, previous = months.values_at(:this, :previous).map { |month| month[:groups] }
+        names(this, previous).map do |name|
+          { 'name' => name, 'this_month' => this[name].to_s('F'), 'previous_month' => previous[name].to_s('F') }
         end
+      end
+
+      # The names of both months, the largest this month first.
+      def names(this, previous)
+        (this.keys | previous.keys).sort_by { |name| [-this[name], -previous[name], name] }
       end
     end
   end

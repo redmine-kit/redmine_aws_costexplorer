@@ -1,6 +1,6 @@
 # 導入
 
-Redmine AWS Cost Explorer を使うために、Redmine サーバーに必要なものです。インストール、設定、スケジュール、IAM 権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ (派生のイメージ) のために、Serverless は、デプロイの設定ファイル (`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効) から、これらを CloudFormation ですべて用意します。このページは、手動で用意するときや、Serverless が作るものを確認するときのためのものです。
+Redmine AWS Cost Explorer を使うために、Redmine サーバーに必要なものです。インストール、設定、スケジュール、IAM 権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ (派生イメージ) のために、Serverless は、デプロイの設定ファイル (`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効) から、これらを CloudFormation ですべて用意します。このページは、手動で用意するときや、Serverless が作るものを確認するときのためのものです。
 
 <a id="requirements"></a>
 

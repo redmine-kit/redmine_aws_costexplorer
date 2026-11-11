@@ -15,7 +15,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 | 機能 | 内容 | 有効になる条件 | ページ |
 | --- | --- | --- | --- |
-| 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別 (使用タイプの明細)、日別 (直近 30 日間。グラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。管理者 | [タブに表示するもの](#what-the-tab-shows) |
+| 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別 (使用タイプの明細)、日別 (直近 30 日間。グラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。システム管理者 | [タブに表示するもの](#what-the-tab-shows) |
 | 毎日の取得 | rake タスク `redmine_aws_costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
 | タグ別のコスト | コスト配分タグ (ふつうは `redmine:instance`) の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある (デフォルトは無効) | [タグ別のコスト](#costs-by-tag-optional) |
 

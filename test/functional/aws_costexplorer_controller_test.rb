@@ -54,7 +54,10 @@ module RedmineAws
         with_enabled { get :index }
 
         assert_select '#aws-costexplorer-services tbody tr.group', 4
-        assert_select '#aws-costexplorer-services tr.group span.expander[aria-expanded=false][tabindex="0"]', 4
+        # Redmine's own expander of grouped lists (issues/_list.html.erb), nothing more.
+        assert_select '#aws-costexplorer-services tr.group span.expander[onclick="toggleRowGroup(this);"]', 4
+        assert_select '#aws-costexplorer-services span.expander[onkeydown]', 0
+        assert_select '#aws-costexplorer-services span.expander[role]', 0
         assert_select '#aws-costexplorer-services tr.idnt-1[style*="display: none"]', 5
         assert_select '#aws-costexplorer-services tr.idnt-1 td.name', text: 'APN1-RDS:GP3-Storage'
         assert_select '#aws-costexplorer-services tbody tr:first-child',

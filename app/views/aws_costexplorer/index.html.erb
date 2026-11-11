@@ -68,10 +68,8 @@
 <tr class="<%= 'group' if details.any? %>">
     <td class="name">
       <% if details.any? %>
-      <span class="expander icon icon-collapsed" role="button" tabindex="0" aria-expanded="false"
-            title="<%= l(:label_aws_costexplorer_usage_types) %>"
-            onclick="toggleRowGroup(this); this.setAttribute('aria-expanded', $(this).closest('tr').hasClass('open'));"
-            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"><%= sprite_icon('angle-right') %></span>
+      <span class="expander icon icon-collapsed" title="<%= l(:label_aws_costexplorer_usage_types) %>"
+            onclick="toggleRowGroup(this);"><%= sprite_icon('angle-right') %></span>
       <% end %>
       <span class="name"><%= row['name'] %></span>
     </td>

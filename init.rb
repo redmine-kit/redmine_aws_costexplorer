@@ -10,6 +10,7 @@ Redmine::Plugin.register :redmine_serverless_costexplorer do
   url 'https://github.com/redmine-kit/redmine_serverless_costexplorer'
   author_url 'https://github.com/redmine-kit'
   requires_redmine version_or_higher: '7.0.0'
+  requires_redmine_plugin :redmine_aws, version_or_higher: '0.1.0'
 end
 
 RedmineServerlessCostexplorer.setup

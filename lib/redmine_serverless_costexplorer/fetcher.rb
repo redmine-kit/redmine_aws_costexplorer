@@ -26,8 +26,8 @@ module RedmineServerlessCostexplorer
 
     def client
       # Short timeouts, so that an unreachable endpoint fails in seconds.
-      @client ||= Aws::CostExplorer::Client.new(region: REGION, http_open_timeout: 5, http_read_timeout: 30,
-                                                retry_limit: 2)
+      @client ||= RedmineAws.client(Aws::CostExplorer::Client, region: REGION, http_open_timeout: 5,
+                                                               http_read_timeout: 30, retry_limit: 2)
     end
 
     # The costs as a hash of plain values, kept as JSON in a snapshot. The

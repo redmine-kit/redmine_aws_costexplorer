@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'screenshot_case'
+require_relative '../test_helper'
+require File.join(Redmine::Plugin.find(:redmine_aws).directory, 'test/support/redmine_aws/screenshot_case')
 
 # The Cost Explorer tab of docs/README.md, with the breakdown by the tag
 # redmine:instance. Cost Explorer answers with SDK response stubs; the
@@ -9,7 +10,9 @@ require_relative 'screenshot_case'
 # Explorer has not finalized yesterday yet. The first service is expanded to
 # its usage types, and the daily table keeps its first 7 days, to keep the
 # image short.
-class RedmineServerlessCostexplorerScreens < ScreenshotCase
+class RedmineServerlessCostexplorerScreens < RedmineAws::ScreenshotCase
+  self.docs = File.expand_path('../../docs', __dir__)
+
   TAG_KEY = 'redmine:instance'
   # Last month's cost of each service, in USD.
   SERVICES = {
@@ -54,7 +57,7 @@ class RedmineServerlessCostexplorerScreens < ScreenshotCase
 
   def test_screens
     each_language do |language|
-      visit '/admin/serverless/costexplorer'
+      visit '/admin/aws/costexplorer'
       assert_selector '#serverless-costexplorer-daily'
       find('#serverless-costexplorer-services tr.group span.expander', match: :first).click
       # Away from the expander, so that its tooltip is not in the image.

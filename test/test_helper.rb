@@ -15,9 +15,12 @@ if ENV['PLUGIN_COVERAGE']
 end
 
 require File.expand_path('../../../test/test_helper', __dir__)
+require File.join(Redmine::Plugin.find(:redmine_aws).directory, 'test/support/redmine_aws/test_helper')
 
 module RedmineServerlessCostexplorer
   module TestHelper
+    include RedmineAws::TestHelper
+
     TODAY = Date.new(2026, 11, 10)
     FIXTURES = File.expand_path('fixtures/cost_explorer', __dir__)
 
@@ -61,15 +64,6 @@ module RedmineServerlessCostexplorer
 
     def fetcher(client = stub_cost_explorer, tag_key: nil)
       RedmineServerlessCostexplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
-    end
-
-    # Runs the block with the environment variables set (nil unsets one).
-    def with_env(values)
-      saved = values.keys.to_h { |key| [key, ENV.fetch(key, nil)] }
-      values.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
-      yield
-    ensure
-      saved.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
     end
 
     def with_enabled(tag_key: nil, &)

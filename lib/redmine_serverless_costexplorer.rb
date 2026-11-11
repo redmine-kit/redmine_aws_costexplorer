@@ -19,7 +19,7 @@ module RedmineServerlessCostexplorer
 
   class << self
     def enabled?
-      ENV.fetch(ENV_ENABLED, '').strip.casecmp?('true')
+      RedmineAws.env_true?(ENV_ENABLED)
     end
 
     # The cost allocation tag that splits the costs per Redmine server, or
@@ -31,7 +31,7 @@ module RedmineServerlessCostexplorer
 
     # Called from init.rb, on every code reload.
     def setup
-      RedmineServerlessAdmin.register_tab(
+      RedmineAws::Admin.register_tab(
         :costexplorer, label: :label_serverless_costexplorer,
                        url: { controller: 'serverless_costexplorer', action: 'index' }, position: 60
       )

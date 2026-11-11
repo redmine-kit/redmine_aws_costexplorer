@@ -5,7 +5,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) is a Redmine plugin that 
 - [Setup](setup.md): requirements, installation, configuration, AWS resources, network, tests
 - [IAM permissions](iam.md): permissions, example policy, resource-based policies
 
-The plugin assumes that the AWS account is used only for the Redmine, so the account's costs are the Redmine's costs. For an account that holds several Redmine servers, the costs can also be split by a cost allocation tag (an option, off by default).
+The plugin assumes that the AWS account is used only for Redmine, so the account's costs are Redmine's costs. For an account that holds several Redmine servers, the costs can also be split by a cost allocation tag (an option, off by default).
 
 ## Features
 

@@ -11,7 +11,7 @@
 <% if @last_request&.error && !@last_request.pending? %>
 <%# Only the error's class here; the daily task logs the whole message %>
 <div class="flash error" id="aws-costexplorer-error">
-  <%= l(:text_aws_costexplorer_failed, time: format_time(@last_request.requested_at), error: @last_request.error.sub(/: .*/m, '')) %>
+  <%= l(:text_aws_costexplorer_failed, time: format_time(@last_request.requested_at), error: aws_costexplorer_error_name(@last_request.error)) %>
   <% if @last_request.unreachable? %><br><%= l(:text_aws_costexplorer_unreachable) %><% end %>
 </div>
 <% end %>
@@ -43,7 +43,7 @@
     <% if costs.dig('forecast', 'total') %>
     <td class="amount"><%= aws_costexplorer_amount(costs.dig('forecast', 'total'), currency) %></td>
     <% else %>
-    <td class="amount"><%= l(:text_aws_costexplorer_no_forecast, error: costs.dig('forecast', 'error').to_s.sub(/: .*/m, '')) %></td>
+    <td class="amount"><%= l(:text_aws_costexplorer_no_forecast, error: aws_costexplorer_error_name(costs.dig('forecast', 'error'))) %></td>
     <% end %>
     <td class="amount"><%= aws_costexplorer_estimated(costs.dig('previous_month', 'estimated')) %> <%= aws_costexplorer_amount(costs.dig('previous_month', 'total'), currency) %></td>
 </tr>
@@ -136,8 +136,7 @@
 <% if costs['tag_key'] %>
 <h3><%= l(:label_aws_costexplorer_by_tag, tag: costs['tag_key']) %></h3>
 
-<% tagged = costs['tags'].to_a.reject { |row| aws_costexplorer_tag_value(row['name'], costs['tag_key']) == l(:label_aws_costexplorer_untagged) } %>
-<% if tagged.empty? %>
+<% if aws_costexplorer_no_tag_data?(costs) %>
 <p class="warning" id="aws-costexplorer-no-tag"><%= l(:text_aws_costexplorer_no_tag_data, tag: costs['tag_key']) %></p>
 <% end %>
 <% if costs['tags'].present? %>

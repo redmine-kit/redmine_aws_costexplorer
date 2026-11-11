@@ -124,6 +124,18 @@ module RedmineAws
         assert_select '#aws-costexplorer-no-tag', text: /Activate it as a cost allocation tag/
       end
 
+      # A tag value that reads like the "(no tag)" label is a tag value.
+      def test_a_tag_value_like_the_untagged_label
+        snapshot = fetched_snapshot(tag_key: 'redmine:instance')
+        data = snapshot.data
+        data['tags'] = [{ 'name' => 'redmine:instance$(no tag)', 'this_month' => '7.51', 'previous_month' => '0.0' }]
+        snapshot.update!(data: data)
+        with_enabled(tag_key: 'redmine:instance') { get :index }
+
+        assert_select '#aws-costexplorer-no-tag', 0
+        assert_select '#aws-costexplorer-tags tbody tr', 1
+      end
+
       def test_no_forecast
         snapshot = fetched_snapshot
         snapshot.update!(data: snapshot.data.merge('forecast' => { 'error' => 'DataUnavailableException: x' }))

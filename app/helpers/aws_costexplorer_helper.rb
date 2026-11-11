@@ -45,7 +45,32 @@ module AwsCostexplorerHelper
   # A tag value as Cost Explorer returns it ("redmine:instance$prod"), or
   # "(no tag)" for the costs without it.
   def aws_costexplorer_tag_value(name, tag_key)
-    value = name.to_s.delete_prefix("#{tag_key}$").delete_prefix('$')
-    value.empty? ? l(:label_aws_costexplorer_untagged) : value
+    return l(:label_aws_costexplorer_untagged) if aws_costexplorer_untagged?(name, tag_key)
+
+    aws_costexplorer_tag(name, tag_key)
+  end
+
+  # Whether a group holds the costs without the tag: Cost Explorer returns
+  # them with an empty value ("redmine:instance$").
+  def aws_costexplorer_untagged?(name, tag_key)
+    aws_costexplorer_tag(name, tag_key).empty?
+  end
+
+  # Whether no costs carry the tag yet (it is not activated as a cost
+  # allocation tag).
+  def aws_costexplorer_no_tag_data?(costs)
+    costs['tags'].to_a.all? { |row| aws_costexplorer_untagged?(row['name'], costs['tag_key']) }
+  end
+
+  # The class of a stored error ("<class>: <message>"): the page shows the
+  # class, and the message stays in the database.
+  def aws_costexplorer_error_name(error)
+    error.to_s.sub(/: .*/m, '')
+  end
+
+  private
+
+  def aws_costexplorer_tag(name, tag_key)
+    name.to_s.delete_prefix("#{tag_key}$").delete_prefix('$')
   end
 end

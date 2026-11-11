@@ -8,10 +8,10 @@
 
 | 操作 | 対象 | 理由 |
 | --- | --- | --- |
-| `ce:GetCostAndUsage` | `*` | サービス別、日別、`REDMINE_COSTEXPLORER_TAG_KEY` があればタグ別の費用 |
+| `ce:GetCostAndUsage` | `*` | サービス別、日別、`REDMINE_COSTEXPLORER_TAG_KEY` があればタグ別のコスト |
 | `ce:GetCostForecast` | `*` | 月末の予測 |
 
-この権限が要るのは、rake タスク `redmine_aws_costexplorer:refresh` を実行するプロセスのロールだけです (Serverless では `redmine-task`)。Web リクエストと Redmine のジョブは Cost Explorer を呼びません。どちらの操作も読むだけです。費用はアカウント全体のもの (メンバーアカウントでは、そのアカウントのもの) で、タグは画面の表示を分けるだけです。
+この権限が要るのは、rake タスク `redmine_aws_costexplorer:refresh` を実行するプロセスのロールだけです (Serverless では `redmine-task`)。Web リクエストと Redmine のジョブは Cost Explorer を呼びません。どちらの操作も読むだけです。コストはアカウント全体のもの (メンバーアカウントでは、そのアカウントのもの) で、タグは画面の表示を分けるだけです。
 
 サービス認可リファレンスは、どちらの操作にも、リソースタイプ `billingview` (`arn:${Partition}:billing::${Account}:billingview/${ResourceId}`) と、条件キー `aws:ResourceTag/${TagKey}` を挙げています (Cost Explorer のサービスリファレンス `ce.json`。2026-11-10 に確認)。プラグインは請求ビュー (`BillingViewArn`) を指定しないので、Cost Explorer はアカウントのプライマリの請求ビューを使います。プライマリの請求ビューの ARN (`billing:ListBillingViews` で分かる) に絞ったポリシーでこれらのリクエストが通るかは、まだ確認していないので、例では `*` にしています。
 

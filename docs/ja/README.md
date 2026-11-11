@@ -1,11 +1,11 @@
 # Redmine AWS Cost Explorer
 
-Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウントの費用を、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。[Redmine AWS](https://redmine-kit.github.io/redmine_aws/ja/) の「AWS」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine AWS が必要です。Redmine そのもののファイルは変えません。開発の初期です。
+Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウントのコストを、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。[Redmine AWS](https://redmine-kit.github.io/redmine_aws/ja/) の「AWS」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine AWS が必要です。Redmine そのもののファイルは変えません。開発の初期です。
 
 - [導入](setup.md): 動作環境、インストール、設定、AWS リソース、ネットワーク、テスト
 - [IAM 権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
 
-このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントの費用が、そのまま Redmine の費用です。複数の Redmine サーバーを置くアカウントのために、コスト配分タグごとにも分けられます (オプション。デフォルトは無効)。
+このプラグインは、AWS アカウントを Redmine だけに使う前提です。アカウントのコストが、そのまま Redmine のコストです。複数の Redmine サーバーを置くアカウントのために、コスト配分タグごとにも分けられます (オプション。デフォルトは無効)。
 
 <a id="features"></a>
 
@@ -16,8 +16,8 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 | 機能 | 内容 | 有効になる条件 | ページ |
 | --- | --- | --- | --- |
 | 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別 (使用タイプの明細)、日別 (直近 30 日間。グラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。管理者 | [タブに表示するもの](#what-the-tab-shows) |
-| 毎日の取得 | rake タスク `redmine_aws_costexplorer:refresh` が、1 日に 1 回費用を取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
-| タグ別の費用 | コスト配分タグ (ふつうは `redmine:instance`) の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある (デフォルトは無効) | [タグ別の費用](#costs-by-tag-optional) |
+| 毎日の取得 | rake タスク `redmine_aws_costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
+| タグ別のコスト | コスト配分タグ (ふつうは `redmine:instance`) の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある (デフォルトは無効) | [タグ別のコスト](#costs-by-tag-optional) |
 
 <a id="what-the-tab-shows"></a>
 
@@ -53,6 +53,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 | --- | --- | --- |
 | 非ブレンドコスト / Unblended cost | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
 | 日別の非ブレンドコスト / Daily unblended costs | 同上 | 同上 |
+| コスト / Cost | 同上の「月末の予測コスト」などの「コスト」。このプラグインの日本語のページも、「費用」ではなくこの語を使う | 同上 |
 | 月末の予測 / Month-end forecast | 同上の「月末の予測コスト」を短くしたもの | 同上 |
 | 推定 / Estimated | 同上の「過去 1 か月の推定コスト」 | 同上 |
 | サービス、使用タイプ、コスト配分タグ / Service, Usage types, Cost allocation tag | `SERVICE`、`USAGE_TYPE`、タグ | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |
@@ -60,15 +61,15 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 <a id="fetching-the-costs"></a>
 
-## 費用の取得
+## コストの取得
 
-画面は Cost Explorer を呼びません。AWS は Cost Explorer の API のリクエストごとに課金し (1 リクエスト 0.01 USD。AWS Cost Explorer の料金のページ。2026-11-10 に確認)、Cost Explorer のデータの更新はおよそ 1 日に 1 回なので、プラグインは 1 日に 1 回費用を取得して保存します。
+画面は Cost Explorer を呼びません。AWS は Cost Explorer の API のリクエストごとに課金し (1 リクエスト 0.01 USD。AWS Cost Explorer の料金のページ。2026-11-10 に確認)、Cost Explorer のデータの更新はおよそ 1 日に 1 回なので、プラグインは 1 日に 1 回コストを取得して保存します。
 
 | 方法 | タイミング | 動く場所 |
 | --- | --- | --- |
 | rake タスク `redmine_aws_costexplorer:refresh` | 1 日に 1 回、スケジュールから ([setup.md](setup.md#schedule)) | タスクを実行するプロセス。その場で取得し、失敗すると、タスクも失敗する (0 以外の終了コード) |
 
-- **取得はこれだけ:** 画面からの取得やボタンはありません。毎日の実行だけなので、リクエストの費用は一定です。
+- **取得はこれだけ:** 画面からの取得やボタンはありません。毎日の実行だけなので、リクエストの料金は一定です。
 - **取得 1 回のリクエスト数:** 3 件 (`GetCostAndUsage` が 2 件、`GetCostForecast` が 1 件)、タグありで 4 件です。`GetCostAndUsage` の長い応答は複数のページに分かれ、次のページごとに 1 件増えます。
 - **1 か月のリクエスト数:** 1 日 3 件か 4 件で、1 か月におよそ 90 件から 120 件、約 0.9 から 1.2 USD です。
 - **失敗した取得:** エラーといっしょに記録し、タブでは最後に成功したデータの上に表示し、タスクも失敗します。次の日の実行で、また取得します。
@@ -76,20 +77,20 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 <a id="costs-by-tag-optional"></a>
 
-## タグ別の費用 (オプション)
+## タグ別のコスト (オプション)
 
-複数の Redmine サーバーを置く AWS アカウントでは、コスト配分タグで費用を分けられます。デフォルトは無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとのリクエストを送らず、画面にもタグの欄を出しません。
+複数の Redmine サーバーを置く AWS アカウントでは、コスト配分タグでコストを分けられます。デフォルトは無効です。`REDMINE_COSTEXPLORER_TAG_KEY` がなければ、タグごとのリクエストを送らず、画面にもタグの欄を出しません。
 
 - **有効にする:** `REDMINE_COSTEXPLORER_TAG_KEY` に、タグのキーを設定します。ふつうは `redmine:instance` です ([Serverless](https://redmine-kit.github.io/serverless/ja/) が、Redmine ごとのリソースに付けるタグです)。Serverless では、デプロイの設定ファイルで設定します。
-- **タグを有効にする:** Billing and Cost Management のコンソール (コスト配分タグ) で、タグのキーをコスト配分タグとして有効にします。有効になるまで、最大で 24 時間かかります。タグの付いた費用がまだないあいだは、画面にそう表示し、有効にする方法を示します。
+- **タグを有効にする:** Billing and Cost Management のコンソール (コスト配分タグ) で、タグのキーをコスト配分タグとして有効にします。有効になるまで、最大で 24 時間かかります。タグの付いたコストがまだないあいだは、画面にそう表示し、有効にする方法を示します。
 - **リクエストが 1 件増える:** 1 回の取得が 3 件から 4 件になります。
-- **タグのない費用:** タグのない費用 (たとえば、共有のリソースや、有効にする前の費用) は「(タグなし)」として表示します。
+- **タグのないコスト:** タグのないコスト (たとえば、共有のリソースや、有効にする前のコスト) は「(タグなし)」として表示します。
 
 <a id="notes"></a>
 
 ## 補足
 
-- **AWS Organizations:** メンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許すかを決めます (コスト管理の設定 ›「Linked account access」。AWS Cost Management ユーザーガイドの「Controlling access to Cost Explorer」。2026-11-10 に確認)。許していなければ、リクエストはアクセスエラーで失敗します。メンバーアカウントで見えるのは、そのアカウントの費用だけです。
+- **AWS Organizations:** メンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許すかを決めます (コスト管理の設定 ›「Linked account access」。AWS Cost Management ユーザーガイドの「Controlling access to Cost Explorer」。2026-11-10 に確認)。許していなければ、リクエストはアクセスエラーで失敗します。メンバーアカウントで見えるのは、そのアカウントのコストだけです。
 - **Cost Explorer を有効にする:** Cost Explorer は、コンソールで一度開くと、そのアカウントで有効になります。そのあと AWS がデータを準備し、最大で 24 時間かかります (AWS Cost Management ユーザーガイドの「Enabling Cost Explorer」。2026-11-10 に確認)。
 - **接続テストはない:** Redmine AWS の「ステータス」のタブには、接続テストを追加しません。テストのたびに、課金されるリクエストになるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
 - **コードの構成:** `lib/redmine_aws/costexplorer/fetcher.rb` がリクエストを送り、`app/models/aws_costexplorer_snapshot.rb` が取得を保存し、`lib/tasks/redmine_aws_costexplorer.rake` が取得を実行し、`app/controllers/aws_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。

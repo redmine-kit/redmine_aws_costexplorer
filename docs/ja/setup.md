@@ -66,13 +66,13 @@ bundle install
 | キー | 説明 | パラメーター |
 | --- | --- | --- |
 | `REDMINE_COSTEXPLORER_ENABLED` | プラグインを有効にする。無効のときは、rake タスクはリクエストを送らず、「Cost Explorer」のタブは、プラグインが無効なことを表示する | 必須。`true` で有効。ほかの値やないときは無効。rake タスクを実行するプロセス (取得のため) と、Web プロセス (タブが、プラグインが有効かを表示するため) に設定する |
-| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値ごとの費用も表示する ([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空かないときは無効 (デフォルト) で、タグのリクエストも送らない。rake タスクを実行するプロセスにだけ設定する。タブは、保存したデータからタグを読む。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
+| `REDMINE_COSTEXPLORER_TAG_KEY` | コスト配分タグのキー。その値別のコストも表示する ([README.md](README.md#costs-by-tag-optional)) | 省略可。例: `redmine:instance`。空か、ないときは無効 (デフォルト) で、タグのリクエストも送らない。rake タスクを実行するプロセスにだけ設定する。タブは、保存したデータからタグを読む。Serverless では `redmine.json` の `costExplorer.allocationTag` が設定する |
 
 | 項目 | 説明 | 変える場所 |
 | --- | --- | --- |
 | AWS の認証情報とリージョン | プラグインは、Redmine のリージョンにかかわらず、いつも `us-east-1` の Cost Explorer を呼ぶ | SDK のいつもの取得元 (Lambda のロール、インスタンスプロファイル、`AWS_*` の変数) |
 
-タグごとに費用を分ける (`REDMINE_COSTEXPLORER_TAG_KEY`) ときは、Billing and Cost Management のコンソール (コスト配分タグ) で、タグのキーをコスト配分タグとして有効にします。有効になるまで、最大で 24 時間かかります。
+タグ別にコストを分ける (`REDMINE_COSTEXPLORER_TAG_KEY`) ときは、Billing and Cost Management のコンソール (コスト配分タグ) で、タグのキーをコスト配分タグとして有効にします。有効になるまで、最大で 24 時間かかります。
 
 <a id="aws-resources"></a>
 
@@ -133,7 +133,7 @@ SDK の応答のスタブを使います。応答は `test/fixtures/cost_explore
 
 `test/integration/cost_explorer_test.rb` が、プラグインのリクエストを、SDK と HTTP を通してバックエンドに送ります。取得、タグありの取得、rake タスクです。トークンがあれば LocalStack で動かし、LocalStack が起動しないときは、`bin/services` がログを出して実行が失敗します。どちらで動いたかはログに出ます (`AWS backend: ...`)。
 
-LocalStack の Cost Explorer は、Ultimate のプランのものです。対応状況のページには、`GetCostAndUsage` はあるが `GetCostForecast` はなく、費用のデータもないと書かれています (LocalStack の Cost Explorer のページ。2026-11-10 に確認)。LocalStack 2026.10.6 では (2026-11-10 に確認)、`GetCostAndUsage` はプラグインのすべてのリクエスト (月別でサービス別、月別でタグ別、日別) に、実際の応答の形で結果なしを返し、`GetCostForecast` は `InternalFailure` (「The get_cost_forecast action has not been implemented」) を返しました。そのため LocalStack では費用が空なことを確認し、金額は moto とスタブで確認します。
+LocalStack の Cost Explorer は、Ultimate のプランのものです。対応状況のページには、`GetCostAndUsage` はあるが `GetCostForecast` はなく、コストのデータもないと書かれています (LocalStack の Cost Explorer のページ。2026-11-10 に確認)。LocalStack 2026.10.6 では (2026-11-10 に確認)、`GetCostAndUsage` はプラグインのすべてのリクエスト (月別でサービス別、月別でタグ別、日別) に、実際の応答の形で結果なしを返し、`GetCostForecast` は `InternalFailure` (「The get_cost_forecast action has not been implemented」) を返しました。そのため LocalStack ではコストが空なことを確認し、金額は moto とスタブで確認します。
 
 トークンがないときは moto を使います。moto は、API で前もって渡した結果 (`/moto-api/static/ce/cost-and-usage-results`) で `GetCostAndUsage` に答えるので、テストは金額を確認します。moto には `GetCostForecast` がありません (500 を返す)。
 
@@ -147,7 +147,7 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 
 ### テストの実行
 
-`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインを入れた状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものを入れます。CI は `redmine-kit/redmine_aws` をチェックアウトします。プラグインのテストは、プラグインのファイルのカバレッジ (SimpleCov。Cobertura の XML を `coverage/coverage.xml` に) も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送ります。
+`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。プラグインのテストは、プラグインのファイルのカバレッジ (SimpleCov。Cobertura の XML を `coverage/coverage.xml` に) も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送ります。
 
 ```sh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト

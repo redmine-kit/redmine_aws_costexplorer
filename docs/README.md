@@ -49,6 +49,7 @@ The screen uses the Japanese terms of the Cost Explorer documentation (checked o
 | --- | --- | --- |
 | Unblended cost / 非ブレンドコスト | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
 | Daily unblended costs / 日別の非ブレンドコスト | Same | Same |
+| Cost / コスト | 「コスト」, as in 「月末の予測コスト」 on the same page. The Japanese pages of this plugin use the same word, not 「費用」 | Same |
 | Month-end forecast / 月末の予測 | A shorter form of 「月末の予測コスト」 on the same page | Same |
 | Estimated / 推定 | 「過去 1 か月の推定コスト」 on the same page | Same |
 | Service, Usage types, Cost allocation tag / サービス、使用タイプ、コスト配分タグ | `SERVICE`, `USAGE_TYPE`, tags | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |

@@ -12,7 +12,7 @@ What a Redmine needs to use Redmine AWS Cost Explorer: installation, configurati
 
 ## Installation
 
-1. Put the plugin in `plugins/redmine_aws_costexplorer` and Redmine AWS in `plugins/redmine_aws`: install the gem ([Gem](#gem)) or clone the repository ([Without the gem](#without-the-gem)).
+1. Put the plugin in `plugins/redmine_aws_costexplorer` and Redmine AWS in `plugins/redmine_aws`: install the gems ([Gem](#gem)) or clone the repositories ([Without the gem](#without-the-gem)).
 2. Run the plugin's migrations. They create the table of snapshots (`aws_costexplorer_snapshots`).
 
    ```sh
@@ -41,7 +41,7 @@ ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_coste
 
 ### Without the gem
 
-Clone the repository into `plugins/redmine_aws_costexplorer`, and Redmine AWS into `plugins/redmine_aws`, and install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`.
+Clone the repository into `plugins/redmine_aws_costexplorer` and Redmine AWS into `plugins/redmine_aws`, then install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`.
 
 ```sh
 git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_aws

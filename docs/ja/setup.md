@@ -16,7 +16,7 @@ Redmine AWS Cost Explorer を使うために、Redmine に必要なものです�
 
 ## インストール
 
-1. プラグインを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` に置きます。gem をインストールするか([gem](#gem))、リポジトリをクローンします([gem を使わないとき](#without-the-gem))。
+1. プラグインを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` に置きます。gem をインストールするか([gem](#gem))、2 つのリポジトリをクローンします([gem を使わないとき](#without-the-gem))。
 2. プラグインの migration を実行します。スナップショットの表(`aws_costexplorer_snapshots`)を作ります。
 
    ```sh

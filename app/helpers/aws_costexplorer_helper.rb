@@ -68,6 +68,12 @@ module AwsCostexplorerHelper
     error.to_s.sub(/: .*/m, '')
   end
 
+  # The class of the error of a failed fetch, or "Timed out" for a fetch
+  # that stopped without finishing.
+  def aws_costexplorer_failure(snapshot)
+    snapshot.error ? aws_costexplorer_error_name(snapshot.error) : l(:label_aws_costexplorer_timed_out)
+  end
+
   private
 
   def aws_costexplorer_tag(name, tag_key)

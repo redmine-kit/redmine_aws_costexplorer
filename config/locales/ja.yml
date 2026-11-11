@@ -13,6 +13,7 @@ ja:
   label_aws_costexplorer_by_tag: "コスト配分タグ別 (%{tag})"
   label_aws_costexplorer_untagged: (タグなし)
   label_aws_costexplorer_estimated: 推定
+  label_aws_costexplorer_timed_out: タイムアウト
   label_aws_costexplorer_updated: "更新: %{time} (1 日 1 回)"
   text_aws_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED が true でないため、コストを取得しません。
   text_aws_costexplorer_no_forecast: "予測なし (%{error})"

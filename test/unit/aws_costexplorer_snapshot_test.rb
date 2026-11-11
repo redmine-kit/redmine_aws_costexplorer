@@ -45,6 +45,18 @@ module RedmineAws
                              'Aws::CostExplorer::Errors::AccessDeniedException: stubbed-response-error-message'
       end
 
+      # A fetch that stopped without a result (the task timed out) does not
+      # stay "running" all day.
+      def test_a_fetch_that_never_finished_is_failed
+        recent = AwsCostexplorerSnapshot.create!(requested_at: 10.minutes.ago)
+        stopped = AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago)
+
+        assert_predicate recent, :pending?
+        assert_not recent.failed?
+        assert_not stopped.pending?
+        assert_predicate stopped, :failed?
+      end
+
       def test_an_unreachable_endpoint
         client = ::Aws::CostExplorer::Client.new(stub_responses: true)
         client.stub_responses(:get_cost_and_usage,

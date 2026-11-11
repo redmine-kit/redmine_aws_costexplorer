@@ -8,10 +8,10 @@
 <p class="warning"><%= l(:text_aws_costexplorer_disabled) %></p>
 <% end %>
 
-<% if @last_request&.error && !@last_request.pending? %>
+<% if @last_request&.failed? %>
 <%# Only the error's class here; the message is in Redmine's log %>
 <div class="flash error" id="aws-costexplorer-error">
-  <%= l(:text_aws_costexplorer_failed, time: format_time(@last_request.requested_at), error: aws_costexplorer_error_name(@last_request.error)) %>
+  <%= l(:text_aws_costexplorer_failed, time: format_time(@last_request.requested_at), error: aws_costexplorer_failure(@last_request)) %>
   <% if @last_request.unreachable? %><br><%= l(:text_aws_costexplorer_unreachable) %><% end %>
 </div>
 <% end %>

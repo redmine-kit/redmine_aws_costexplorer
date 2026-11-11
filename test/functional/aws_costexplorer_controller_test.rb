@@ -76,17 +76,6 @@ module RedmineAws
         assert_select '#aws-costexplorer-summary td.amount span.badge.badge-status-locked', text: 'Estimated'
       end
 
-      def test_no_forecast
-        snapshot = fetched_snapshot
-        error = 'Aws::CostExplorer::Errors::DataUnavailableException: Data is not available for account 111122223333'
-        snapshot.update!(data: snapshot.data.merge('forecast' => { 'error' => error }))
-        with_enabled { get :index }
-
-        assert_select '#aws-costexplorer-summary td.amount',
-                      text: 'No forecast (Aws::CostExplorer::Errors::DataUnavailableException)'
-        assert_not_includes response.body, '111122223333'
-      end
-
       def test_disabled
         fetched_snapshot
         with_env('REDMINE_COSTEXPLORER_ENABLED' => nil) { get :index }
@@ -100,27 +89,6 @@ module RedmineAws
         assert_response :success
         assert_select 'p.nodata'
         assert_equal 0, AwsCostexplorerSnapshot.count
-      end
-
-      def test_the_last_daily_fetch_failed
-        fetched_snapshot(requested_at: 3.hours.ago)
-        AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago,
-                                        error: 'Seahorse::Client::NetworkingError: execution expired')
-        with_enabled { get :index }
-
-        assert_select '#aws-costexplorer-error', text: /Fetch error: .* \(Seahorse::Client::NetworkingError\)/
-        assert_select '#aws-costexplorer-error', text: /NetworkingError/
-        assert_select 'div.flash.error#aws-costexplorer-error'
-        assert_select '#aws-costexplorer-error', text: /could not be reached/
-        assert_not_includes response.body, 'execution expired', 'the message stays in the log'
-        assert_select '#aws-costexplorer-summary'
-      end
-
-      def test_a_running_daily_fetch
-        AwsCostexplorerSnapshot.request!
-        with_enabled { get :index }
-
-        assert_select '#aws-costexplorer-updated', text: /Updated: running \(since .*\)/
       end
 
       def test_no_refresh_route

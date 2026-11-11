@@ -6,6 +6,10 @@
 class AwsCostexplorerSnapshot < ApplicationRecord
   serialize :data, coder: JSON
 
+  # A fetch not finished after this stopped (the task timed out or was
+  # killed); it is shown as failed. One fetch takes seconds.
+  PENDING_LIMIT = 1.hour
+
   scope :fetched, -> { where.not(fetched_at: nil).where(error: nil) }
 
   class << self
@@ -30,6 +34,15 @@ class AwsCostexplorerSnapshot < ApplicationRecord
   end
 
   def pending?
+    unfinished? && requested_at > PENDING_LIMIT.ago
+  end
+
+  # Failed with an error, or stopped without one.
+  def failed?
+    error.present? || (unfinished? && !pending?)
+  end
+
+  def unfinished?
     fetched_at.nil? && error.nil?
   end
 

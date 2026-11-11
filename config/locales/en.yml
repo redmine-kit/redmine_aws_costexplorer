@@ -13,6 +13,7 @@ en:
   label_aws_costexplorer_by_tag: "By cost allocation tag (%{tag})"
   label_aws_costexplorer_untagged: (no tag)
   label_aws_costexplorer_estimated: Estimated
+  label_aws_costexplorer_timed_out: Timed out
   label_aws_costexplorer_updated: "Updated: %{time} (daily)"
   text_aws_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED is not true, so costs are not fetched.
   text_aws_costexplorer_no_forecast: "No forecast (%{error})"

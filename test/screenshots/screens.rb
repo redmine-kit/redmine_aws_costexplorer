@@ -49,7 +49,7 @@ module RedmineAws
         @saved = names.index_with { |name| ENV.fetch(name, nil) }
         ENV['REDMINE_COSTEXPLORER_ENABLED'] = 'true'
         ENV['REDMINE_COSTEXPLORER_TAG_KEY'] = TAG_KEY
-        snapshot = AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago, requested_by: 'schedule')
+        snapshot = AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago)
         snapshot.fetch!(Fetcher.new(client: client, tag_key: TAG_KEY, today: today))
         snapshot.update_columns(fetched_at: 2.hours.ago)
       end

@@ -8,7 +8,7 @@ namespace :redmine_aws_costexplorer do
       next
     end
 
-    snapshot = AwsCostexplorerSnapshot.request!(AwsCostexplorerSnapshot::SCHEDULE)
+    snapshot = AwsCostexplorerSnapshot.request!
     snapshot.fetch!
     abort "Cost Explorer: #{snapshot.error} (#{snapshot.requests} request(s))" if snapshot.error
 

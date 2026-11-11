@@ -19,7 +19,7 @@ module RedmineAws
 
       def test_a_failed_fetch_keeps_the_error
         client = ::Aws::CostExplorer::Client.new(stub_responses: { get_cost_and_usage: 'AccessDeniedException' })
-        snapshot = AwsCostexplorerSnapshot.request!('admin')
+        snapshot = AwsCostexplorerSnapshot.request!
 
         assert_not snapshot.fetch!(fetcher(client))
         assert_match(/\AAws::CostExplorer::Errors::AccessDeniedException: /, snapshot.error)
@@ -34,7 +34,7 @@ module RedmineAws
         client = ::Aws::CostExplorer::Client.new(stub_responses: true)
         client.stub_responses(:get_cost_and_usage,
                               Seahorse::Client::NetworkingError.new(Net::OpenTimeout.new('execution expired')))
-        snapshot = AwsCostexplorerSnapshot.request!('admin')
+        snapshot = AwsCostexplorerSnapshot.request!
         snapshot.fetch!(fetcher(client))
 
         assert_predicate snapshot, :unreachable?
@@ -42,15 +42,15 @@ module RedmineAws
 
       def test_the_latest_successful_snapshot
         older = fetched_snapshot(requested_at: 1.day.ago)
-        AwsCostexplorerSnapshot.request!('admin').update!(error: 'RuntimeError: boom')
+        AwsCostexplorerSnapshot.request!.update!(error: 'RuntimeError: boom')
 
         assert_equal older, AwsCostexplorerSnapshot.latest
       end
 
       def test_prune_keeps_the_latest_successful_snapshot
         kept = fetched_snapshot(requested_at: 100.days.ago)
-        AwsCostexplorerSnapshot.create!(requested_at: 95.days.ago, requested_by: 'admin', error: 'boom')
-        recent = AwsCostexplorerSnapshot.request!('admin')
+        AwsCostexplorerSnapshot.create!(requested_at: 95.days.ago, error: 'boom')
+        recent = AwsCostexplorerSnapshot.request!
 
         assert_equal 1, AwsCostexplorerSnapshot.prune
         assert_equal [kept, recent].map(&:id).sort, AwsCostexplorerSnapshot.pluck(:id).sort

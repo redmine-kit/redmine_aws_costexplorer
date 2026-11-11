@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-class CreateAwsCostexplorerSnapshots < ActiveRecord::Migration[7.2]
+class CreateAwsCostexplorerSnapshots < ActiveRecord::Migration[8.1]
   def change
     create_table :aws_costexplorer_snapshots do |t|
       t.datetime :requested_at, null: false
-      t.string :requested_by, null: false
       t.datetime :fetched_at
       t.text :data
       t.text :error

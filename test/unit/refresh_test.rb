@@ -20,11 +20,11 @@ module RedmineAws
       end
 
       def test_the_task_fetches_and_prunes
-        AwsCostexplorerSnapshot.create!(requested_at: 100.days.ago, requested_by: 'schedule', error: 'boom')
+        AwsCostexplorerSnapshot.create!(requested_at: 100.days.ago, error: 'boom')
         out, = with_enabled { with_fetcher_client(stub_cost_explorer) { run_task } }
 
         assert_match(/fetched the costs with 3 request\(s\); deleted 1 old snapshot\(s\)/, out)
-        assert_equal 'schedule', AwsCostexplorerSnapshot.latest.requested_by
+        assert_not_nil AwsCostexplorerSnapshot.latest
       end
 
       def test_the_task_with_the_tag_key

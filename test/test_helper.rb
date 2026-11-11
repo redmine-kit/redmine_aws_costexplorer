@@ -73,7 +73,7 @@ module RedmineAws
 
       # A snapshot fetched from the fixtures.
       def fetched_snapshot(tag_key: nil, requested_at: 2.hours.ago)
-        snapshot = AwsCostexplorerSnapshot.create!(requested_at: requested_at, requested_by: 'schedule')
+        snapshot = AwsCostexplorerSnapshot.create!(requested_at: requested_at)
         snapshot.fetch!(fetcher(tag_key: tag_key))
         snapshot
       end

@@ -4,8 +4,6 @@
 # redmine_aws_costexplorer:refresh), filled with the data or the
 # error. The "Cost Explorer" tab shows the latest successful one.
 class AwsCostexplorerSnapshot < ApplicationRecord
-  SCHEDULE = 'schedule'
-
   serialize :data, coder: JSON
 
   scope :fetched, -> { where.not(fetched_at: nil).where(error: nil) }
@@ -19,8 +17,8 @@ class AwsCostexplorerSnapshot < ApplicationRecord
       order(requested_at: :desc, id: :desc).first
     end
 
-    def request!(by)
-      create!(requested_at: Time.current, requested_by: by)
+    def request!
+      create!(requested_at: Time.current)
     end
 
     # Deletes the snapshots older than the given days, keeping the latest

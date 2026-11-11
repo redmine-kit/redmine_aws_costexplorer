@@ -68,7 +68,7 @@ The page never calls Cost Explorer. AWS charges each Cost Explorer API request (
 - **Requests per fetch:** 3 (`GetCostAndUsage` twice, `GetCostForecast` once), or 4 with the tag. A long answer of `GetCostAndUsage` comes in pages, and each further page is one more request.
 - **Requests in a month:** 3 or 4 a day: about 90 to 120 a month, about USD 0.9 to 1.2.
 - **A failed fetch:** It is recorded with its error, shown on the tab above the last successful data, and the task fails. The next day's run fetches again.
-- **Snapshots:** Each fetch is a row in `aws_costexplorer_snapshots`: when it was started and by whom (`schedule`), when it was fetched, the data (JSON), the error, and the number of requests. The rake task deletes rows older than 90 days after each successful fetch, keeping the latest successful one.
+- **Snapshots:** Each fetch is a row in `aws_costexplorer_snapshots`: when it was started, when it was fetched, the data (JSON), the error, and the number of requests. The rake task deletes rows older than 90 days after each successful fetch, keeping the latest successful one.
 
 ## Costs by tag (optional)
 

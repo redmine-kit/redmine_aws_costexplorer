@@ -89,7 +89,7 @@ module RedmineAws
         with_enabled { with_fetcher_client(@client) { capture_io { task.invoke } } }
         snapshot = AwsCostexplorerSnapshot.latest
 
-        assert_equal 'schedule', snapshot.requested_by
+        assert_not_nil snapshot.fetched_at
         assert_equal 3, snapshot.requests
         assert_equal(LOCALSTACK ? 0 : 30, snapshot.data['daily'].size)
       end

@@ -150,7 +150,7 @@ module RedmineAws
 
       def test_the_last_daily_fetch_failed
         fetched_snapshot(requested_at: 3.hours.ago)
-        AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago, requested_by: 'schedule',
+        AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago,
                                         error: 'Seahorse::Client::NetworkingError: execution expired')
         with_enabled { get :index }
 
@@ -163,7 +163,7 @@ module RedmineAws
       end
 
       def test_a_running_daily_fetch
-        AwsCostexplorerSnapshot.request!(AwsCostexplorerSnapshot::SCHEDULE)
+        AwsCostexplorerSnapshot.request!
         with_enabled { get :index }
 
         assert_select '#aws-costexplorer-updated', text: /Updated: running \(since .*\)/

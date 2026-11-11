@@ -17,7 +17,7 @@ end
 require File.expand_path('../../../test/test_helper', __dir__)
 require File.join(Redmine::Plugin.find(:redmine_aws).directory, 'test/support/redmine_aws/test_helper')
 
-module RedmineServerlessCostexplorer
+module RedmineAwsCostexplorer
   module TestHelper
     include RedmineAws::TestHelper
 
@@ -63,7 +63,7 @@ module RedmineServerlessCostexplorer
     end
 
     def fetcher(client = stub_cost_explorer, tag_key: nil)
-      RedmineServerlessCostexplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
+      RedmineAwsCostexplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
     end
 
     def with_enabled(tag_key: nil, &)
@@ -72,17 +72,17 @@ module RedmineServerlessCostexplorer
 
     # A snapshot fetched from the fixtures.
     def fetched_snapshot(tag_key: nil, requested_at: 2.hours.ago)
-      snapshot = ServerlessCostexplorerSnapshot.create!(requested_at: requested_at, requested_by: 'schedule')
+      snapshot = AwsCostexplorerSnapshot.create!(requested_at: requested_at, requested_by: 'schedule')
       snapshot.fetch!(fetcher(tag_key: tag_key))
       snapshot
     end
 
     # Makes every new Fetcher use the given client.
     def with_fetcher_client(client)
-      RedmineServerlessCostexplorer::Fetcher.any_instance.stubs(:client).returns(client)
+      RedmineAwsCostexplorer::Fetcher.any_instance.stubs(:client).returns(client)
       yield
     ensure
-      RedmineServerlessCostexplorer::Fetcher.any_instance.unstub(:client)
+      RedmineAwsCostexplorer::Fetcher.any_instance.unstub(:client)
     end
   end
 end

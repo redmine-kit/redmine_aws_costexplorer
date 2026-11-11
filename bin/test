@@ -9,8 +9,8 @@
 # shellcheck disable=SC2016
 set -euo pipefail
 cd "$(dirname "$0")/.."
-image=redmine-serverless-costexplorer-test
-network=redmine-serverless-costexplorer-test_default
+image=redmine-aws-costexplorer-test
+network=redmine-aws-costexplorer-test_default
 # The same tests run on LocalStack (with LOCALSTACK_AUTH_TOKEN) or moto;
 # TEST_AWS_BACKEND names it.
 if [[ -n "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
@@ -34,18 +34,18 @@ run() {
 run_plugin() {
   mkdir -p coverage
   docker run --rm --network "$network" -e TEST_AWS_BACKEND="$backend" -e PLUGIN_COVERAGE=1 -e PARALLEL_WORKERS=1 \
-    -v "$PWD/coverage:/redmine/plugins/redmine_serverless_costexplorer/coverage" "$image" \
+    -v "$PWD/coverage:/redmine/plugins/redmine_aws_costexplorer/coverage" "$image" \
     sh -c "$setup"' && "$@"' test "$@"
 }
 redmine_tests=(test/functional/admin_controller_test.rb test/unit/lib/redmine/plugin_test.rb)
 # Redmine's tests that fail with the current gems for known reasons.
 known=$(grep -v -e '^#' -e '^$' test/redmine_known_failures.txt | sed 's/[.]/\\./g' | paste -sd '|' -)
 if [[ "${1:-}" == "--redmine" ]]; then
-  run_plugin bin/rails test plugins/redmine_serverless_costexplorer/test
+  run_plugin bin/rails test plugins/redmine_aws_costexplorer/test
   run bin/rails test --exclude "/^($known)\$/"
 elif (($#)); then
-  run_plugin bin/rails test "${@/#/plugins/redmine_serverless_costexplorer/}"
+  run_plugin bin/rails test "${@/#/plugins/redmine_aws_costexplorer/}"
 else
-  run_plugin bin/rails test plugins/redmine_serverless_costexplorer/test
+  run_plugin bin/rails test plugins/redmine_aws_costexplorer/test
   run bin/rails test "${redmine_tests[@]}"
 fi

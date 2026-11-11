@@ -3,34 +3,34 @@
 require_relative '../test_helper'
 require 'rake'
 
-module RedmineServerlessCostexplorer
-  # The rake task redmine_serverless_costexplorer:refresh, the only fetch.
+module RedmineAwsCostexplorer
+  # The rake task redmine_aws_costexplorer:refresh, the only fetch.
   class RefreshTest < ActiveSupport::TestCase
-    include RedmineServerlessCostexplorer::TestHelper
+    include RedmineAwsCostexplorer::TestHelper
 
     def setup
-      Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_serverless_costexplorer:refresh')
+      Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_aws_costexplorer:refresh')
     end
 
     def run_task
-      task = Rake::Task['redmine_serverless_costexplorer:refresh']
+      task = Rake::Task['redmine_aws_costexplorer:refresh']
       task.reenable
       capture_io { task.invoke }
     end
 
     def test_the_task_fetches_and_prunes
-      ServerlessCostexplorerSnapshot.create!(requested_at: 100.days.ago, requested_by: 'schedule', error: 'boom')
+      AwsCostexplorerSnapshot.create!(requested_at: 100.days.ago, requested_by: 'schedule', error: 'boom')
       out, = with_enabled { with_fetcher_client(stub_cost_explorer) { run_task } }
 
       assert_match(/fetched the costs with 3 request\(s\); deleted 1 old snapshot\(s\)/, out)
-      assert_equal 'schedule', ServerlessCostexplorerSnapshot.latest.requested_by
+      assert_equal 'schedule', AwsCostexplorerSnapshot.latest.requested_by
     end
 
     def test_the_task_with_the_tag_key
       out, = with_enabled(tag_key: 'redmine:instance') { with_fetcher_client(stub_cost_explorer) { run_task } }
 
       assert_match(/with 4 request/, out)
-      assert_equal 'redmine:instance', ServerlessCostexplorerSnapshot.latest.data['tag_key']
+      assert_equal 'redmine:instance', AwsCostexplorerSnapshot.latest.data['tag_key']
     end
 
     def test_the_task_fails_with_the_error
@@ -40,24 +40,24 @@ module RedmineServerlessCostexplorer
       end
 
       assert_not error.success?
-      assert_match(/AccessDeniedException/, ServerlessCostexplorerSnapshot.last_request.error)
+      assert_match(/AccessDeniedException/, AwsCostexplorerSnapshot.last_request.error)
     end
 
     def test_the_task_does_nothing_when_disabled
       out, = with_env('REDMINE_COSTEXPLORER_ENABLED' => 'false') { run_task }
 
       assert_match(/nothing fetched/, out)
-      assert_equal 0, ServerlessCostexplorerSnapshot.count
+      assert_equal 0, AwsCostexplorerSnapshot.count
     end
 
     def test_settings_from_the_environment
       with_env('REDMINE_COSTEXPLORER_ENABLED' => ' TRUE ', 'REDMINE_COSTEXPLORER_TAG_KEY' => ' ') do
-        assert_predicate RedmineServerlessCostexplorer, :enabled?
-        assert_nil RedmineServerlessCostexplorer.tag_key
+        assert_predicate RedmineAwsCostexplorer, :enabled?
+        assert_nil RedmineAwsCostexplorer.tag_key
       end
       with_env('REDMINE_COSTEXPLORER_ENABLED' => '1', 'REDMINE_COSTEXPLORER_TAG_KEY' => 'redmine:instance') do
-        assert_not RedmineServerlessCostexplorer.enabled?
-        assert_equal 'redmine:instance', RedmineServerlessCostexplorer.tag_key
+        assert_not RedmineAwsCostexplorer.enabled?
+        assert_equal 'redmine:instance', RedmineAwsCostexplorer.tag_key
       end
     end
   end

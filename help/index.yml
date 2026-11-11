@@ -1,6 +1,6 @@
 # The sidebar section of this plugin's help, read by redmine_help
 # (https://github.com/redmine-kit/redmine_help, docs/extending.md).
 sections:
-  - id: serverless-costexplorer
-    title: Redmine Serverless Cost Explorer
-    topics: [serverless-costexplorer/costs]
+  - id: aws-costexplorer
+    title: Redmine AWS Cost Explorer
+    topics: [aws-costexplorer/costs]

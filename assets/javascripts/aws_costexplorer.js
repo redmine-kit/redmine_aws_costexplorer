@@ -4,7 +4,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { application } from "controllers/application"
 
-// Connects to data-controller="serverless-costexplorer--daily"
+// Connects to data-controller="aws-costexplorer--daily"
 class DailyController extends Controller {
   static targets = ['labels', 'datasets', 'canvas']
   static values = { currency: String }
@@ -58,4 +58,4 @@ function jsonData(template) {
   return template.content ? JSON.parse(template.content.textContent) : []
 }
 
-application.register('serverless-costexplorer--daily', DailyController)
+application.register('aws-costexplorer--daily', DailyController)

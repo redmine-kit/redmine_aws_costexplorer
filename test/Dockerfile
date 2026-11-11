@@ -16,10 +16,10 @@ RUN curl -fsSLo /tmp/redmine.tar.gz "https://www.redmine.org/releases/redmine-${
 WORKDIR /redmine
 COPY test/database.yml config/database.yml
 COPY --from=redmine_aws . plugins/redmine_aws/
-COPY . plugins/redmine_serverless_costexplorer/
+COPY . plugins/redmine_aws_costexplorer/
 # The plugin as a gem by path, as an installed gem is (docs/setup.md), and
 # redmine_aws, which its gemspec requires, by path without loading it.
-RUN printf "gem 'redmine_aws', path: 'plugins/redmine_aws', require: false\ngem 'redmine_serverless_costexplorer', path: 'plugins/redmine_serverless_costexplorer'\ngem 'simplecov-cobertura', group: :test\n" > Gemfile.local \
+RUN printf "gem 'redmine_aws', path: 'plugins/redmine_aws', require: false\ngem 'redmine_aws_costexplorer', path: 'plugins/redmine_aws_costexplorer'\ngem 'simplecov-cobertura', group: :test\n" > Gemfile.local \
   && bundle config set --local without development \
   && bundle install --jobs 4
 ENV RAILS_ENV=test

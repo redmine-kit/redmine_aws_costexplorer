@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-# Redmine Serverless Cost Explorer: the AWS account's costs from Cost Explorer on the
-# "Cost Explorer" tab of the Serverless administration page (docs/README.md).
+# Redmine AWS Cost Explorer: the AWS account's costs from Cost Explorer on the
+# "Cost Explorer" tab of the AWS administration page (docs/README.md).
 #
 # The plugin is on only when REDMINE_COSTEXPLORER_ENABLED is true. The page
-# never calls Cost Explorer: the rake task redmine_serverless_costexplorer:refresh,
+# never calls Cost Explorer: the rake task redmine_aws_costexplorer:refresh,
 # run once a day, fetches the costs and keeps them in
-# serverless_costexplorer_snapshots.
-module RedmineServerlessCostexplorer
-  VERSION = '0.1.3'
+# aws_costexplorer_snapshots.
+module RedmineAwsCostexplorer
+  VERSION = '0.1.0'
 
   # Environment variables (docs/setup.md#configuration).
   ENV_ENABLED = 'REDMINE_COSTEXPLORER_ENABLED'
@@ -32,8 +32,8 @@ module RedmineServerlessCostexplorer
     # Called from init.rb, on every code reload.
     def setup
       RedmineAws::Admin.register_tab(
-        :costexplorer, label: :label_serverless_costexplorer,
-                       url: { controller: 'serverless_costexplorer', action: 'index' }, position: 60
+        :costexplorer, label: :label_aws_costexplorer,
+                       url: { controller: 'aws_costexplorer', action: 'index' }, position: 60
       )
     end
   end

@@ -1,2 +1,2 @@
 # This plugin's screens -> help topics, read by redmine_help (docs/mapping.md).
-serverless_costexplorer: serverless-costexplorer/costs
+aws_costexplorer: aws-costexplorer/costs

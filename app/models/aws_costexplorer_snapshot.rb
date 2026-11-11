@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # One daily fetch of the costs from Cost Explorer (the rake task
-# redmine_serverless_costexplorer:refresh), filled with the data or the
+# redmine_aws_costexplorer:refresh), filled with the data or the
 # error. The "Cost Explorer" tab shows the latest successful one.
-class ServerlessCostexplorerSnapshot < ApplicationRecord
+class AwsCostexplorerSnapshot < ApplicationRecord
   SCHEDULE = 'schedule'
 
   serialize :data, coder: JSON
@@ -25,7 +25,7 @@ class ServerlessCostexplorerSnapshot < ApplicationRecord
 
     # Deletes the snapshots older than the given days, keeping the latest
     # successful one.
-    def prune(days = RedmineServerlessCostexplorer::KEEP_DAYS)
+    def prune(days = RedmineAwsCostexplorer::KEEP_DAYS)
       keep = latest&.id
       where(requested_at: ...days.to_i.days.ago).where.not(id: keep).delete_all
     end
@@ -37,7 +37,7 @@ class ServerlessCostexplorerSnapshot < ApplicationRecord
 
   # Fetches the costs and keeps them, or the error. Never raises; the rake
   # task reports the error.
-  def fetch!(fetcher = RedmineServerlessCostexplorer::Fetcher.new)
+  def fetch!(fetcher = RedmineAwsCostexplorer::Fetcher.new)
     update!(data: fetcher.fetch, fetched_at: Time.current, requests: fetcher.requests)
   rescue StandardError => e
     update!(error: "#{e.class}: #{e.message}", requests: fetcher.requests)

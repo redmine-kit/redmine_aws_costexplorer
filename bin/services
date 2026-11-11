@@ -3,7 +3,7 @@
 # and LocalStack when LOCALSTACK_AUTH_TOKEN is set (as in CI), moto otherwise.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-compose=(docker compose -f test/compose.yml -p redmine-serverless-costexplorer-test --profile localstack)
+compose=(docker compose -f test/compose.yml -p redmine-aws-costexplorer-test --profile localstack)
 if [[ "${1:-}" == "--down" ]]; then
   "${compose[@]}" down -v
   exit 0

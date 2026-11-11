@@ -10,7 +10,7 @@ require File.join(Redmine::Plugin.find(:redmine_aws).directory, 'test/support/re
 # Explorer has not finalized yesterday yet. The first service is expanded to
 # its usage types, and the daily table keeps its first 7 days, to keep the
 # image short.
-class RedmineServerlessCostexplorerScreens < RedmineAws::ScreenshotCase
+class RedmineAwsCostexplorerScreens < RedmineAws::ScreenshotCase
   self.docs = File.expand_path('../../docs', __dir__)
 
   TAG_KEY = 'redmine:instance'
@@ -46,8 +46,8 @@ class RedmineServerlessCostexplorerScreens < RedmineAws::ScreenshotCase
     @saved = %w[REDMINE_COSTEXPLORER_ENABLED REDMINE_COSTEXPLORER_TAG_KEY].index_with { |name| ENV.fetch(name, nil) }
     ENV['REDMINE_COSTEXPLORER_ENABLED'] = 'true'
     ENV['REDMINE_COSTEXPLORER_TAG_KEY'] = TAG_KEY
-    snapshot = ServerlessCostexplorerSnapshot.create!(requested_at: 2.hours.ago, requested_by: 'schedule')
-    snapshot.fetch!(RedmineServerlessCostexplorer::Fetcher.new(client: client, tag_key: TAG_KEY, today: today))
+    snapshot = AwsCostexplorerSnapshot.create!(requested_at: 2.hours.ago, requested_by: 'schedule')
+    snapshot.fetch!(RedmineAwsCostexplorer::Fetcher.new(client: client, tag_key: TAG_KEY, today: today))
     snapshot.update_columns(fetched_at: 2.hours.ago)
   end
 
@@ -58,14 +58,14 @@ class RedmineServerlessCostexplorerScreens < RedmineAws::ScreenshotCase
   def test_screens
     each_language do |language|
       visit '/admin/aws/costexplorer'
-      assert_selector '#serverless-costexplorer-daily'
-      find('#serverless-costexplorer-services tr.group span.expander', match: :first).click
+      assert_selector '#aws-costexplorer-daily'
+      find('#aws-costexplorer-services tr.group span.expander', match: :first).click
       # Away from the expander, so that its tooltip is not in the image.
       find('h2', match: :first).hover
       # Chart.js sizes the canvas when it draws; then its animation ends.
-      assert_selector '#serverless-costexplorer-daily-chart[style*="box-sizing"]'
+      assert_selector '#aws-costexplorer-daily-chart[style*="box-sizing"]'
       sleep 1.5
-      page.execute_script("document.querySelectorAll('#serverless-costexplorer-daily > tbody > tr')" \
+      page.execute_script("document.querySelectorAll('#aws-costexplorer-daily > tbody > tr')" \
                           ".forEach((row, index) => { if (index >= 7) row.style.display = 'none'; })")
       shoot 'costexplorer', language
     end

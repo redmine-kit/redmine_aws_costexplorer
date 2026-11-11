@@ -2,7 +2,7 @@
 
 require 'bigdecimal'
 
-module RedmineServerlessCostexplorer
+module RedmineAwsCostexplorer
   # Reads the account's costs from Cost Explorer (docs/README.md#what-the-tab-shows):
   # three requests, four with the cost allocation tag, and one more for each
   # further page of a long answer. Amounts are unblended costs, as strings in
@@ -17,7 +17,7 @@ module RedmineServerlessCostexplorer
 
     attr_reader :requests
 
-    def initialize(client: nil, tag_key: RedmineServerlessCostexplorer.tag_key, today: Time.now.utc.to_date)
+    def initialize(client: nil, tag_key: RedmineAwsCostexplorer.tag_key, today: Time.now.utc.to_date)
       @client = client
       @tag_key = tag_key
       @today = today

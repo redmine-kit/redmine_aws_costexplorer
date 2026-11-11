@@ -8,9 +8,9 @@
 # shellcheck disable=SC2016
 set -euo pipefail
 cd "$(dirname "$0")/.."
-plugin=redmine_serverless_costexplorer
-image=redmine-serverless-costexplorer-test
-project=redmine-serverless-costexplorer-screenshots
+plugin=redmine_aws_costexplorer
+image=redmine-aws-costexplorer-test
+project=redmine-aws-costexplorer-screenshots
 compose=(docker compose -f test/compose.yml -p "$project" --profile screenshots)
 "${compose[@]}" up -d --wait >/dev/null
 # Its own Compose project, apart from bin/test's, removed afterwards.

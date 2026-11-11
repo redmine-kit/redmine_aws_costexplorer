@@ -1,7 +1,7 @@
 *
 !init.rb
 !Gemfile
-!redmine_serverless_costexplorer.gemspec
+!redmine_aws_costexplorer.gemspec
 !LICENSE
 !app/
 !assets/

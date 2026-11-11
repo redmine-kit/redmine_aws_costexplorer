@@ -4,13 +4,13 @@ require_relative '../test_helper'
 require 'net/http'
 require 'rake'
 
-module RedmineServerlessCostexplorer
+module RedmineAwsCostexplorer
   # Cost Explorer through the SDK's real requests and parsing: on LocalStack
   # when bin/test runs with LOCALSTACK_AUTH_TOKEN (as in CI), on moto
   # otherwise. GetCostForecast, which neither implements, is mocked with an
   # answer in the documented shape (docs/setup.md#tests).
   class CostExplorerTest < ActiveSupport::TestCase
-    include RedmineServerlessCostexplorer::TestHelper
+    include RedmineAwsCostexplorer::TestHelper
 
     LOCALSTACK = ENV['TEST_AWS_BACKEND'] == 'localstack'
     ENDPOINT = LOCALSTACK ? ENV.fetch('LOCALSTACK_ENDPOINT_URL') : ENV.fetch('MOTO_ENDPOINT_URL', 'http://moto:5000')
@@ -82,11 +82,11 @@ module RedmineServerlessCostexplorer
 
     def test_the_rake_task_keeps_a_snapshot
       give_results('services', 'daily')
-      Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_serverless_costexplorer:refresh')
-      task = Rake::Task['redmine_serverless_costexplorer:refresh']
+      Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_aws_costexplorer:refresh')
+      task = Rake::Task['redmine_aws_costexplorer:refresh']
       task.reenable
       with_enabled { with_fetcher_client(@client) { capture_io { task.invoke } } }
-      snapshot = ServerlessCostexplorerSnapshot.latest
+      snapshot = AwsCostexplorerSnapshot.latest
 
       assert_equal 'schedule', snapshot.requested_by
       assert_equal 3, snapshot.requests

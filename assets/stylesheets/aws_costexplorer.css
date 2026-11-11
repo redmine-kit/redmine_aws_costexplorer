@@ -1,0 +1,12 @@
+/* Redmine right-aligns only hour columns (td.spent_hours, #time-report td.hours);
+   the amounts of the Cost Explorer tab line up on the right the same way. */
+#aws-costexplorer-summary td.amount,
+#aws-costexplorer-summary th.amount,
+#aws-costexplorer-services td.amount,
+#aws-costexplorer-daily td.amount,
+#aws-costexplorer-tags td.amount,
+#aws-costexplorer-services th.amount,
+#aws-costexplorer-daily th.amount,
+#aws-costexplorer-tags th.amount { text-align: right; padding-inline-end: 0.5em; }
+/* The daily chart, as wide as Redmine's charts (.repository-graph, .issue-report-graph). */
+.aws-costexplorer-graph { inline-size: 75%; margin-block-end: 2em; }

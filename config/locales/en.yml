@@ -1,22 +1,22 @@
 en:
-  label_serverless_costexplorer: Cost Explorer
-  label_serverless_costexplorer_forecast: Month-end forecast
-  label_serverless_costexplorer_previous_month: Last month
-  label_serverless_costexplorer_this_month: This month
-  label_serverless_costexplorer_by_service: By service
-  label_serverless_costexplorer_service: Service
-  label_serverless_costexplorer_usage_types: Usage types
-  label_serverless_costexplorer_daily: Daily (last 30 days)
-  label_serverless_costexplorer_daily_chart: Daily unblended costs
-  label_serverless_costexplorer_unblended_cost: Unblended cost
-  label_serverless_costexplorer_amount: Cost
-  label_serverless_costexplorer_by_tag: "By cost allocation tag (%{tag})"
-  label_serverless_costexplorer_untagged: (no tag)
-  label_serverless_costexplorer_estimated: Estimated
-  label_serverless_costexplorer_updated: "Updated: %{time} (daily)"
-  text_serverless_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED is not true, so costs are not fetched.
-  text_serverless_costexplorer_no_forecast: "No forecast (%{error})"
-  text_serverless_costexplorer_no_tag_data: "No costs carry the tag %{tag} yet. Activate it as a cost allocation tag in the Billing and Cost Management console (it can take up to 24 hours)."
-  text_serverless_costexplorer_pending: "Updated: running (since %{time})"
-  text_serverless_costexplorer_failed: "Fetch error: %{time} (%{error})"
-  text_serverless_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) could not be reached. A network without internet access needs a route to it, such as a NAT.
+  label_aws_costexplorer: Cost Explorer
+  label_aws_costexplorer_forecast: Month-end forecast
+  label_aws_costexplorer_previous_month: Last month
+  label_aws_costexplorer_this_month: This month
+  label_aws_costexplorer_by_service: By service
+  label_aws_costexplorer_service: Service
+  label_aws_costexplorer_usage_types: Usage types
+  label_aws_costexplorer_daily: Daily (last 30 days)
+  label_aws_costexplorer_daily_chart: Daily unblended costs
+  label_aws_costexplorer_unblended_cost: Unblended cost
+  label_aws_costexplorer_amount: Cost
+  label_aws_costexplorer_by_tag: "By cost allocation tag (%{tag})"
+  label_aws_costexplorer_untagged: (no tag)
+  label_aws_costexplorer_estimated: Estimated
+  label_aws_costexplorer_updated: "Updated: %{time} (daily)"
+  text_aws_costexplorer_disabled: REDMINE_COSTEXPLORER_ENABLED is not true, so costs are not fetched.
+  text_aws_costexplorer_no_forecast: "No forecast (%{error})"
+  text_aws_costexplorer_no_tag_data: "No costs carry the tag %{tag} yet. Activate it as a cost allocation tag in the Billing and Cost Management console (it can take up to 24 hours)."
+  text_aws_costexplorer_pending: "Updated: running (since %{time})"
+  text_aws_costexplorer_failed: "Fetch error: %{time} (%{error})"
+  text_aws_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) could not be reached. A network without internet access needs a route to it, such as a NAT.

@@ -1,0 +1,166 @@
+<%= render partial: 'aws_admin/tabs', locals: { selected: 'costexplorer' } %>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'aws_costexplorer', plugin: 'redmine_aws_costexplorer' %>
+  <%= javascript_include_tag 'aws_costexplorer', plugin: 'redmine_aws_costexplorer', type: 'module' %>
+<% end %>
+
+<% unless @enabled %>
+<p class="warning"><%= l(:text_aws_costexplorer_disabled) %></p>
+<% end %>
+
+<% if @last_request&.error && !@last_request.pending? %>
+<%# Only the error's class here; the daily task logs the whole message %>
+<div class="flash error" id="aws-costexplorer-error">
+  <%= l(:text_aws_costexplorer_failed, time: format_time(@last_request.requested_at), error: @last_request.error.sub(/: .*/m, '')) %>
+  <% if @last_request.unreachable? %><br><%= l(:text_aws_costexplorer_unreachable) %><% end %>
+</div>
+<% end %>
+
+<div class="contextual" id="aws-costexplorer-updated">
+  <% if @last_request&.pending? %>
+  <%= l(:text_aws_costexplorer_pending, time: format_time(@last_request.requested_at)) %>
+  <% elsif @snapshot %>
+  <%= l(:label_aws_costexplorer_updated, time: format_time(@snapshot.fetched_at)) %>
+  <% end %>
+</div>
+
+<% if @snapshot %>
+<% costs = @snapshot.data %>
+<% currency = costs['currency'] %>
+<% today = costs['today'] ? Date.parse(costs['today']) : @snapshot.fetched_at.utc.to_date %>
+<h3><%= l(:label_total) %></h3>
+
+<div class="autoscroll">
+<table class="list totals" id="aws-costexplorer-summary"><thead>
+<tr>
+    <th class="amount"><%= l(:label_aws_costexplorer_this_month) %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_forecast) %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_previous_month) %></th>
+</tr></thead>
+<tbody>
+<tr>
+    <td class="amount"><%= aws_costexplorer_amount(costs.dig('this_month', 'total'), currency) %></td>
+    <% if costs.dig('forecast', 'total') %>
+    <td class="amount"><%= aws_costexplorer_amount(costs.dig('forecast', 'total'), currency) %></td>
+    <% else %>
+    <td class="amount"><%= l(:text_aws_costexplorer_no_forecast, error: costs.dig('forecast', 'error').to_s.sub(/: .*/m, '')) %></td>
+    <% end %>
+    <td class="amount"><%= aws_costexplorer_estimated(costs.dig('previous_month', 'estimated')) %> <%= aws_costexplorer_amount(costs.dig('previous_month', 'total'), currency) %></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3><%= l(:label_aws_costexplorer_by_service) %></h3>
+
+<% if costs['services'].present? %>
+<div class="autoscroll">
+<table class="list services" id="aws-costexplorer-services"><thead>
+<tr>
+    <th><%= l(:label_aws_costexplorer_service) %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_this_month) %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_previous_month) %></th>
+</tr></thead>
+<tbody>
+<%# Each service is a group of its usage types, collapsed, as Redmine's grouped issue list (toggleRowGroup) %>
+<% costs['services'].each do |row| %>
+<% details = Array(row['details']) %>
+<tr class="<%= 'group' if details.any? %>">
+    <td class="name">
+      <% if details.any? %>
+      <span class="expander icon icon-collapsed" role="button" tabindex="0" aria-expanded="false"
+            title="<%= l(:label_aws_costexplorer_usage_types) %>"
+            onclick="toggleRowGroup(this); this.setAttribute('aria-expanded', $(this).closest('tr').hasClass('open'));"
+            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"><%= sprite_icon('angle-right') %></span>
+      <% end %>
+      <span class="name"><%= row['name'] %></span>
+    </td>
+    <td class="amount"><%= aws_costexplorer_amount(row['this_month'], currency) %></td>
+    <td class="amount"><%= aws_costexplorer_amount(row['previous_month'], currency) %></td>
+</tr>
+<% details.each do |detail| %>
+<tr class="idnt idnt-1" style="display: none;">
+    <td class="name"><%= detail['name'] %></td>
+    <td class="amount"><%= aws_costexplorer_amount(detail['this_month'], currency) %></td>
+    <td class="amount"><%= aws_costexplorer_amount(detail['previous_month'], currency) %></td>
+</tr>
+<% end %>
+<% end %>
+</tbody>
+</table>
+</div>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<h3><%= l(:label_aws_costexplorer_daily) %></h3>
+
+<% days = costs['daily'].to_a.last(RedmineAwsCostexplorer::Fetcher::DAYS) %>
+<% if days.any? %>
+<% chart = aws_costexplorer_daily_chart(days, today) %>
+<%# As Redmine's charts (repositories/stats); the table under it has the same values %>
+<div class="aws-costexplorer-graph hide-when-print"
+     data-controller="aws-costexplorer--daily"
+     data-aws-costexplorer--daily-currency-value="<%= currency %>">
+  <template data-aws-costexplorer--daily-target="labels">
+    <%= chart['labels'].to_json %>
+  </template>
+  <template data-aws-costexplorer--daily-target="datasets">
+    <%= chart['datasets'].to_json %>
+  </template>
+  <canvas id="aws-costexplorer-daily-chart" data-aws-costexplorer--daily-target="canvas"
+          role="img" aria-label="<%= l(:label_aws_costexplorer_daily_chart) %>"></canvas>
+</div>
+
+<div class="autoscroll">
+<table class="list days" id="aws-costexplorer-daily"><thead>
+<tr>
+    <th><%= l(:label_date) %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_amount) %></th>
+</tr></thead>
+<tbody>
+<% days.reverse_each do |day| %>
+<tr>
+    <td><%= format_date(Date.parse(day['date'])) %></td>
+    <%# The badge before the amount, so that the amounts stay aligned on the right %>
+    <td class="amount"><%= aws_costexplorer_estimated(aws_costexplorer_estimated_day?(day, today)) %> <%= aws_costexplorer_amount(day['amount'], currency) %></td>
+</tr>
+<% end %>
+</tbody>
+</table>
+</div>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<% if costs['tag_key'] %>
+<h3><%= l(:label_aws_costexplorer_by_tag, tag: costs['tag_key']) %></h3>
+
+<% tagged = costs['tags'].to_a.reject { |row| aws_costexplorer_tag_value(row['name'], costs['tag_key']) == l(:label_aws_costexplorer_untagged) } %>
+<% if tagged.empty? %>
+<p class="warning" id="aws-costexplorer-no-tag"><%= l(:text_aws_costexplorer_no_tag_data, tag: costs['tag_key']) %></p>
+<% end %>
+<% if costs['tags'].present? %>
+<div class="autoscroll">
+<table class="list tags" id="aws-costexplorer-tags"><thead>
+<tr>
+    <th><%= costs['tag_key'] %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_this_month) %></th>
+    <th class="amount"><%= l(:label_aws_costexplorer_previous_month) %></th>
+</tr></thead>
+<tbody>
+<% costs['tags'].each do |row| %>
+<tr>
+    <td class="name"><%= aws_costexplorer_tag_value(row['name'], costs['tag_key']) %></td>
+    <td class="amount"><%= aws_costexplorer_amount(row['this_month'], currency) %></td>
+    <td class="amount"><%= aws_costexplorer_amount(row['previous_month'], currency) %></td>
+</tr>
+<% end %>
+</tbody>
+</table>
+</div>
+<% end %>
+<% end %>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>

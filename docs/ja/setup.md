@@ -153,6 +153,7 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト
 bin/test --redmine  # Redmine のすべてのテストも
 bin/lint            # RuboCop
+bin/test-gem        # プラグインと Redmine AWS の gem をビルド・インストールし、plugins/ にリンクして起動する
 bin/services --down # PostgreSQL と、moto か LocalStack を止める
 ```
 

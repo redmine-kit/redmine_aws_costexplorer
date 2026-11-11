@@ -125,6 +125,7 @@ Only `GetCostForecast` is mocked, because neither backend implements it. The int
 bin/test            # the plugin's tests and Redmine's tests around administration
 bin/test --redmine  # with every Redmine test
 bin/lint            # RuboCop
+bin/test-gem        # the gems of the plugin and Redmine AWS: built, installed, linked into plugins/, booted
 bin/services --down # stops PostgreSQL and moto or LocalStack
 ```
 

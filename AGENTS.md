@@ -12,7 +12,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) is a Redmine plugin that 
 - **Off without its settings:** without `REDMINE_COSTEXPLORER_ENABLED=true`, the plugin makes no requests to AWS. The tag split is off without `REDMINE_COSTEXPLORER_TAG_KEY`. Both settings are environment variables only; there is no settings page.
 - **No requests from the web process:** each Cost Explorer request is charged. Pages only read the stored snapshots; only the daily rake task calls Cost Explorer. Keep the number of requests per fetch stated in the docs and on the page.
 - **Tests:** added code has tests, run with Redmine's own mechanism (`bin/test` runs them in Docker with PostgreSQL and moto; [setup.md](docs/setup.md#tests)).
-- **Code layout:** `lib/redmine_aws_costexplorer/` has the requests to Cost Explorer, `app/` the model, the controller and the view, `db/` the migration, `lib/tasks/` the rake task. `init.rb` calls `RedmineAwsCostexplorer.setup`.
+- **Code layout:** `lib/redmine_aws/costexplorer/` has the requests to Cost Explorer, `app/` the model, the controller and the view, `db/` the migration, `lib/tasks/` the rake task. `init.rb` calls `RedmineAws::Costexplorer.setup`.
 - **Shared parts:** the administration menu, its tabs, the settings of the AWS clients and the test support come from [redmine_aws](https://github.com/redmine-kit/redmine_aws), which the plugin requires. The tests load it from a checkout next to this one (`../redmine_aws`, or `REDMINE_AWS_DIR`).
 - **No secrets in the repository.**
 

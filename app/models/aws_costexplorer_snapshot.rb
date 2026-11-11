@@ -25,7 +25,7 @@ class AwsCostexplorerSnapshot < ApplicationRecord
 
     # Deletes the snapshots older than the given days, keeping the latest
     # successful one.
-    def prune(days = RedmineAwsCostexplorer::KEEP_DAYS)
+    def prune(days = RedmineAws::Costexplorer::KEEP_DAYS)
       keep = latest&.id
       where(requested_at: ...days.to_i.days.ago).where.not(id: keep).delete_all
     end
@@ -37,7 +37,7 @@ class AwsCostexplorerSnapshot < ApplicationRecord
 
   # Fetches the costs and keeps them, or the error. Never raises; the rake
   # task reports the error.
-  def fetch!(fetcher = RedmineAwsCostexplorer::Fetcher.new)
+  def fetch!(fetcher = RedmineAws::Costexplorer::Fetcher.new)
     update!(data: fetcher.fetch, fetched_at: Time.current, requests: fetcher.requests)
   rescue StandardError => e
     update!(error: "#{e.class}: #{e.message}", requests: fetcher.requests)

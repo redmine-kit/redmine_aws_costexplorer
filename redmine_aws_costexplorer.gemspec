@@ -6,7 +6,7 @@
 # Gemfile is not in it: Redmine's Gemfile would load it again.
 Gem::Specification.new do |spec|
   spec.name = 'redmine_aws_costexplorer'
-  spec.version = File.read(File.join(__dir__, 'lib/redmine_aws_costexplorer.rb'))[/VERSION = '([^']+)'/, 1]
+  spec.version = File.read(File.join(__dir__, 'lib/redmine_aws/costexplorer.rb'))[/VERSION = '([^']+)'/, 1]
   spec.summary = "Shows the AWS account's costs from Cost Explorer in Redmine's administration"
   spec.authors = ['Redmine Kit']
   spec.license = 'GPL-2.0-or-later'

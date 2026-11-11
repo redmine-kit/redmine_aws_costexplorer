@@ -3,7 +3,7 @@
 namespace :redmine_aws_costexplorer do
   desc 'Fetches the costs from Cost Explorer for the "Cost Explorer" tab (once a day; 3 requests, 4 with the tag key)'
   task refresh: :environment do
-    unless RedmineAwsCostexplorer.enabled?
+    unless RedmineAws::Costexplorer.enabled?
       puts 'REDMINE_COSTEXPLORER_ENABLED is not true; nothing fetched'
       next
     end

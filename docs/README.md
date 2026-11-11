@@ -84,7 +84,7 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 - **AWS Organizations:** In a member account, the management account decides whether member accounts may use Cost Explorer (Cost Management preferences › "Linked account access"; AWS Cost Management User Guide, "Controlling access to Cost Explorer", checked on 2026-11-10). Without it, the requests fail with an access error. A member account sees only its own costs.
 - **Enabling Cost Explorer:** Cost Explorer is enabled for an account by opening it once in the console; AWS then prepares the data, which can take up to 24 hours (AWS Cost Management User Guide, "Enabling Cost Explorer", checked on 2026-11-10).
 - **No connection test:** The plugin does not add a connection test to Redmine AWS's "Status" tab: each test would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
-- **Code structure:** `lib/redmine_aws_costexplorer/fetcher.rb` makes the requests, `app/models/aws_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_aws_costexplorer.rake` runs them, and `app/controllers/aws_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
+- **Code structure:** `lib/redmine_aws/costexplorer/fetcher.rb` makes the requests, `app/models/aws_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_aws_costexplorer.rake` runs them, and `app/controllers/aws_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
 - **Migrations:** A table for the snapshots (`aws_costexplorer_snapshots`). Run `redmine:plugins:migrate`.
 
 ## Sponsors

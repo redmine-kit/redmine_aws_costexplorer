@@ -92,7 +92,7 @@ Redmine AWS Cost Explorer(`redmine_aws_costexplorer`)は、AWS アカウント�
 - **AWS Organizations:** メンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許すかを決めます(コスト管理の設定 ›「Linked account access」。AWS Cost Management ユーザーガイドの「Controlling access to Cost Explorer」。2026-11-10 に確認)。許していなければ、要求はアクセスのエラーで失敗します。メンバーアカウントで見えるのは、そのアカウントの費用だけです。
 - **Cost Explorer を有効にする:** Cost Explorer は、コンソールで一度開くと、そのアカウントで有効になります。そのあと AWS がデータを準備し、最大で 24 時間かかります(AWS Cost Management ユーザーガイドの「Enabling Cost Explorer」。2026-11-10 に確認)。
 - **接続テストはない:** Redmine AWS の「ステータス」のタブには、接続テストを追加しません。テストのたびに、課金される要求になるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
-- **コードの構成:** `lib/redmine_aws_costexplorer/fetcher.rb` が要求を送り、`app/models/aws_costexplorer_snapshot.rb` が取得を保存し、`lib/tasks/redmine_aws_costexplorer.rake` が取得を実行し、`app/controllers/aws_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。
+- **コードの構成:** `lib/redmine_aws/costexplorer/fetcher.rb` が要求を送り、`app/models/aws_costexplorer_snapshot.rb` が取得を保存し、`lib/tasks/redmine_aws_costexplorer.rake` が取得を実行し、`app/controllers/aws_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。
 - **マイグレーション:** スナップショットの表(`aws_costexplorer_snapshots`)を作ります。`redmine:plugins:migrate` を実行します。
 
 <a id="sponsors"></a>

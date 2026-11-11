@@ -29,7 +29,7 @@ Redmine AWS Cost Explorer を使うために、Redmine に必要なものです�
 
 ### gem
 
-バージョンのタグ (`v*`) ごとに、プラグインを gem として GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`) に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル (`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`LICENSE`) が入っていて、プラグインの `Gemfile` は入っていません。gem は `redmine_aws` に依存し、Bundler が同じソースからインストールします。Redmine は `plugins/` からだけプラグインを読むので、インストールした 2 つの gem をそこにリンクします。
+バージョンのタグ (`v*`) ごとに、プラグインを gem として GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`) に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル (`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`help/`、`LICENSE`) が入っていて、プラグインの `Gemfile` は入っていません。gem は `redmine_aws` に依存し、Bundler が同じソースからインストールするので、`Gemfile.local` に書くのはこのプラグインの gem だけです。Redmine は `plugins/` からだけプラグインを読むので、インストールした 2 つの gem をそこにリンクします。
 
 ```ruby
 # Redmine の Gemfile.local
@@ -49,7 +49,7 @@ ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_coste
 
 ### gem を使わないとき
 
-リポジトリを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。
+リポジトリを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。Rails の起動前に読み込むものがないので、`Gemfile.local` に行を追加する必要はありません。
 
 ```sh
 git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_aws

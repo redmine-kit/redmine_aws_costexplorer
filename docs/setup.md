@@ -1,6 +1,6 @@
 # Setup
 
-What a Redmine needs to use Redmine AWS Cost Explorer: installation, configuration, the schedule, IAM permissions and network access. [Serverless](https://redmine-kit.github.io/serverless/)'s image does not include the plugin. For an image that adds it (a derived image), Serverless sets all of this up with CloudFormation from its deployment configuration file (`costExplorer.enabled` and `costExplorer.allocationTag` in `redmine.json`, off by default); this page is for setting it up by hand, or for checking what Serverless creates.
+What a Redmine server needs to use Redmine AWS Cost Explorer: installation, configuration, the schedule, IAM permissions and network access. [Serverless](https://redmine-kit.github.io/serverless/)'s image does not include the plugin. For an image that adds it (a derived image), Serverless sets all of this up with CloudFormation from its deployment configuration file (`costExplorer.enabled` and `costExplorer.allocationTag` in `redmine.json`, off by default); this page is for setting it up by hand, or for checking what Serverless creates.
 
 ## Requirements
 
@@ -23,7 +23,7 @@ What a Redmine needs to use Redmine AWS Cost Explorer: installation, configurati
 
 ### Gem
 
-Each version tag (`v*`) publishes the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`; `.github/workflows/gem.yml`). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `assets/`, `config/`, `db/`, `LICENSE`); the plugin's `Gemfile` is not in it. The gem depends on `redmine_aws`, which Bundler installs from the same source. Redmine loads plugins only from `plugins/`, so both installed gems are linked there:
+Each version tag (`v*`) publishes the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`; `.github/workflows/gem.yml`). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `assets/`, `config/`, `db/`, `help/`, `LICENSE`); the plugin's `Gemfile` is not in it. The gem depends on `redmine_aws`, which Bundler installs from the same source, so `Gemfile.local` names only this plugin's gem. Redmine loads plugins only from `plugins/`, so both installed gems are linked there:
 
 ```ruby
 # Redmine's Gemfile.local
@@ -41,7 +41,7 @@ ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_coste
 
 ### Without the gem
 
-Clone the repository into `plugins/redmine_aws_costexplorer` and Redmine AWS into `plugins/redmine_aws`, then install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`.
+Clone the repository into `plugins/redmine_aws_costexplorer` and Redmine AWS into `plugins/redmine_aws`, then install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`. Nothing of the plugin has to load before Rails starts, so it needs no line in `Gemfile.local`.
 
 ```sh
 git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_aws

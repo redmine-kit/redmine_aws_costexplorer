@@ -4,10 +4,10 @@ require_relative '../test_helper'
 require 'rake'
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     # The rake task redmine_aws_costexplorer:refresh, the only fetch.
     class RefreshTest < ActiveSupport::TestCase
-      include RedmineAws::Costexplorer::TestHelper
+      include RedmineAws::CostExplorer::TestHelper
 
       def setup
         Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_aws_costexplorer:refresh')
@@ -53,12 +53,12 @@ module RedmineAws
 
       def test_settings_from_the_environment
         with_env('REDMINE_COSTEXPLORER_ENABLED' => ' TRUE ', 'REDMINE_COSTEXPLORER_TAG_KEY' => ' ') do
-          assert_predicate RedmineAws::Costexplorer, :enabled?
-          assert_nil RedmineAws::Costexplorer.tag_key
+          assert_predicate RedmineAws::CostExplorer, :enabled?
+          assert_nil RedmineAws::CostExplorer.tag_key
         end
         with_env('REDMINE_COSTEXPLORER_ENABLED' => '1', 'REDMINE_COSTEXPLORER_TAG_KEY' => 'redmine:instance') do
-          assert_not RedmineAws::Costexplorer.enabled?
-          assert_equal 'redmine:instance', RedmineAws::Costexplorer.tag_key
+          assert_not RedmineAws::CostExplorer.enabled?
+          assert_equal 'redmine:instance', RedmineAws::CostExplorer.tag_key
         end
       end
     end

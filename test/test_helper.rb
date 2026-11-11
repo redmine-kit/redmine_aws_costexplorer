@@ -18,7 +18,7 @@ require File.expand_path('../../../test/test_helper', __dir__)
 require File.join(Redmine::Plugin.find(:redmine_aws).directory, 'test/support/redmine_aws/test_helper')
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     module TestHelper
       include RedmineAws::TestHelper
 
@@ -64,7 +64,7 @@ module RedmineAws
       end
 
       def fetcher(client = stub_cost_explorer, tag_key: nil)
-        RedmineAws::Costexplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
+        RedmineAws::CostExplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
       end
 
       def with_enabled(tag_key: nil, &)
@@ -80,10 +80,10 @@ module RedmineAws
 
       # Makes every new Fetcher use the given client.
       def with_fetcher_client(client)
-        RedmineAws::Costexplorer::Fetcher.any_instance.stubs(:client).returns(client)
+        RedmineAws::CostExplorer::Fetcher.any_instance.stubs(:client).returns(client)
         yield
       ensure
-        RedmineAws::Costexplorer::Fetcher.any_instance.unstub(:client)
+        RedmineAws::CostExplorer::Fetcher.any_instance.unstub(:client)
       end
     end
   end

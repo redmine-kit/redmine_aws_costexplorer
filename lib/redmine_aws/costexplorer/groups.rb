@@ -3,7 +3,7 @@
 require 'bigdecimal'
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     # The rows of the tab from the monthly groups of Fetcher#monthly
     # ({ previous: { groups: { [keys] => amount } }, this: ... }).
     module Groups

@@ -8,7 +8,7 @@
 # run once a day, fetches the costs and keeps them in
 # aws_costexplorer_snapshots.
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     VERSION = '0.1.0'
 
     # Environment variables (docs/setup.md#configuration).

@@ -3,9 +3,9 @@
 require_relative '../test_helper'
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     class FetcherTest < ActiveSupport::TestCase
-      include RedmineAws::Costexplorer::TestHelper
+      include RedmineAws::CostExplorer::TestHelper
 
       def test_the_account_costs
         data = fetcher.fetch

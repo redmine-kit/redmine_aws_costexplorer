@@ -6,11 +6,11 @@ Redmine::Plugin.register :redmine_aws_costexplorer do
   name 'Redmine AWS Cost Explorer'
   author 'Redmine Kit'
   description "Shows the AWS account's costs from Cost Explorer in the administration"
-  version RedmineAws::Costexplorer::VERSION
+  version RedmineAws::CostExplorer::VERSION
   url 'https://github.com/redmine-kit/redmine_aws_costexplorer'
   author_url 'https://github.com/redmine-kit'
   requires_redmine version_or_higher: '7.0.0'
   requires_redmine_plugin :redmine_aws, version_or_higher: '0.1.0'
 end
 
-RedmineAws::Costexplorer.setup
+RedmineAws::CostExplorer.setup

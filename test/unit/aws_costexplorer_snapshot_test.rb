@@ -3,9 +3,9 @@
 require_relative '../test_helper'
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     class AwsCostexplorerSnapshotTest < ActiveSupport::TestCase
-      include RedmineAws::Costexplorer::TestHelper
+      include RedmineAws::CostExplorer::TestHelper
 
       def test_a_fetch_keeps_the_data
         snapshot = fetched_snapshot

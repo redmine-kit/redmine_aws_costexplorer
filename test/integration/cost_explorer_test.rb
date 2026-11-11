@@ -5,13 +5,13 @@ require 'net/http'
 require 'rake'
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     # Cost Explorer through the SDK's real requests and parsing: on LocalStack
     # when bin/test runs with LOCALSTACK_AUTH_TOKEN (as in CI), on moto
     # otherwise. GetCostForecast, which neither implements, is mocked with an
     # answer in the documented shape (docs/setup.md#tests).
     class CostExplorerTest < ActiveSupport::TestCase
-      include RedmineAws::Costexplorer::TestHelper
+      include RedmineAws::CostExplorer::TestHelper
 
       LOCALSTACK = ENV['TEST_AWS_BACKEND'] == 'localstack'
       ENDPOINT = LOCALSTACK ? ENV.fetch('LOCALSTACK_ENDPOINT_URL') : ENV.fetch('MOTO_ENDPOINT_URL', 'http://moto:5000')

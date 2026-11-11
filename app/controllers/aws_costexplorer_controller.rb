@@ -8,7 +8,7 @@ class AwsCostexplorerController < ApplicationController
   helper :aws_costexplorer
 
   def index
-    @enabled = RedmineAws::Costexplorer.enabled?
+    @enabled = RedmineAws::CostExplorer.enabled?
     @snapshot = AwsCostexplorerSnapshot.latest
     @last_request = AwsCostexplorerSnapshot.last_request
   end

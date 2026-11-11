@@ -3,9 +3,9 @@
 require_relative '../test_helper'
 
 module RedmineAws
-  module Costexplorer
+  module CostExplorer
     class AwsCostexplorerControllerTest < Redmine::ControllerTest
-      include RedmineAws::Costexplorer::TestHelper
+      include RedmineAws::CostExplorer::TestHelper
 
       tests AwsCostexplorerController
 

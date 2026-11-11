@@ -95,7 +95,7 @@
 
 <h3><%= l(:label_aws_costexplorer_daily) %></h3>
 
-<% days = costs['daily'].to_a.last(RedmineAws::Costexplorer::Fetcher::DAYS) %>
+<% days = costs['daily'].to_a.last(RedmineAws::CostExplorer::Fetcher::DAYS) %>
 <% if days.any? %>
 <% chart = aws_costexplorer_daily_chart(days, today) %>
 <%# As Redmine's charts (repositories/stats); the table under it has the same values %>

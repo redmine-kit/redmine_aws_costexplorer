@@ -1,6 +1,11 @@
-// The daily chart, drawn as Redmine draws its charts: a Stimulus controller
-// that loads Redmine's Chart.js lazily from the importmap
-// (app/javascript/controllers/repositories/stats_controller.js).
+// The daily chart of the Cost Explorer tab, the only page that loads this
+// file. Redmine draws charts only with its own Stimulus controllers, and none
+// fits: reports--details draws horizontal bars of whole numbers with a title,
+// and repositories--stats requests its data from the repository. This one is
+// written after reports--details (app/javascript/controllers/reports/
+// details_controller.js), with the data in the page and Redmine's Chart.js
+// loaded lazily from the importmap, for vertical bars of amounts in the
+// snapshot's currency.
 import { Controller } from "@hotwired/stimulus"
 import { application } from "controllers/application"
 

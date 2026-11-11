@@ -78,11 +78,13 @@ module RedmineAws
 
       def test_no_forecast
         snapshot = fetched_snapshot
-        snapshot.update!(data: snapshot.data.merge('forecast' => { 'error' => 'DataUnavailableException: x' }))
+        error = 'Aws::CostExplorer::Errors::DataUnavailableException: Data is not available for account 111122223333'
+        snapshot.update!(data: snapshot.data.merge('forecast' => { 'error' => error }))
         with_enabled { get :index }
 
         assert_select '#aws-costexplorer-summary td.amount',
-                      text: 'No forecast (DataUnavailableException)'
+                      text: 'No forecast (Aws::CostExplorer::Errors::DataUnavailableException)'
+        assert_not_includes response.body, '111122223333'
       end
 
       def test_disabled

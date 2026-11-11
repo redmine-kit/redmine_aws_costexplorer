@@ -37,7 +37,8 @@ module RedmineAws
         error = "Aws::CostExplorer::Errors::AccessDeniedException: User: arn:...\nmore"
 
         assert_equal 'Aws::CostExplorer::Errors::AccessDeniedException', aws_costexplorer_error_name(error)
-        assert_equal 'DataUnavailableException', aws_costexplorer_error_name('DataUnavailableException')
+        assert_equal 'Aws::CostExplorer::Errors::DataUnavailableException',
+                     aws_costexplorer_error_name('Aws::CostExplorer::Errors::DataUnavailableException')
         assert_equal '', aws_costexplorer_error_name(nil)
       end
     end

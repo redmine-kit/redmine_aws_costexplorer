@@ -92,14 +92,16 @@ module RedmineAws
       end
 
       # The month's total: the costs until yesterday plus Cost Explorer's
-      # forecast from today to the end of the month. nil with the reason when
-      # Cost Explorer has no forecast (for example, too little history).
+      # forecast from today to the end of the month. The error instead when
+      # Cost Explorer has no forecast (for example, too little history), as
+      # "<class>: <message>" like a failed fetch, with the message in the log.
       def forecast(daily)
         response = request(:get_cost_forecast, time_period: period(@today, this_month_start.next_month),
                                                metric: FORECAST_METRIC, granularity: 'MONTHLY')
         { 'total' => (until_yesterday(daily) + BigDecimal(response.total.amount)).to_s('F') }
       rescue ::Aws::Errors::ServiceError => e
-        { 'error' => "#{e.class.name.demodulize}: #{e.message}" }
+        Rails.logger.warn("[redmine_aws_costexplorer] no forecast: #{e.class}: #{e.message}")
+        { 'error' => "#{e.class}: #{e.message}" }
       end
 
       def until_yesterday(daily)

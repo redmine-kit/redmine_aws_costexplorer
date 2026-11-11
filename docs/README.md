@@ -26,7 +26,7 @@ The costs of the whole account. All amounts are AWS Cost Explorer's unblended co
 | Section | Contents | Cost Explorer request |
 | --- | --- | --- |
 | Total: "This month" | The month's costs until today, including today's costs so far | `GetCostAndUsage`, monthly, by service and usage type, from the first day of the previous month to tomorrow (the total) |
-| Total: "Month-end forecast" | The costs until yesterday plus Cost Explorer's forecast from today to the end of the month. When Cost Explorer has no forecast (for example, in an account with too little history), "No forecast (`<reason>`)" in its cell | `GetCostForecast`, from today to the first day of next month |
+| Total: "Month-end forecast" | The costs until yesterday plus Cost Explorer's forecast from today to the end of the month. When Cost Explorer has no forecast (for example, in an account with too little history), "No forecast (`<error class>`)" in its cell | `GetCostForecast`, from today to the first day of next month |
 | Total: "Last month" | The previous month's costs, with an "Estimated" badge before the amount while Cost Explorer has not finalized them | Same request as "This month" |
 | By service | Each service's costs this month and last month, the largest this month first. Each service row expands to its usage types (`USAGE_TYPE`); the rows start collapsed and open with the arrow on the left, like Redmine's grouped lists | Same request (`GroupBy` `SERVICE` and `USAGE_TYPE`) |
 | Daily (last 30 days) | A bar chart of the daily unblended costs, and a table of the same values under it. Past days that Cost Explorer has not finalized have an "Estimated" badge (a lighter bar in the chart) | `GetCostAndUsage`, daily, from 29 days ago (or the first day of the month, if earlier) to tomorrow |
@@ -37,7 +37,7 @@ The costs of the whole account. All amounts are AWS Cost Explorer's unblended co
 - **Chart:** Redmine's own Chart.js (`chart.js` in its importmap), loaded lazily from a Stimulus controller as Redmine's charts (such as the repository statistics) do. No JavaScript library is added. The chart shows the same values as the table under it.
 - **Dates:** Cost Explorer's dates are in UTC, so "today" is today in UTC.
 - **The fetch time:** The top right shows when the data was fetched. Cost Explorer updates its data about once a day, so data a day old is normal.
-- **Errors:** When the last fetch failed, the page shows "Fetch error: `<time>` (`<error class>`)" above the last successful data. When Cost Explorer could not be reached (no route from the network, DNS or a timeout), it also says that a network without internet access needs a route to it ([setup.md](setup.md#network)).
+- **Errors:** When the last fetch failed, the page shows "Fetch error: `<time>` (`<error class>`)" above the last successful data. When Cost Explorer could not be reached (no route from the network, DNS or a timeout), it also says that a network without internet access needs a route to it ([setup.md](setup.md#network)). The page shows only the class of the error, as the "Status" tab of Redmine AWS does; the message, which may name accounts or resources, is written to Redmine's log (`[redmine_aws_costexplorer] fetch of snapshot … failed …`, and `[redmine_aws_costexplorer] no forecast: …` for the forecast).
 
 <a id="terms"></a>
 

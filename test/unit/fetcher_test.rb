@@ -50,11 +50,17 @@ module RedmineAws
         assert_equal({ 'total' => '22.2' }, fetcher.fetch['forecast'])
       end
 
+      # The class of the error as the other errors of the AWS plugins, and the
+      # message in the log.
       def test_no_forecast
         client = stub_cost_explorer(forecast: 'DataUnavailableException')
-        forecast = fetcher(client).fetch['forecast']
+        forecast = nil
+        log = capture_log { forecast = fetcher(client).fetch['forecast'] }
 
-        assert_match(/\ADataUnavailableException: /, forecast['error'])
+        assert_equal 'Aws::CostExplorer::Errors::DataUnavailableException: stubbed-response-error-message',
+                     forecast['error']
+        assert_includes log, 'no forecast: Aws::CostExplorer::Errors::DataUnavailableException: ' \
+                             'stubbed-response-error-message'
       end
 
       def test_no_tag_request_without_the_tag_key

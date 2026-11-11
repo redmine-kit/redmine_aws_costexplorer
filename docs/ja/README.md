@@ -30,7 +30,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 | 欄 | 内容 | Cost Explorer へのリクエスト |
 | --- | --- | --- |
 | 合計の「今月」 | 今月の、今日までのコスト。今日のこれまでのコストを含む | `GetCostAndUsage`。月別、サービスと使用タイプ別。先月の 1 日から明日まで (合計) |
-| 合計の「月末の予測」 | 昨日までのコストと、Cost Explorer の今日から月末までの予測の合計。Cost Explorer に予測がないとき (たとえば、履歴の短いアカウント) はそのセルに「予測なし (`<理由>`)」 | `GetCostForecast`。今日から来月の 1 日まで |
+| 合計の「月末の予測」 | 昨日までのコストと、Cost Explorer の今日から月末までの予測の合計。Cost Explorer に予測がないとき (たとえば、履歴の短いアカウント) はそのセルに「予測なし (`<エラーのクラス>`)」 | `GetCostForecast`。今日から来月の 1 日まで |
 | 合計の「先月」 | 先月のコスト。Cost Explorer が確定していないときは、金額の前に「推定」のバッジ | 「今月」と同じリクエスト |
 | サービス別 | サービス別の今月と先月のコスト。今月の多い順。各サービスの行は、使用タイプ (`USAGE_TYPE`) の明細を開ける。明細は最初は閉じていて、Redmine のグループ表示と同じく、行の左の矢印で開く | 同じリクエスト (`GroupBy` に `SERVICE` と `USAGE_TYPE`) |
 | 日別 (直近 30 日間) | 日別の非ブレンドコストの棒グラフと、その下に同じ値の表。Cost Explorer が確定していない過去の日には「推定」のバッジ (グラフでは薄い色) | `GetCostAndUsage`。日別。29 日前 (月の 1 日のほうが前なら、その日) から明日まで |
@@ -41,7 +41,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 - **グラフ:** Redmine の Chart.js (importmap の `chart.js`) を、Redmine のグラフ (リポジトリの統計など) と同じく、Stimulus のコントローラーから必要なときに読み込みます。新しい JavaScript のライブラリは追加しません。グラフの値は、下の表と同じです。
 - **日付:** Cost Explorer の日付は UTC です。「今日」は UTC の今日です。
 - **取得の日時:** 右上に、データを取得した日時を表示します。Cost Explorer のデータは、およそ 1 日に 1 回更新されるので、1 日前のデータはふつうです。
-- **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: `<日時>` (`<エラーのクラス>`)」を表示します。Cost Explorer につながらなかったとき (ネットワークの経路がない、DNS、タイムアウト) は、インターネットにつながらないネットワークには経路が必要なことも表示します ([setup.md](setup.md#network))。
+- **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: `<日時>` (`<エラーのクラス>`)」を表示します。Cost Explorer につながらなかったとき (ネットワークの経路がない、DNS、タイムアウト) は、インターネットにつながらないネットワークには経路が必要なことも表示します ([setup.md](setup.md#network))。画面には、Redmine AWS の「ステータス」タブと同じく例外のクラスだけを表示します。アカウントやリソースを含むことがある例外のメッセージは、Redmine のログに記録します (`[redmine_aws_costexplorer] fetch of snapshot … failed …`、予測は `[redmine_aws_costexplorer] no forecast: …`)。
 
 <a id="terms"></a>
 

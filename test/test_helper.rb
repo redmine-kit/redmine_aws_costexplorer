@@ -78,6 +78,18 @@ module RedmineAws
         snapshot
       end
 
+      # The plugin's own lines ([redmine_aws_costexplorer]) that the block
+      # writes to Rails' log.
+      def capture_log
+        io = StringIO.new
+        logger = ActiveSupport::Logger.new(io)
+        Rails.logger.broadcast_to(logger)
+        yield
+        io.string.lines.grep(/\[redmine_aws_costexplorer\]/).join
+      ensure
+        Rails.logger.stop_broadcasting_to(logger)
+      end
+
       # Makes every new Fetcher use the given client.
       def with_fetcher_client(client)
         RedmineAws::CostExplorer::Fetcher.any_instance.stubs(:client).returns(client)

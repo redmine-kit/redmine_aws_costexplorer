@@ -34,10 +34,13 @@ class AwsCostexplorerSnapshot < ApplicationRecord
   end
 
   # Fetches the costs and keeps them, or the error. Never raises; the rake
-  # task reports the error.
+  # task reports the error. The tab shows only the class of the error; the
+  # message, which may name accounts or resources, goes to Redmine's log.
   def fetch!(fetcher = RedmineAws::CostExplorer::Fetcher.new)
     update!(data: fetcher.fetch, fetched_at: Time.current, requests: fetcher.requests)
   rescue StandardError => e
+    Rails.logger.error("[redmine_aws_costexplorer] fetch of snapshot #{id} failed after #{fetcher.requests} " \
+                       "request(s): #{e.class}: #{e.message}")
     update!(error: "#{e.class}: #{e.message}", requests: fetcher.requests)
     false
   end

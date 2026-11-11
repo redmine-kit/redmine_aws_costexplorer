@@ -35,6 +35,16 @@ module RedmineAws
         assert_equal snapshot, AwsCostexplorerSnapshot.last_request
       end
 
+      # The message, which the tab does not show, goes to the log with the
+      # snapshot and the number of requests.
+      def test_a_failed_fetch_logs_the_message
+        snapshot = AwsCostexplorerSnapshot.request!
+        log = capture_log { snapshot.fetch!(fetcher(denied_client)) }
+
+        assert_includes log, "fetch of snapshot #{snapshot.id} failed after 1 request(s): " \
+                             'Aws::CostExplorer::Errors::AccessDeniedException: stubbed-response-error-message'
+      end
+
       def test_an_unreachable_endpoint
         client = ::Aws::CostExplorer::Client.new(stub_responses: true)
         client.stub_responses(:get_cost_and_usage,

@@ -188,11 +188,13 @@ module RedmineAws
         assert_raises(ActionController::UrlGenerationError) { post :refresh }
       end
 
-      def test_non_administrators_are_refused
-        @request.session[:user_id] = 2
-        get :index
+      def test_only_administrators
+        { 2 => :forbidden, nil => :redirect }.each do |user_id, status|
+          @request.session[:user_id] = user_id
+          get :index
 
-        assert_response :forbidden
+          assert_response status, "user #{user_id.inspect}"
+        end
       end
 
       private

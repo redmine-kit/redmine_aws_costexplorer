@@ -5,7 +5,9 @@ class CreateAwsCostexplorerSnapshots < ActiveRecord::Migration[8.1]
     create_table :aws_costexplorer_snapshots do |t|
       t.datetime :requested_at, null: false
       t.datetime :fetched_at
-      t.text :data
+      # Up to 16 MB on MySQL, whose TEXT holds 64 KB, as Redmine's own
+      # migrations widen their text columns.
+      t.text :data, limit: (16.megabytes if Redmine::Database.mysql?)
       t.text :error
       t.integer :requests, null: false, default: 0
     end

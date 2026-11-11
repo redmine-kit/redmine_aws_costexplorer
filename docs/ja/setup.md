@@ -147,7 +147,7 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 
 ### テストの実行
 
-`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。プラグインのテストは、プラグインのファイルのカバレッジ (SimpleCov。Cobertura の XML を `coverage/coverage.xml` に) も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送ります。
+`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。プラグインのテストは、プラグインのファイルのカバレッジ (SimpleCov。Cobertura の XML を `coverage/coverage.xml` に) も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送ります。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`RUBY_IMAGE=ruby:3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
 
 ```sh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト

@@ -119,7 +119,7 @@ Only `GetCostForecast` is mocked, because neither backend implements it. The int
 
 ### Running the tests
 
-`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The tests build Redmine with Redmine AWS from a checkout next to this one (`../redmine_aws`), or from the directory in `REDMINE_AWS_DIR`; CI checks out `redmine-kit/redmine_aws`. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer).
+`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The tests build Redmine with Redmine AWS from a checkout next to this one (`../redmine_aws`), or from the directory in `REDMINE_AWS_DIR`; CI checks out `redmine-kit/redmine_aws`. The plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`), which CI uploads to [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer). CI runs the lint and the tests on Ruby 3.2 and 4.0; locally, `RUBY_IMAGE=ruby:3.2 bin/test` (or `bin/lint`) runs them on Ruby 3.2.
 
 ```sh
 bin/test            # the plugin's tests and Redmine's tests around administration

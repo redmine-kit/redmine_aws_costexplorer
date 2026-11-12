@@ -101,6 +101,8 @@ An interface endpoint may also work, but it is not checked. The AWS PrivateLink 
 
 The tests are in `test/` and run with Redmine's standard mechanism, in Redmine 7.0.3 on PostgreSQL 16 in Docker. Cost Explorer is LocalStack when `LOCALSTACK_AUTH_TOKEN` is set (in CI, the organization's secret), and moto otherwise.
 
+The tests stay on moto and LocalStack, not on [AWS Emulator](https://docs.aws.amazon.com/emulator/latest/userguide/), which the organization uses for tests against AWS: AWS Emulator 1.0.322 answers `NotImplemented` to `GetCostAndUsage`, `GetCostForecast` and `GetDimensionValues`, and only moto can load cost data for the tests. They move to the emulator once it supports them.
+
 ### Unit and functional tests
 
 These use SDK response stubs. The answers are JSON bodies in `test/fixtures/cost_explorer/`, which the SDK parses as real answers. They follow the response syntax of the API reference; they are not recorded from an account, because the tests have no AWS account.

@@ -39,7 +39,7 @@ end
 ```
 
 ```sh
-bundle config set --global rubygems.pkg.github.com <user>:<token>   # または変数 BUNDLE_RUBYGEMS__PKG__GITHUB__COM
+bundle config set --global rubygems.pkg.github.com <ユーザー>:<トークン>   # か、変数 BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 bundle install
 ln -s "$(bundle info --path redmine_aws)" plugins/redmine_aws
 ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_costexplorer

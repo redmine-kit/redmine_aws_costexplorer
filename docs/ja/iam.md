@@ -6,7 +6,7 @@
 
 ## 権限
 
-| 操作 | 対象 | 理由 |
+| アクション | リソース | 理由 |
 | --- | --- | --- |
 | `ce:GetCostAndUsage` | `*` | サービス別、日別、`REDMINE_COSTEXPLORER_TAG_KEY` があればタグ別のコスト |
 | `ce:GetCostForecast` | `*` | 月末の予測 |

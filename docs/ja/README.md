@@ -100,7 +100,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 ## スポンサー
 
-<Sponsors><a href="https://localstack.cloud">LocalStack</a></Sponsors>
+<Sponsors><a href="https://www.keyselect.co.jp/">KEY SELECT</a> <a href="https://localstack.cloud">LocalStack</a></Sponsors>
 
 <a id="license"></a>
 

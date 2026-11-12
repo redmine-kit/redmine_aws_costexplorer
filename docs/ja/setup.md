@@ -149,6 +149,8 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 
 `bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。プラグインのテストは、プラグインのファイルのカバレッジ (SimpleCov。Cobertura の XML を `coverage/coverage.xml` に) も書き、CI が [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送ります。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`TEST_RUBY=3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
 
+`bin/test-gem` は gem を確認します。チェックアウトからプラグインと Redmine AWS の gem をビルドし、[gem](#gem) のとおりにインストールして `plugins/` にリンクし、すべてのファイルを読み込んで Redmine を起動します (`zeitwerk:check` と、起動時にすべてを読み込む production 環境)。CI もこれを実行するので、gem にないファイルがあれば、アダプタがインストールする前に失敗します。
+
 ```sh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト
 bin/test --redmine  # Redmine のすべてのテストも

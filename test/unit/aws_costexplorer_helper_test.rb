@@ -33,6 +33,21 @@ module RedmineAws
         assert_not aws_costexplorer_no_tag_data?(rows.call("#{TAG}$(no tag)"))
       end
 
+      def test_today_of_a_snapshot
+        fetched = Time.utc(2026, 11, 10, 23, 30)
+
+        assert_equal Date.new(2026, 11, 9), aws_costexplorer_today(snapshot({ 'today' => '2026-11-09' }, at: fetched))
+        assert_equal Date.new(2026, 11, 10), aws_costexplorer_today(snapshot(at: fetched))
+      end
+
+      def test_the_last_days
+        days = (1..35).map { |day| { 'date' => format('2026-10-%02d', day) } }
+
+        assert_equal Fetcher::DAYS, aws_costexplorer_days('daily' => days).size
+        assert_equal '2026-10-35', aws_costexplorer_days('daily' => days).last['date']
+        assert_empty aws_costexplorer_days({})
+      end
+
       def test_error_name
         error = "Aws::CostExplorer::Errors::AccessDeniedException: User: arn:...\nmore"
 
@@ -40,6 +55,12 @@ module RedmineAws
         assert_equal 'Aws::CostExplorer::Errors::DataUnavailableException',
                      aws_costexplorer_error_name('Aws::CostExplorer::Errors::DataUnavailableException')
         assert_equal '', aws_costexplorer_error_name(nil)
+      end
+
+      private
+
+      def snapshot(data = {}, at:)
+        AwsCostexplorerSnapshot.new(data: data, fetched_at: at)
       end
     end
   end

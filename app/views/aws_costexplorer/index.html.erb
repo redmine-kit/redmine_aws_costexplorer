@@ -27,7 +27,7 @@
 <% if @snapshot %>
 <% costs = @snapshot.data %>
 <% currency = costs['currency'] %>
-<% today = costs['today'] ? Date.parse(costs['today']) : @snapshot.fetched_at.utc.to_date %>
+<% today = aws_costexplorer_today(@snapshot) %>
 <h3><%= l(:label_total) %></h3>
 
 <div class="autoscroll">
@@ -93,7 +93,7 @@
 
 <h3><%= l(:label_aws_costexplorer_daily) %></h3>
 
-<% days = costs['daily'].to_a.last(RedmineAws::CostExplorer::Fetcher::DAYS) %>
+<% days = aws_costexplorer_days(costs) %>
 <% if days.any? %>
 <% chart = aws_costexplorer_daily_chart(days, today) %>
 <%# As Redmine's charts (repositories/stats); the table under it has the same values %>

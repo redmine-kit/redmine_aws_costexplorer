@@ -19,6 +19,18 @@ module AwsCostexplorerHelper
     content_tag('span', l(:label_aws_costexplorer_estimated), class: 'badge badge-status-locked')
   end
 
+  # The day of the fetch in UTC, as Cost Explorer's dates are: stored with
+  # the data, or the fetch time for older snapshots.
+  def aws_costexplorer_today(snapshot)
+    today = snapshot.data['today']
+    today ? Date.parse(today) : snapshot.fetched_at.utc.to_date
+  end
+
+  # The days of the daily table and chart, the last DAYS of them.
+  def aws_costexplorer_days(costs)
+    costs['daily'].to_a.last(RedmineAws::CostExplorer::Fetcher::DAYS)
+  end
+
   # A past day that Cost Explorer still marks as estimated. Today is not past.
   def aws_costexplorer_estimated_day?(day, today)
     day['estimated'] == true && Date.parse(day['date']) < today

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # The plugin's tests in Redmine 7.0.3 on PostgreSQL 16, with Cost Explorer on
-# LocalStack (when LOCALSTACK_AUTH_TOKEN is set) or moto, in Docker.
+# LocalStack (when LOCALSTACK_AUTH_TOKEN is set) or moto, in Apple container
+# when it runs, else in Docker (CONTAINER_CLI=container|docker chooses).
 #   bin/test                 # the plugin's tests, then the Redmine tests around administration and jobs
 #   bin/test --redmine       # also every Redmine test, with the plugin installed
 #   bin/test <files>         # some files of the plugin's tests
@@ -10,8 +11,10 @@
 # shellcheck disable=SC2016
 set -euo pipefail
 cd "$(dirname "$0")/.."
-image=redmine-kit-aws-costexplorer-test
-network=redmine-kit-aws-costexplorer-test_default
+source bin/container_cli
+source bin/test_slot
+plugin=redmine_kit_aws_costexplorer
+name=redmine-kit-aws-costexplorer-test
 # The same tests run on LocalStack (with LOCALSTACK_AUTH_TOKEN) or moto;
 # TEST_AWS_BACKEND names it.
 if [[ -n "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
@@ -21,34 +24,40 @@ else
 fi
 echo "AWS backend: $backend"
 bin/services >/dev/null
-# redmine_kit_aws, which the plugin requires: a checkout next to this one, or
-# REDMINE_KIT_AWS_DIR.
-aws_dir=${REDMINE_KIT_AWS_DIR:-../redmine_kit_aws}
-[[ -f "$aws_dir/init.rb" ]] || { echo "redmine_kit_aws is not in $aws_dir; set REDMINE_KIT_AWS_DIR" >&2; exit 1; }
-# test/Dockerfile on the Ruby of TEST_RUBY (default 4.0), whose image is
-# pinned in test/ruby-<version>.Dockerfile, in place of its FROM ruby line.
-ruby=$(sed -n 's/^FROM //p' "test/ruby-${TEST_RUBY:-4.0}.Dockerfile")
-dockerfile() {
-  sed "s|^FROM ruby:[^ ]*|FROM $ruby|" test/Dockerfile
-}
-dockerfile | docker buildx build --load -q -t "$image" --build-context redmine_kit_aws="$aws_dir" -f - . >/dev/null
+source bin/test_image
+# The services by name in Docker (test/Dockerfile has their URLs); by address
+# in Apple container, where containers on a network of their own don't find
+# each other by name, with more memory than the 1 GB a container gets by
+# default.
+if [[ "$cli" == docker ]]; then
+  opts=(--network "${name}_default" -e PARALLEL_WORKERS="${PARALLEL_WORKERS:-4}")
+else
+  opts=(--network "$name" -m 4G -e PARALLEL_WORKERS="${PARALLEL_WORKERS:-2}"
+    -e TEST_DATABASE_HOST="$(container_address "$name-postgres")")
+  if [[ "$backend" == localstack ]]; then
+    opts+=(-e LOCALSTACK_ENDPOINT_URL="http://$(container_address "$name-localstack"):4566")
+  else
+    opts+=(-e MOTO_ENDPOINT_URL="http://$(container_address "$name-moto"):5000")
+  fi
+fi
+# A database of this run's own (test/database.yml), dropped when the tests end.
+db="redmine_test_$$"
 setup='bin/rails db:drop db:create db:migrate redmine:plugins:migrate db:schema:dump >/dev/null'
+teardown='; status=$?; bin/rails db:drop >/dev/null 2>&1; exit $status'
 run() {
-  docker run --rm --network "$network" -e PARALLEL_WORKERS="${PARALLEL_WORKERS:-4}" "$image" \
-    sh -c "$setup"' && "$@"' test "$@"
+  "$cli" run --rm "${opts[@]}" -e TEST_DATABASE="$db" "$image" sh -c "$setup"' && "$@"'"$teardown" test "$@"
 }
 # The plugin's tests; with COVERAGE set, in one process with the coverage
 # written to coverage/coverage.xml (test/test_helper.rb). COVERAGE itself is not
 # passed on: Redmine's test helper would start a SimpleCov of its own.
 run_plugin() {
-  local cov=(-e PARALLEL_WORKERS="${PARALLEL_WORKERS:-4}")
+  local cov=()
   if [[ -n "${COVERAGE:-}" ]]; then
     rm -f coverage/.resultset.json && mkdir -p coverage
-    cov=(-e PLUGIN_COVERAGE=1 -e PARALLEL_WORKERS=1
-      -v "$PWD/coverage:/redmine/plugins/redmine_kit_aws_costexplorer/coverage")
+    cov=(-e PLUGIN_COVERAGE=1 -e PARALLEL_WORKERS=1 -v "$PWD/coverage:/redmine/plugins/$plugin/coverage")
   fi
-  docker run --rm "${cov[@]}" --network "$network" -e TEST_AWS_BACKEND="$backend" "$image" \
-    sh -c "$setup"' && "$@"' test "$@"
+  "$cli" run --rm "${opts[@]}" ${cov[@]+"${cov[@]}"} -e TEST_AWS_BACKEND="$backend" -e TEST_DATABASE="$db" "$image" \
+    sh -c "$setup"' && "$@"'"$teardown" test "$@"
 }
 redmine_tests=(test/functional/admin_controller_test.rb test/unit/lib/redmine/plugin_test.rb)
 # Redmine's tests that fail with the current gems for known reasons.

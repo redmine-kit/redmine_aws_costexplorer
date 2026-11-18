@@ -129,7 +129,7 @@ Cost Explorer を呼ぶのは、rake タスクを実行するプロセスだけ�
 
 テストは `test/` にあり、Redmine の標準のしくみで、Redmine 7.0.3 と PostgreSQL 16 で動かします。Apple container がインストールされて動いていれば Apple container で、そうでなければ Docker で動かします (`CONTAINER_CLI=container` または `docker` で選べます。1 台のマシンで同時に実行する redmine-kit のリポジトリのテストは 2 つまで、`TEST_SLOTS`)。Cost Explorer は、`LOCALSTACK_AUTH_TOKEN` (CI では組織のシークレット) があれば LocalStack、なければ moto です。
 
-テストは、組織が AWS に対するテストに使う [AWS Emulator](https://docs.aws.amazon.com/emulator/latest/userguide/) ではなく、moto と LocalStack で動かします。AWS Emulator 1.0.322 は `GetCostAndUsage`、`GetCostForecast`、`GetDimensionValues` に `NotImplemented` を返し、テストのコストのデータを読み込めるのは moto だけだからです。エミュレーターが対応したら移します。
+テストは、組織が AWS に対するテストに使う [AWS Emulator](https://docs.aws.amazon.com/emulator/latest/userguide/) ではなく、moto と LocalStack で動かします。AWS Emulator 1.0.512 (2026-11-19 に確認) は `GetCostAndUsage`、`GetCostForecast`、`GetDimensionValues` に `NotImplemented` を返し、テストのコストのデータを読み込めるのは moto だけだからです。エミュレーターが対応したら移します。
 
 <a id="unit-and-functional-tests"></a>
 

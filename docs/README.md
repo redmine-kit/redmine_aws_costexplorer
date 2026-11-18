@@ -1,6 +1,6 @@
-# Redmine AWS Cost Explorer
+# Redmine Kit AWS Cost Explorer
 
-Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) is a Redmine plugin that shows the costs of the AWS account in Redmine's administration, from AWS Cost Explorer. It adds the "Cost Explorer" tab to the "AWS" administration menu of [Redmine AWS](https://redmine-kit.github.io/redmine_aws/), which it requires. It does not modify Redmine's own files. The plugin is in early development.
+Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) is a Redmine plugin that shows the costs of the AWS account in Redmine's administration, from AWS Cost Explorer. It adds the "Cost Explorer" tab to the "AWS" administration menu of [Redmine Kit AWS](https://redmine-kit.github.io/redmine_aws/), which it requires. It does not modify Redmine's own files. The plugin is in early development.
 
 - [Setup](setup.md): requirements, installation, configuration, AWS resources, network, tests
 - [IAM permissions](iam.md): permissions, example policy, resource-based policies
@@ -14,7 +14,7 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 | Feature | Contents | Enabled when | Page |
 | --- | --- | --- | --- |
 | The "Cost Explorer" tab | The costs of the AWS account: the total (this month, month-end forecast, last month), by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
-| Daily fetch | The rake task `redmine_aws_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
+| Daily fetch | The rake task `redmine_kit_aws_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
 
 ## What the tab shows
@@ -37,7 +37,7 @@ The costs of the whole account. All amounts are AWS Cost Explorer's unblended co
 - **Chart:** Redmine's own Chart.js (`chart.js` in its importmap), loaded lazily from a Stimulus controller as Redmine's charts (such as the repository statistics) do. No JavaScript library is added. The chart shows the same values as the table under it.
 - **Dates:** Cost Explorer's dates are in UTC, so "today" is today in UTC.
 - **The fetch time:** The top right shows when the data was fetched ("Updated: `<time>` (daily)"). While the daily task is fetching, it shows "Updated: running (since `<time>`)" instead. Cost Explorer updates its data about once a day, so data a day old is normal.
-- **Errors:** When the last fetch failed, the page shows "Fetch error: `<time>` (`<error class>`)" above the last successful data. A fetch that has not finished an hour after it started (the task timed out or was stopped) is shown the same way, with "Timed out" in place of the class. When Cost Explorer could not be reached (no route from the network, DNS or a timeout), it also says that a network without internet access needs a route to it ([setup.md](setup.md#network)). The page shows only the class of the error, as the "Status" tab of Redmine AWS does; the message, which may name accounts or resources, is written to Redmine's log (`[redmine_aws_costexplorer] fetch of snapshot … failed …`, and `[redmine_aws_costexplorer] no forecast: …` for the forecast).
+- **Errors:** When the last fetch failed, the page shows "Fetch error: `<time>` (`<error class>`)" above the last successful data. A fetch that has not finished an hour after it started (the task timed out or was stopped) is shown the same way, with "Timed out" in place of the class. When Cost Explorer could not be reached (no route from the network, DNS or a timeout), it also says that a network without internet access needs a route to it ([setup.md](setup.md#network)). The page shows only the class of the error, as the "Status" tab of Redmine Kit AWS does; the message, which may name accounts or resources, is written to Redmine's log (`[redmine_kit_aws_costexplorer] fetch of snapshot … failed …`, and `[redmine_kit_aws_costexplorer] no forecast: …` for the forecast).
 
 <a id="terms"></a>
 
@@ -63,7 +63,7 @@ The page never calls Cost Explorer. AWS charges each Cost Explorer API request (
 
 | How | When | Runs in |
 | --- | --- | --- |
-| Rake task `redmine_aws_costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
+| Rake task `redmine_kit_aws_costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
 
 - **The only fetch:** There is no fetch from the page and no button: the daily run is the only one, so the cost of the requests stays fixed.
 - **Requests per fetch:** 3 (`GetCostAndUsage` twice, `GetCostForecast` once), or 4 with the tag. A long answer of `GetCostAndUsage` comes in pages, and each further page is one more request.
@@ -84,8 +84,8 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 
 - **AWS Organizations:** In a member account, the management account decides whether member accounts may use Cost Explorer (Cost Management preferences › "Linked account access"; AWS Cost Management User Guide, "Controlling access to Cost Explorer", checked on 2026-11-10). Without it, the requests fail with an access error. A member account sees only its own costs.
 - **Enabling Cost Explorer:** Cost Explorer is enabled for an account by opening it once in the console; AWS then prepares the data, which can take up to 24 hours (AWS Cost Management User Guide, "Enabling Cost Explorer", checked on 2026-11-10).
-- **No connection test:** The plugin does not add a connection test to Redmine AWS's "Status" tab: each test would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
-- **Code structure:** `lib/redmine_aws/costexplorer/fetcher.rb` makes the requests, `app/models/aws_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_aws_costexplorer.rake` runs them, and `app/controllers/aws_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
+- **No connection test:** The plugin does not add a connection test to Redmine Kit AWS's "Status" tab: each test would be a charged request. The "Cost Explorer" tab shows the result of the last fetch.
+- **Code structure:** `lib/redmine_kit/aws/costexplorer/fetcher.rb` makes the requests, `app/models/aws_costexplorer_snapshot.rb` keeps the fetches, `lib/tasks/redmine_kit_aws_costexplorer.rake` runs them, and `app/controllers/aws_costexplorer_controller.rb` shows the tab. `init.rb` registers the tab.
 - **Migrations:** A table for the snapshots (`aws_costexplorer_snapshots`). Run `redmine:plugins:migrate`.
 
 ## Sponsors
@@ -94,4 +94,4 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 
 ## License
 
-Redmine AWS Cost Explorer is released under the GNU General Public License, version 2 or (at your option) any later version. See [LICENSE](../LICENSE). An unofficial Redmine plugin.
+Redmine Kit AWS Cost Explorer is released under the GNU General Public License, version 2 or (at your option) any later version. See [LICENSE](../LICENSE). An unofficial Redmine plugin.

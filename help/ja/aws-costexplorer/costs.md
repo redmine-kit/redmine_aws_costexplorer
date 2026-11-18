@@ -4,4 +4,4 @@
 
 コストは、ページを開いたときではなく、1 日 1 回、定期のタスクが取得します。ページには、取得した日時を表示します。
 
-詳しくは [Redmine AWS Cost Explorer](https://redmine-kit.github.io/redmine_aws_costexplorer/ja/) を参照してください。
+詳しくは [Redmine Kit AWS Cost Explorer](https://redmine-kit.github.io/redmine_aws_costexplorer/ja/) を参照してください。

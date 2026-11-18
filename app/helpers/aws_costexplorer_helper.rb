@@ -28,7 +28,7 @@ module AwsCostexplorerHelper
 
   # The days of the daily table and chart, the last DAYS of them.
   def aws_costexplorer_days(costs)
-    costs['daily'].to_a.last(RedmineAws::CostExplorer::Fetcher::DAYS)
+    costs['daily'].to_a.last(RedmineKit::Aws::Costexplorer::Fetcher::DAYS)
   end
 
   # A past day that Cost Explorer still marks as estimated. Today is not past.

@@ -19,87 +19,89 @@ if ENV['PLUGIN_COVERAGE'] && !(defined?(SimpleCov) && SimpleCov.running)
 end
 
 require File.expand_path('../../../test/test_helper', __dir__)
-require File.join(Redmine::Plugin.find(:redmine_aws).directory, 'test/support/redmine_aws/test_helper')
+require File.join(Redmine::Plugin.find(:redmine_kit_aws).directory, 'test/support/redmine_kit/aws/test_helper')
 
-module RedmineAws
-  module CostExplorer
-    module TestHelper
-      include RedmineAws::TestHelper
+module RedmineKit
+  module Aws
+    module Costexplorer
+      module TestHelper
+        include RedmineKit::Aws::TestHelper
 
-      TODAY = Date.new(2026, 11, 10)
-      FIXTURES = File.expand_path('fixtures/cost_explorer', __dir__)
+        TODAY = Date.new(2026, 11, 10)
+        FIXTURES = File.expand_path('fixtures/cost_explorer', __dir__)
 
-      def fixture(name)
-        File.read(File.join(FIXTURES, "#{name}.json"))
-      end
-
-      # The daily costs from 2026-10-12 to 2026-11-10: 0.5 a day in October,
-      # 0.8 a day from November 1 to 9 (7.2) and 0.3 today, estimated.
-      def daily_body
-        results = (Date.new(2026, 10, 12)..TODAY).map do |day|
-          amount = if day == TODAY then '0.3'
-                   elsif day.month == 11 then '0.8'
-                   else '0.5'
-                   end
-          { 'TimePeriod' => { 'Start' => day.iso8601, 'End' => (day + 1).iso8601 },
-            'Total' => { 'UnblendedCost' => { 'Amount' => amount, 'Unit' => 'USD' } },
-            'Groups' => [], 'Estimated' => day == TODAY }
+        def fixture(name)
+          File.read(File.join(FIXTURES, "#{name}.json"))
         end
-        { 'ResultsByTime' => results, 'DimensionValueAttributes' => [] }.to_json
-      end
 
-      def http_body(body)
-        { status_code: 200, headers: { 'content-type' => 'application/x-amz-json-1.1' }, body: body }
-      end
-
-      # A client whose answers are the fixtures, parsed by the SDK as real
-      # answers are.
-      def stub_cost_explorer(forecast: http_body(fixture('forecast')))
-        client = ::Aws::CostExplorer::Client.new(stub_responses: true, region: 'us-east-1')
-        client.stub_responses(:get_cost_and_usage, lambda { |context|
-          group = context.params[:group_by]&.first
-          if group.nil? then http_body(daily_body)
-          elsif group[:type] == 'TAG' then http_body(fixture('tags'))
-          else http_body(fixture('services'))
+        # The daily costs from 2026-10-12 to 2026-11-10: 0.5 a day in October,
+        # 0.8 a day from November 1 to 9 (7.2) and 0.3 today, estimated.
+        def daily_body
+          results = (Date.new(2026, 10, 12)..TODAY).map do |day|
+            amount = if day == TODAY then '0.3'
+                     elsif day.month == 11 then '0.8'
+                     else '0.5'
+                     end
+            { 'TimePeriod' => { 'Start' => day.iso8601, 'End' => (day + 1).iso8601 },
+              'Total' => { 'UnblendedCost' => { 'Amount' => amount, 'Unit' => 'USD' } },
+              'Groups' => [], 'Estimated' => day == TODAY }
           end
-        })
-        client.stub_responses(:get_cost_forecast, forecast)
-        client
-      end
+          { 'ResultsByTime' => results, 'DimensionValueAttributes' => [] }.to_json
+        end
 
-      def fetcher(client = stub_cost_explorer, tag_key: nil)
-        RedmineAws::CostExplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
-      end
+        def http_body(body)
+          { status_code: 200, headers: { 'content-type' => 'application/x-amz-json-1.1' }, body: body }
+        end
 
-      def with_enabled(tag_key: nil, &)
-        with_env({ 'REDMINE_COSTEXPLORER_ENABLED' => 'true', 'REDMINE_COSTEXPLORER_TAG_KEY' => tag_key }, &)
-      end
+        # A client whose answers are the fixtures, parsed by the SDK as real
+        # answers are.
+        def stub_cost_explorer(forecast: http_body(fixture('forecast')))
+          client = ::Aws::CostExplorer::Client.new(stub_responses: true, region: 'us-east-1')
+          client.stub_responses(:get_cost_and_usage, lambda { |context|
+            group = context.params[:group_by]&.first
+            if group.nil? then http_body(daily_body)
+            elsif group[:type] == 'TAG' then http_body(fixture('tags'))
+            else http_body(fixture('services'))
+            end
+          })
+          client.stub_responses(:get_cost_forecast, forecast)
+          client
+        end
 
-      # A snapshot fetched from the fixtures.
-      def fetched_snapshot(tag_key: nil, requested_at: 2.hours.ago)
-        snapshot = AwsCostexplorerSnapshot.create!(requested_at: requested_at)
-        snapshot.fetch!(fetcher(tag_key: tag_key))
-        snapshot
-      end
+        def fetcher(client = stub_cost_explorer, tag_key: nil)
+          RedmineKit::Aws::Costexplorer::Fetcher.new(client: client, tag_key: tag_key, today: TODAY)
+        end
 
-      # The plugin's own lines ([redmine_aws_costexplorer]) that the block
-      # writes to Rails' log.
-      def capture_log
-        io = StringIO.new
-        logger = ActiveSupport::Logger.new(io)
-        Rails.logger.broadcast_to(logger)
-        yield
-        io.string.lines.grep(/\[redmine_aws_costexplorer\]/).join
-      ensure
-        Rails.logger.stop_broadcasting_to(logger)
-      end
+        def with_enabled(tag_key: nil, &)
+          with_env({ 'REDMINE_COSTEXPLORER_ENABLED' => 'true', 'REDMINE_COSTEXPLORER_TAG_KEY' => tag_key }, &)
+        end
 
-      # Makes every new Fetcher use the given client.
-      def with_fetcher_client(client)
-        RedmineAws::CostExplorer::Fetcher.any_instance.stubs(:client).returns(client)
-        yield
-      ensure
-        RedmineAws::CostExplorer::Fetcher.any_instance.unstub(:client)
+        # A snapshot fetched from the fixtures.
+        def fetched_snapshot(tag_key: nil, requested_at: 2.hours.ago)
+          snapshot = AwsCostexplorerSnapshot.create!(requested_at: requested_at)
+          snapshot.fetch!(fetcher(tag_key: tag_key))
+          snapshot
+        end
+
+        # The plugin's own lines ([redmine_kit_aws_costexplorer]) that the block
+        # writes to Rails' log.
+        def capture_log
+          io = StringIO.new
+          logger = ActiveSupport::Logger.new(io)
+          Rails.logger.broadcast_to(logger)
+          yield
+          io.string.lines.grep(/\[redmine_kit_aws_costexplorer\]/).join
+        ensure
+          Rails.logger.stop_broadcasting_to(logger)
+        end
+
+        # Makes every new Fetcher use the given client.
+        def with_fetcher_client(client)
+          RedmineKit::Aws::Costexplorer::Fetcher.any_instance.stubs(:client).returns(client)
+          yield
+        ensure
+          RedmineKit::Aws::Costexplorer::Fetcher.any_instance.unstub(:client)
+        end
       end
     end
   end

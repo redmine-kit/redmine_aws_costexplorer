@@ -4,4 +4,4 @@ Administration › AWS › **Cost Explorer** shows the costs of this AWS account
 
 The costs are fetched once a day by a scheduled task, not when the page is opened; the page shows when they were fetched.
 
-More: [Redmine AWS Cost Explorer](https://redmine-kit.github.io/redmine_aws_costexplorer/).
+More: [Redmine Kit AWS Cost Explorer](https://redmine-kit.github.io/redmine_aws_costexplorer/).

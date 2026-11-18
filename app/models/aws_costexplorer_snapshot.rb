@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # One daily fetch of the costs from Cost Explorer (the rake task
-# redmine_aws_costexplorer:refresh), filled with the data or the
+# redmine_kit_aws_costexplorer:refresh), filled with the data or the
 # error. The "Cost Explorer" tab shows the latest successful one.
 class AwsCostexplorerSnapshot < ApplicationRecord
   serialize :data, coder: JSON
@@ -27,7 +27,7 @@ class AwsCostexplorerSnapshot < ApplicationRecord
 
     # Deletes the snapshots older than the given days, keeping the latest
     # successful one.
-    def prune(days = RedmineAws::CostExplorer::KEEP_DAYS)
+    def prune(days = RedmineKit::Aws::Costexplorer::KEEP_DAYS)
       keep = latest&.id
       where(requested_at: ...days.to_i.days.ago).where.not(id: keep).delete_all
     end
@@ -49,10 +49,10 @@ class AwsCostexplorerSnapshot < ApplicationRecord
   # Fetches the costs and keeps them, or the error. Never raises; the rake
   # task reports the error. The tab shows only the class of the error; the
   # message, which may name accounts or resources, goes to Redmine's log.
-  def fetch!(fetcher = RedmineAws::CostExplorer::Fetcher.new)
+  def fetch!(fetcher = RedmineKit::Aws::Costexplorer::Fetcher.new)
     update!(data: fetcher.fetch, fetched_at: Time.current, requests: fetcher.requests)
   rescue StandardError => e
-    Rails.logger.error("[redmine_aws_costexplorer] fetch of snapshot #{id} failed after #{fetcher.requests} " \
+    Rails.logger.error("[redmine_kit_aws_costexplorer] fetch of snapshot #{id} failed after #{fetcher.requests} " \
                        "request(s): #{e.class}: #{e.message}")
     update!(error: "#{e.class}: #{e.message}", requests: fetcher.requests)
     false

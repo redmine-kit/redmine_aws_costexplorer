@@ -1,13 +1,13 @@
 # 導入
 
-Redmine AWS Cost Explorer を使うために、Redmine サーバーに必要なものです。インストール、設定、スケジュール、IAM 権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ (派生イメージ) のために、Serverless は、デプロイの設定ファイル (`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効) から、これらを CloudFormation ですべて用意します。このページは、手動で用意するときや、Serverless が作るものを確認するときのためのものです。
+Redmine Kit AWS Cost Explorer を使うために、Redmine サーバーに必要なものです。インストール、設定、スケジュール、IAM 権限、ネットワークです。[Serverless](https://redmine-kit.github.io/serverless/ja/) のイメージには、このプラグインは入っていません。プラグインを追加したイメージ (派生イメージ) のために、Serverless は、デプロイの設定ファイル (`redmine.json` の `costExplorer.enabled` と `costExplorer.allocationTag`。デフォルトは無効) から、これらを CloudFormation ですべて用意します。このページは、手動で用意するときや、Serverless が作るものを確認するときのためのものです。
 
 <a id="requirements"></a>
 
 ## 動作環境
 
 - Redmine 7.0 以降。
-- [Redmine AWS](https://redmine-kit.github.io/redmine_aws/ja/) (`redmine_aws`) 0.1 以降。「AWS」の管理メニューがあります (gem の依存です。チェックアウトでは、これもクローンします)。
+- [Redmine Kit AWS](https://redmine-kit.github.io/redmine_aws/ja/) (`redmine_kit_aws`) 0.1 以降。「AWS」の管理メニューがあります (gem の依存です。チェックアウトでは、これもクローンします)。
 - AWS の gem `aws-sdk-costexplorer` (gem の依存です。チェックアウトでは、プラグインの `Gemfile` が追加します)。
 - Cost Explorer が有効な AWS アカウント ([README.md](README.md#notes))。AWS Organizations のメンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許している必要があります。
 - rake タスクを 1 日に 1 回実行するもの。
@@ -16,7 +16,7 @@ Redmine AWS Cost Explorer を使うために、Redmine サーバーに必要な�
 
 ## インストール
 
-1. プラグインを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` に置きます。gem をインストールするか ([gem](#gem))、2 つのリポジトリをクローンします ([gem を使わないとき](#without-the-gem))。
+1. プラグインを `plugins/redmine_kit_aws_costexplorer` に、Redmine Kit AWS を `plugins/redmine_kit_aws` に置きます。gem をインストールするか ([gem](#gem))、2 つのリポジトリをクローンします ([gem を使わないとき](#without-the-gem))。
 2. プラグインのマイグレーションを実行します。スナップショットのテーブル (`aws_costexplorer_snapshots`) を作ります。
 
    ```sh
@@ -29,31 +29,39 @@ Redmine AWS Cost Explorer を使うために、Redmine サーバーに必要な�
 
 ### gem
 
-バージョンのタグ (`v*`) ごとに、プラグインを gem として GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`) に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル (`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`help/`、`LICENSE`) が入っていて、プラグインの `Gemfile` は入っていません。gem は `redmine_aws` に依存し、Bundler が同じソースからインストールするので、`Gemfile.local` に書くのはこのプラグインの gem だけです。Redmine は `plugins/` からだけプラグインを読むので、インストールした 2 つの gem をそこにリンクします。
+バージョンのタグ (`v*`) ごとに、プラグインを gem として GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`。`.github/workflows/gem.yml`) に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル (`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`help/`、`LICENSE`) が入っていて、プラグインの `Gemfile` は入っていません。gem は `redmine_kit_aws` に依存し、Bundler が同じソースからインストールするので、`Gemfile.local` に書くのはこのプラグインの gem だけです。Redmine は `plugins/` からだけプラグインを読むので、インストールした 2 つの gem をそこにリンクします。
 
 ```ruby
 # Redmine の Gemfile.local
 source 'https://rubygems.pkg.github.com/redmine-kit' do
-  gem 'redmine_aws_costexplorer'
+  gem 'redmine_kit_aws_costexplorer'
 end
 ```
 
 ```sh
 bundle config set --global rubygems.pkg.github.com <ユーザー>:<トークン>   # か、変数 BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 bundle install
-ln -s "$(bundle info --path redmine_aws)" plugins/redmine_aws
-ln -s "$(bundle info --path redmine_aws_costexplorer)" plugins/redmine_aws_costexplorer
+ln -s "$(bundle info --path redmine_kit_aws)" plugins/redmine_kit_aws
+ln -s "$(bundle info --path redmine_kit_aws_costexplorer)" plugins/redmine_kit_aws_costexplorer
 ```
 
 <a id="without-the-gem"></a>
 
+Bundler は、それぞれのリポジトリからもプラグインをインストールできます。この場合、トークンは不要です。`plugins/` へのリンクは上と同じです。
+
+```ruby
+# Redmine の Gemfile.local
+gem 'redmine_kit_aws', git: 'https://github.com/redmine-kit/redmine_aws.git', tag: 'v0.1.0', require: false
+gem 'redmine_kit_aws_costexplorer', git: 'https://github.com/redmine-kit/redmine_aws_costexplorer.git', tag: 'v0.1.0', require: false
+```
+
 ### gem を使わないとき
 
-リポジトリを `plugins/redmine_aws_costexplorer` に、Redmine AWS を `plugins/redmine_aws` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。Rails の起動前に読み込むものがないので、`Gemfile.local` に行を追加する必要はありません。
+リポジトリを `plugins/redmine_kit_aws_costexplorer` に、Redmine Kit AWS を `plugins/redmine_kit_aws` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。Rails の起動前に読み込むものがないので、`Gemfile.local` に行を追加する必要はありません。
 
 ```sh
-git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_aws
-git clone https://github.com/redmine-kit/redmine_aws_costexplorer.git plugins/redmine_aws_costexplorer
+git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_kit_aws
+git clone https://github.com/redmine-kit/redmine_aws_costexplorer.git plugins/redmine_kit_aws_costexplorer
 bundle install
 ```
 
@@ -84,17 +92,17 @@ bundle install
 
 ### スケジュール
 
-rake タスク `redmine_aws_costexplorer:refresh` を 1 日に 1 回実行します。
+rake タスク `redmine_kit_aws_costexplorer:refresh` を 1 日に 1 回実行します。
 
 ```sh
-bin/rake redmine_aws_costexplorer:refresh
+bin/rake redmine_kit_aws_costexplorer:refresh
 ```
 
 実行する時刻はいつでもかまいません。Cost Explorer のデータはおよそ 1 日に 1 回更新され、1 回の実行でリクエストは 3 件か 4 件です ([README.md](README.md#fetching-the-costs))。取得が失敗するとタスクも失敗し (0 以外の終了コード。エラーは標準エラー出力)、スケジューラーが失敗を記録できます。プラグインが無効なら、何も取得しなかったことを出力して成功します。
 
 | 環境 | タスクを動かすもの |
 | --- | --- |
-| Serverless | EventBridge のルール (`<instance>-costexplorer-refresh`) が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_aws_costexplorer:refresh"]}` で呼ぶ ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
+| Serverless | EventBridge のルール (`<instance>-costexplorer-refresh`) が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_kit_aws_costexplorer:refresh"]}` で呼ぶ ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
 | ほかの環境 | cron、systemd のタイマー、スケジュールで動くコンテナのタスクなど。Redmine のディレクトリで、Redmine と同じ環境変数でコマンドを実行する |
 
 <a id="iam-permissions"></a>
@@ -149,16 +157,16 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 
 ### テストの実行
 
-`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine AWS (`../redmine_aws`) か、`REDMINE_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。`COVERAGE=1` を付けると、プラグインのテストは、プラグイン自身のファイルのカバレッジ (SimpleCov。Cobertura の XML の `coverage/coverage.xml`) も出力し、1 プロセスで実行します。CI は Ruby 4.0 でこれを有効にし、レポートを `plugin` フラグで [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送信します。送信の認証は OIDC (`id-token: write`) なので、トークンをシークレットに保存しません。Codecov のステータスは参考情報で、コミットや Pull Request を失敗にしません (`codecov.yml`)。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`TEST_RUBY=3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
+`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine Kit AWS (`../redmine_kit_aws`) か、`REDMINE_KIT_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。`COVERAGE=1` を付けると、プラグインのテストは、プラグイン自身のファイルのカバレッジ (SimpleCov。Cobertura の XML の `coverage/coverage.xml`) も出力し、1 プロセスで実行します。CI は Ruby 4.0 でこれを有効にし、レポートを `plugin` フラグで [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送信します。送信の認証は OIDC (`id-token: write`) なので、トークンをシークレットに保存しません。Codecov のステータスは参考情報で、コミットや Pull Request を失敗にしません (`codecov.yml`)。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`TEST_RUBY=3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
 
-`bin/test-gem` は gem を確認します。チェックアウトからプラグインと Redmine AWS の gem をビルドし、[gem](#gem) のとおりにインストールして `plugins/` にリンクし、すべてのファイルを読み込んで Redmine を起動します (`zeitwerk:check` と、起動時にすべてを読み込む production 環境)。CI もこれを実行するので、gem にないファイルがあれば、アダプタがインストールする前に失敗します。
+`bin/test-gem` は gem を確認します。チェックアウトからプラグインと Redmine Kit AWS の gem をビルドし、[gem](#gem) のとおりにインストールして `plugins/` にリンクし、すべてのファイルを読み込んで Redmine を起動します (`zeitwerk:check` と、起動時にすべてを読み込む production 環境)。CI もこれを実行するので、gem にないファイルがあれば、アダプタがインストールする前に失敗します。
 
 ```sh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト
 bin/test --redmine  # Redmine のすべてのテストも
 COVERAGE=1 bin/test # カバレッジを coverage/coverage.xml に出力する
 bin/lint            # RuboCop
-bin/test-gem        # プラグインと Redmine AWS の gem をビルド・インストールし、plugins/ にリンクして起動する
+bin/test-gem        # プラグインと Redmine Kit AWS の gem をビルド・インストールし、plugins/ にリンクして起動する
 bin/services --down # PostgreSQL と、moto か LocalStack を止める
 ```
 

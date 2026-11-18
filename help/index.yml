@@ -2,5 +2,5 @@
 # (https://github.com/redmine-kit/redmine_help, docs/extending.md).
 sections:
   - id: aws-costexplorer
-    title: Redmine AWS Cost Explorer
+    title: Redmine Kit AWS Cost Explorer
     topics: [aws-costexplorer/costs]

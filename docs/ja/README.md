@@ -1,6 +1,6 @@
-# Redmine AWS Cost Explorer
+# Redmine Kit AWS Cost Explorer
 
-Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウントのコストを、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。[Redmine AWS](https://redmine-kit.github.io/redmine_aws/ja/) の「AWS」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine AWS が必要です。Redmine そのもののファイルは変えません。開発の初期です。
+Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカウントのコストを、AWS Cost Explorer から Redmine の管理画面に表示する Redmine のプラグインです。[Redmine Kit AWS](https://redmine-kit.github.io/redmine_aws/ja/) の「AWS」の管理メニューに、「Cost Explorer」のタブを追加します。Redmine Kit AWS が必要です。Redmine そのもののファイルは変えません。開発の初期です。
 
 - [導入](setup.md): 動作環境、インストール、設定、AWS リソース、ネットワーク、テスト
 - [IAM 権限](iam.md): 権限、ポリシーの例、リソースベースのポリシー
@@ -16,7 +16,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 | 機能 | 内容 | 有効になる条件 | ページ |
 | --- | --- | --- | --- |
 | 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別 (使用タイプの明細)、日別 (直近 30 日間。グラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。システム管理者 | [タブに表示するもの](#what-the-tab-shows) |
-| 毎日の取得 | rake タスク `redmine_aws_costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
+| 毎日の取得 | rake タスク `redmine_kit_aws_costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
 | タグ別のコスト | コスト配分タグ (ふつうは `redmine:instance`) の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある (デフォルトは無効) | [タグ別のコスト](#costs-by-tag-optional) |
 
 <a id="what-the-tab-shows"></a>
@@ -41,7 +41,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 - **グラフ:** Redmine の Chart.js (importmap の `chart.js`) を、Redmine のグラフ (リポジトリの統計など) と同じく、Stimulus のコントローラーから必要なときに読み込みます。新しい JavaScript のライブラリは追加しません。グラフの値は、下の表と同じです。
 - **日付:** Cost Explorer の日付は UTC です。「今日」は UTC の今日です。
 - **取得の日時:** 右上に、データを取得した日時を表示します (「更新: `<日時>` (1 日 1 回)」)。毎日のタスクが取得しているあいだは、代わりに「更新: 実行中 (`<日時>` から)」を表示します。Cost Explorer のデータは、およそ 1 日に 1 回更新されるので、1 日前のデータはふつうです。
-- **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: `<日時>` (`<エラーのクラス>`)」を表示します。開始から 1 時間たっても終わらない取得 (タスクのタイムアウトや停止) も同じように表示し、クラスの代わりに「タイムアウト」と表示します。Cost Explorer につながらなかったとき (ネットワークの経路がない、DNS、タイムアウト) は、インターネットにつながらないネットワークには経路が必要なことも表示します ([setup.md](setup.md#network))。画面には、Redmine AWS の「ステータス」のタブと同じく例外のクラスだけを表示します。アカウントやリソースを含むことがある例外のメッセージは、Redmine のログに記録します (`[redmine_aws_costexplorer] fetch of snapshot … failed …`、予測は `[redmine_aws_costexplorer] no forecast: …`)。
+- **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: `<日時>` (`<エラーのクラス>`)」を表示します。開始から 1 時間たっても終わらない取得 (タスクのタイムアウトや停止) も同じように表示し、クラスの代わりに「タイムアウト」と表示します。Cost Explorer につながらなかったとき (ネットワークの経路がない、DNS、タイムアウト) は、インターネットにつながらないネットワークには経路が必要なことも表示します ([setup.md](setup.md#network))。画面には、Redmine Kit AWS の「ステータス」のタブと同じく例外のクラスだけを表示します。アカウントやリソースを含むことがある例外のメッセージは、Redmine のログに記録します (`[redmine_kit_aws_costexplorer] fetch of snapshot … failed …`、予測は `[redmine_kit_aws_costexplorer] no forecast: …`)。
 
 <a id="terms"></a>
 
@@ -67,7 +67,7 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 | 方法 | タイミング | 動く場所 |
 | --- | --- | --- |
-| rake タスク `redmine_aws_costexplorer:refresh` | 1 日に 1 回、スケジュールから ([setup.md](setup.md#schedule)) | タスクを実行するプロセス。その場で取得し、失敗すると、タスクも失敗する (0 以外の終了コード) |
+| rake タスク `redmine_kit_aws_costexplorer:refresh` | 1 日に 1 回、スケジュールから ([setup.md](setup.md#schedule)) | タスクを実行するプロセス。その場で取得し、失敗すると、タスクも失敗する (0 以外の終了コード) |
 
 - **取得はこれだけ:** 画面からの取得やボタンはありません。毎日の実行だけなので、リクエストの料金は一定です。
 - **取得 1 回のリクエスト数:** 3 件 (`GetCostAndUsage` が 2 件、`GetCostForecast` が 1 件)、タグありで 4 件です。`GetCostAndUsage` の長い応答は複数のページに分かれ、次のページごとに 1 件増えます。
@@ -92,8 +92,8 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 - **AWS Organizations:** メンバーアカウントでは、管理アカウントが、メンバーアカウントに Cost Explorer を許すかを決めます (コスト管理の設定 ›「Linked account access」。AWS Cost Management ユーザーガイドの「Controlling access to Cost Explorer」。2026-11-10 に確認)。許していなければ、リクエストはアクセスエラーで失敗します。メンバーアカウントで見えるのは、そのアカウントのコストだけです。
 - **Cost Explorer を有効にする:** Cost Explorer は、コンソールで一度開くと、そのアカウントで有効になります。そのあと AWS がデータを準備し、最大で 24 時間かかります (AWS Cost Management ユーザーガイドの「Enabling Cost Explorer」。2026-11-10 に確認)。
-- **接続テストはない:** Redmine AWS の「ステータス」のタブには、接続テストを追加しません。テストのたびに、課金されるリクエストになるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
-- **コードの構成:** `lib/redmine_aws/costexplorer/fetcher.rb` がリクエストを送り、`app/models/aws_costexplorer_snapshot.rb` が取得を保存し、`lib/tasks/redmine_aws_costexplorer.rake` が取得を実行し、`app/controllers/aws_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。
+- **接続テストはない:** Redmine Kit AWS の「ステータス」のタブには、接続テストを追加しません。テストのたびに、課金されるリクエストになるためです。最後の取得の結果は、「Cost Explorer」のタブに表示します。
+- **コードの構成:** `lib/redmine_kit/aws/costexplorer/fetcher.rb` がリクエストを送り、`app/models/aws_costexplorer_snapshot.rb` が取得を保存し、`lib/tasks/redmine_kit_aws_costexplorer.rake` が取得を実行し、`app/controllers/aws_costexplorer_controller.rb` がタブを表示します。`init.rb` がタブを登録します。
 - **マイグレーション:** スナップショットのテーブル (`aws_costexplorer_snapshots`) を作ります。`redmine:plugins:migrate` を実行します。
 
 <a id="sponsors"></a>
@@ -106,4 +106,4 @@ Redmine AWS Cost Explorer (`redmine_aws_costexplorer`) は、AWS アカウント
 
 ## ライセンス
 
-Redmine AWS Cost Explorer は、GNU General Public License バージョン 2 またはそれ以降のバージョンで公開しています。[LICENSE](../../LICENSE) を参照してください。Redmine の非公式のプラグインです。
+Redmine Kit AWS Cost Explorer は、GNU General Public License バージョン 2 またはそれ以降のバージョンで公開しています。[LICENSE](../../LICENSE) を参照してください。Redmine の非公式のプラグインです。

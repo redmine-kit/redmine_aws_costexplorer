@@ -32,7 +32,7 @@ source bin/test_image
 if [[ "$cli" == docker ]]; then
   opts=(--network "${name}_default" -e PARALLEL_WORKERS="${PARALLEL_WORKERS:-4}")
 else
-  opts=(--network "$name" -m 4G -e PARALLEL_WORKERS="${PARALLEL_WORKERS:-2}"
+  opts=(--network "$kit_test_network" -m 4G -e PARALLEL_WORKERS="${PARALLEL_WORKERS:-2}"
     -e TEST_DATABASE_HOST="$(container_address "$name-postgres")")
   if [[ "$backend" == localstack ]]; then
     opts+=(-e LOCALSTACK_ENDPOINT_URL="http://$(container_address "$name-localstack"):4566")

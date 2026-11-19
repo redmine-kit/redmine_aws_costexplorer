@@ -20,12 +20,15 @@ module RedmineKit
           capture_io { task.invoke }
         end
 
-        def test_the_task_fetches_and_prunes
-          AwsCostexplorerSnapshot.create!(requested_at: 100.days.ago, error: 'boom')
+        # Deleting old snapshots is redmine_kit:aws:costexplorer:prune's work
+        # (PruneTaskTest): refresh only fetches.
+        def test_the_task_fetches_and_keeps_old_snapshots
+          old = AwsCostexplorerSnapshot.create!(requested_at: 100.days.ago, error: 'boom')
           out, = with_enabled { with_fetcher_client(stub_cost_explorer) { run_task } }
 
-          assert_match(/fetched the costs with 3 request\(s\); deleted 1 old snapshot\(s\)/, out)
+          assert_equal "fetched the costs with 3 request(s)\n", out
           assert_not_nil AwsCostexplorerSnapshot.latest
+          assert AwsCostexplorerSnapshot.exists?(old.id)
         end
 
         def test_the_task_with_the_tag_key

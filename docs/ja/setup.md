@@ -92,17 +92,20 @@ bundle install
 
 ### スケジュール
 
-rake タスク `redmine_kit:aws:costexplorer:refresh` を 1 日に 1 回実行します。
+rake タスク `redmine_kit:aws:costexplorer:refresh` を 1 日に 1 回実行します。古いスナップショットを削除する `redmine_kit:aws:costexplorer:prune` も 1 日に 1 回実行します。
 
 ```sh
 bin/rake redmine_kit:aws:costexplorer:refresh
+bin/rake redmine_kit:aws:costexplorer:prune DAYS=90
 ```
+
+`prune` は、`DAYS` の日数 (デフォルトは 90。1 から 99999 までの整数) より古いスナップショットを削除します。日数の指定は Redmine の `redmine:users:prune` と同じ形で、最後に成功したものは必ず残します。ほかの値では何も削除せず、メッセージを表示してタスクを中止します。AWS へのリクエストは送りません。
 
 実行する時刻はいつでもかまいません。Cost Explorer のデータはおよそ 1 日に 1 回更新され、1 回の実行でリクエストは 3 件か 4 件です ([README.md](README.md#fetching-the-costs))。取得が失敗するとタスクも失敗し (0 以外の終了コード。エラーは標準エラー出力)、スケジューラーが失敗を記録できます。プラグインが無効なら、何も取得しなかったことを出力して成功します。
 
 | 環境 | タスクを動かすもの |
 | --- | --- |
-| Serverless | EventBridge のルール (`<instance>-costexplorer-refresh`) が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:refresh"]}` で呼ぶ ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
+| Serverless | EventBridge Scheduler が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:refresh"]}` (`<instance>-costexplorer-refresh`) と `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:prune"], "env": {"DAYS": "<retention.recordsDays>"}}` (`<instance>-costexplorer-prune`) で呼ぶ ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
 | ほかの環境 | cron、systemd のタイマー、スケジュールで動くコンテナのタスクなど。Redmine のディレクトリで、Redmine と同じ環境変数でコマンドを実行する |
 
 <a id="iam-permissions"></a>
@@ -146,6 +149,12 @@ SDK の応答のスタブを使います。応答は `test/fixtures/cost_explore
 LocalStack の Cost Explorer は、Ultimate のプランのものです。対応状況のページには、`GetCostAndUsage` はあるが `GetCostForecast` はなく、コストのデータもないと書かれています (LocalStack の Cost Explorer のページ。2026-11-10 に確認)。LocalStack 2026.10.6 では (2026-11-10 に確認)、`GetCostAndUsage` はプラグインのすべてのリクエスト (月別でサービス別、月別でタグ別、日別) に、実際の応答の形で結果なしを返し、`GetCostForecast` は `InternalFailure` (「The get_cost_forecast action has not been implemented」) を返しました。そのため LocalStack ではコストが空なことを確認し、金額は moto とスタブで確認します。
 
 トークンがないときは moto を使います。moto は、API で前もって渡した結果 (`/moto-api/static/ce/cost-and-usage-results`) で `GetCostAndUsage` に答えるので、テストは金額を確認します。moto には `GetCostForecast` がありません (500 を返す)。
+
+<a id="redmine-kit-charges"></a>
+
+### Redmine Kit Charges
+
+Redmine Kit Charges のプロバイダー (`charges_provider_test.rb`) は、SDK のレスポンスのスタブでテストします。ソースの種類ごとのリクエスト (このアカウント、共有された請求ビューの `BillingViewArn`、スタブの STS による外部 ID 付きの AssumeRole)、行、`LimitExceededException` での再試行、拒否する設定です。`test/integration/charges_test.rb` は、1 つのソースを Redmine Kit Charges の毎日の取得で、moto に対して実行します。moto は Cost Explorer のデータを読み込める唯一のバックエンドです (AWS Emulator は `NotImplemented` を返します。moto は `BillingViewArn` を無視するので、請求ビューはスタブだけで確認します)。テストのイメージに Redmine Kit Charges が要ります。`bin/test_image` が、このチェックアウトの隣のもの (`../redmine_kit_charges`、または `REDMINE_KIT_CHARGES_DIR`) を追加し、なければ (このリポジトリが非公開の CI では) これらのテストをスキップします。
 
 <a id="the-mocked-call"></a>
 

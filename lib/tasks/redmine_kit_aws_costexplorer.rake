@@ -15,8 +15,14 @@ namespace :redmine_kit do
         snapshot.fetch!
         abort "Cost Explorer: #{snapshot.error} (#{snapshot.requests} request(s))" if snapshot.error
 
-        pruned = AwsCostexplorerSnapshot.prune
-        puts "fetched the costs with #{snapshot.requests} request(s); deleted #{pruned} old snapshot(s)"
+        puts "fetched the costs with #{snapshot.requests} request(s)"
+      end
+
+      desc 'Deletes the snapshots of the costs older than a number of days, keeping the latest successful one. ' \
+           'Use DAYS to set the number of days (default 90).'
+      task prune: :environment do
+        line, ok = RedmineKit::Aws::Costexplorer::Tasks.prune(ENV)
+        ok ? puts(line) : abort(line)
       end
     end
   end

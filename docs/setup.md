@@ -78,17 +78,20 @@ The plugin creates no AWS resources and needs none of its own. Cost Explorer's A
 
 ### Schedule
 
-Run the rake task `redmine_kit:aws:costexplorer:refresh` once a day:
+Run the rake task `redmine_kit:aws:costexplorer:refresh` once a day, and `redmine_kit:aws:costexplorer:prune` once a day to delete the old snapshots:
 
 ```sh
 bin/rake redmine_kit:aws:costexplorer:refresh
+bin/rake redmine_kit:aws:costexplorer:prune DAYS=90
 ```
+
+`prune` deletes the snapshots older than `DAYS` days (default 90; a whole number from 1 to 99999), as Redmine's `redmine:users:prune` takes it, and always keeps the latest successful one. Another value deletes nothing and stops the task with a message. It makes no requests to AWS.
 
 Any time of day works: Cost Explorer updates its data about once a day, and one run costs 3 or 4 requests ([README.md](README.md#fetching-the-costs)). When the fetch fails, the task fails too (a non-zero exit, with the error on standard error), so that the scheduler records the failure. With the plugin off, it prints that nothing was fetched and succeeds.
 
 | Where | What runs the task |
 | --- | --- |
-| Serverless | An EventBridge rule (`<instance>-costexplorer-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)) |
+| Serverless | EventBridge Scheduler invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:refresh"]}` (`<instance>-costexplorer-refresh`) and with `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:prune"], "env": {"DAYS": "<retention.recordsDays>"}}` (`<instance>-costexplorer-prune`) ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)) |
 | Elsewhere | cron, a systemd timer or a scheduled container task that runs the command in Redmine's directory, with Redmine's environment |
 
 ## IAM permissions
@@ -122,6 +125,10 @@ These use SDK response stubs. The answers are JSON bodies in `test/fixtures/cost
 LocalStack's Cost Explorer is in the Ultimate plan. Its coverage page lists `GetCostAndUsage` but not `GetCostForecast`, and says it has no cost data (LocalStack's Cost Explorer page, checked on 2026-11-10). On LocalStack 2026.10.6 (checked on 2026-11-10), `GetCostAndUsage` answered every request of the plugin (monthly by service, monthly by the tag, daily) in the real response shape with no results, and `GetCostForecast` answered `InternalFailure` ("The get_cost_forecast action has not been implemented"). So on LocalStack the tests check the empty costs, and the amounts are checked with moto and the stubs.
 
 Without the token, moto answers `GetCostAndUsage` with results given in advance through its API (`/moto-api/static/ce/cost-and-usage-results`), so the tests check the amounts. moto has no `GetCostForecast` (it answers 500).
+
+### Redmine Kit Charges
+
+The provider of Redmine Kit Charges (`charges_provider_test.rb`) is tested with SDK response stubs: the requests of each kind of source (this account, a shared billing view's `BillingViewArn`, AssumeRole with the external ID through a stubbed STS), the rows, the retries on `LimitExceededException`, and the settings it refuses. `test/integration/charges_test.rb` runs one source through Redmine Kit Charges' daily fetch on moto, the backend that can load Cost Explorer data (AWS Emulator answers `NotImplemented`; moto ignores `BillingViewArn`, so billing views are checked with the stubs only). It needs Redmine Kit Charges in the test image: `bin/test_image` adds a checkout next to this one (`../redmine_kit_charges`, or `REDMINE_KIT_CHARGES_DIR`), and without it (CI, where that repository is private) those tests are skipped.
 
 ### The mocked call
 

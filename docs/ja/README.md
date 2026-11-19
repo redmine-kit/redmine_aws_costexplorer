@@ -73,7 +73,7 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 - **取得 1 回のリクエスト数:** 3 件 (`GetCostAndUsage` が 2 件、`GetCostForecast` が 1 件)、タグありで 4 件です。`GetCostAndUsage` の長い応答は複数のページに分かれ、次のページごとに 1 件増えます。
 - **1 か月のリクエスト数:** 1 日 3 件か 4 件で、1 か月におよそ 90 件から 120 件、約 0.9 から 1.2 USD です。
 - **失敗した取得:** エラーといっしょに記録し、タブでは最後に成功したデータの上に表示し、タスクも失敗します。次の日の実行で、また取得します。
-- **スナップショット:** 取得ごとに、`aws_costexplorer_snapshots` に 1 行を作ります。始めた日時、取得した日時、データ (JSON)、エラー、リクエスト数です。rake タスクは、取得が成功するたびに、90 日より古い行を消します。最後に成功した行は残します。
+- **スナップショット:** 取得ごとに、`aws_costexplorer_snapshots` に 1 行を作ります。始めた日時、取得した日時、データ (JSON)、エラー、リクエスト数です。rake タスク `redmine_kit:aws:costexplorer:prune` が、90 日、または `DAYS` (1 から 99999 までの整数) の日数より古い行を削除します。最後に成功した行は残します。このタスクもスケジュールで実行します ([setup.md](setup.md#schedule))。`refresh` は取得だけをします。
 
 <a id="costs-by-tag-optional"></a>
 

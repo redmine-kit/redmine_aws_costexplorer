@@ -16,7 +16,8 @@ module RedmineKit
       ENV_ENABLED = 'REDMINE_COSTEXPLORER_ENABLED'
       ENV_TAG_KEY = 'REDMINE_COSTEXPLORER_TAG_KEY'
 
-      # Snapshots older than this are deleted after each scheduled fetch.
+      # The days redmine_kit:aws:costexplorer:prune keeps the snapshots for
+      # when DAYS is not given.
       KEEP_DAYS = 90
 
       class << self

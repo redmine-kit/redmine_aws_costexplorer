@@ -92,17 +92,17 @@ bundle install
 
 ### スケジュール
 
-rake タスク `redmine_kit_aws_costexplorer:refresh` を 1 日に 1 回実行します。
+rake タスク `redmine_kit:aws:costexplorer:refresh` を 1 日に 1 回実行します。
 
 ```sh
-bin/rake redmine_kit_aws_costexplorer:refresh
+bin/rake redmine_kit:aws:costexplorer:refresh
 ```
 
 実行する時刻はいつでもかまいません。Cost Explorer のデータはおよそ 1 日に 1 回更新され、1 回の実行でリクエストは 3 件か 4 件です ([README.md](README.md#fetching-the-costs))。取得が失敗するとタスクも失敗し (0 以外の終了コード。エラーは標準エラー出力)、スケジューラーが失敗を記録できます。プラグインが無効なら、何も取得しなかったことを出力して成功します。
 
 | 環境 | タスクを動かすもの |
 | --- | --- |
-| Serverless | EventBridge のルール (`<instance>-costexplorer-refresh`) が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_kit_aws_costexplorer:refresh"]}` で呼ぶ ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
+| Serverless | EventBridge のルール (`<instance>-costexplorer-refresh`) が、毎日、関数 `redmine-task` を `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:refresh"]}` で呼ぶ ([Serverless の tasks.md](https://redmine-kit.github.io/serverless/ja/tasks.html#scheduled-runs)) |
 | ほかの環境 | cron、systemd のタイマー、スケジュールで動くコンテナのタスクなど。Redmine のディレクトリで、Redmine と同じ環境変数でコマンドを実行する |
 
 <a id="iam-permissions"></a>

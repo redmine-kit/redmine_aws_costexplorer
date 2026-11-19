@@ -4,7 +4,7 @@ Guidelines for people and coding agents working in this repository. See [README.
 
 ## What this project does
 
-Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) is a Redmine plugin that shows the costs of the AWS account from AWS Cost Explorer on the "Cost Explorer" tab of the "AWS" administration menu of redmine_kit_aws. It fetches the costs once a day (rake task `redmine_kit_aws_costexplorer:refresh`) and keeps them in the database. [Serverless](https://github.com/redmine-kit/serverless)'s image does not include it; its templates can set it up, off by default, for an image that adds the plugin (a derived image). It is in early development.
+Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) is a Redmine plugin that shows the costs of the AWS account from AWS Cost Explorer on the "Cost Explorer" tab of the "AWS" administration menu of redmine_kit_aws. It fetches the costs once a day (rake task `redmine_kit:aws:costexplorer:refresh`) and keeps them in the database. [Serverless](https://github.com/redmine-kit/serverless)'s image does not include it; its templates can set it up, off by default, for an image that adds the plugin (a derived image). It is in early development.
 
 ## Rules
 

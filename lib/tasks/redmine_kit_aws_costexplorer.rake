@@ -1,18 +1,23 @@
 # frozen_string_literal: true
 
-namespace :redmine_kit_aws_costexplorer do
-  desc 'Fetches the costs from Cost Explorer for the "Cost Explorer" tab (once a day; 3 requests, 4 with the tag key)'
-  task refresh: :environment do
-    unless RedmineKit::Aws::Costexplorer.enabled?
-      puts 'REDMINE_COSTEXPLORER_ENABLED is not true; nothing fetched'
-      next
+namespace :redmine_kit do
+  namespace :aws do
+    namespace :costexplorer do
+      desc 'Fetches the costs from Cost Explorer for the "Cost Explorer" tab ' \
+           '(once a day; 3 requests, 4 with the tag key)'
+      task refresh: :environment do
+        unless RedmineKit::Aws::Costexplorer.enabled?
+          puts 'REDMINE_COSTEXPLORER_ENABLED is not true; nothing fetched'
+          next
+        end
+
+        snapshot = AwsCostexplorerSnapshot.request!
+        snapshot.fetch!
+        abort "Cost Explorer: #{snapshot.error} (#{snapshot.requests} request(s))" if snapshot.error
+
+        pruned = AwsCostexplorerSnapshot.prune
+        puts "fetched the costs with #{snapshot.requests} request(s); deleted #{pruned} old snapshot(s)"
+      end
     end
-
-    snapshot = AwsCostexplorerSnapshot.request!
-    snapshot.fetch!
-    abort "Cost Explorer: #{snapshot.error} (#{snapshot.requests} request(s))" if snapshot.error
-
-    pruned = AwsCostexplorerSnapshot.prune
-    puts "fetched the costs with #{snapshot.requests} request(s); deleted #{pruned} old snapshot(s)"
   end
 end

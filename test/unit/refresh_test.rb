@@ -6,16 +6,16 @@ require 'rake'
 module RedmineKit
   module Aws
     module Costexplorer
-      # The rake task redmine_kit_aws_costexplorer:refresh, the only fetch.
+      # The rake task redmine_kit:aws:costexplorer:refresh, the only fetch.
       class RefreshTest < ActiveSupport::TestCase
         include RedmineKit::Aws::Costexplorer::TestHelper
 
         def setup
-          Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_kit_aws_costexplorer:refresh')
+          Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_kit:aws:costexplorer:refresh')
         end
 
         def run_task
-          task = Rake::Task['redmine_kit_aws_costexplorer:refresh']
+          task = Rake::Task['redmine_kit:aws:costexplorer:refresh']
           task.reenable
           capture_io { task.invoke }
         end

@@ -16,7 +16,7 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 | 機能 | 内容 | 有効になる条件 | ページ |
 | --- | --- | --- | --- |
 | 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別 (使用タイプの明細)、日別 (直近 30 日間。グラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。システム管理者 | [タブに表示するもの](#what-the-tab-shows) |
-| 毎日の取得 | rake タスク `redmine_kit_aws_costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
+| 毎日の取得 | rake タスク `redmine_kit:aws:costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
 | タグ別のコスト | コスト配分タグ (ふつうは `redmine:instance`) の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある (デフォルトは無効) | [タグ別のコスト](#costs-by-tag-optional) |
 
 <a id="what-the-tab-shows"></a>
@@ -67,7 +67,7 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 
 | 方法 | タイミング | 動く場所 |
 | --- | --- | --- |
-| rake タスク `redmine_kit_aws_costexplorer:refresh` | 1 日に 1 回、スケジュールから ([setup.md](setup.md#schedule)) | タスクを実行するプロセス。その場で取得し、失敗すると、タスクも失敗する (0 以外の終了コード) |
+| rake タスク `redmine_kit:aws:costexplorer:refresh` | 1 日に 1 回、スケジュールから ([setup.md](setup.md#schedule)) | タスクを実行するプロセス。その場で取得し、失敗すると、タスクも失敗する (0 以外の終了コード) |
 
 - **取得はこれだけ:** 画面からの取得やボタンはありません。毎日の実行だけなので、リクエストの料金は一定です。
 - **取得 1 回のリクエスト数:** 3 件 (`GetCostAndUsage` が 2 件、`GetCostForecast` が 1 件)、タグありで 4 件です。`GetCostAndUsage` の長い応答は複数のページに分かれ、次のページごとに 1 件増えます。

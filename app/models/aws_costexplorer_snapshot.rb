@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # One daily fetch of the costs from Cost Explorer (the rake task
-# redmine_kit_aws_costexplorer:refresh), filled with the data or the
+# redmine_kit:aws:costexplorer:refresh), filled with the data or the
 # error. The "Cost Explorer" tab shows the latest successful one.
 class AwsCostexplorerSnapshot < ApplicationRecord
   serialize :data, coder: JSON

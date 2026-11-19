@@ -14,7 +14,7 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 | Feature | Contents | Enabled when | Page |
 | --- | --- | --- | --- |
 | The "Cost Explorer" tab | The costs of the AWS account: the total (this month, month-end forecast, last month), by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
-| Daily fetch | The rake task `redmine_kit_aws_costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
+| Daily fetch | The rake task `redmine_kit:aws:costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
 
 ## What the tab shows
@@ -63,7 +63,7 @@ The page never calls Cost Explorer. AWS charges each Cost Explorer API request (
 
 | How | When | Runs in |
 | --- | --- | --- |
-| Rake task `redmine_kit_aws_costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
+| Rake task `redmine_kit:aws:costexplorer:refresh` | Once a day, from a schedule ([setup.md](setup.md#schedule)) | The process that runs the task. It fetches at once and fails (non-zero exit) when the fetch fails |
 
 - **The only fetch:** There is no fetch from the page and no button: the daily run is the only one, so the cost of the requests stays fixed.
 - **Requests per fetch:** 3 (`GetCostAndUsage` twice, `GetCostForecast` once), or 4 with the tag. A long answer of `GetCostAndUsage` comes in pages, and each further page is one more request.

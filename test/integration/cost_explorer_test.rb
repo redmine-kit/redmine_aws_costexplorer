@@ -116,8 +116,8 @@ module RedmineKit
         end
 
         def refresh_task
-          Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_kit_aws_costexplorer:refresh')
-          Rake::Task['redmine_kit_aws_costexplorer:refresh'].tap(&:reenable)
+          Rails.application.load_tasks unless Rake::Task.task_defined?('redmine_kit:aws:costexplorer:refresh')
+          Rake::Task['redmine_kit:aws:costexplorer:refresh'].tap(&:reenable)
         end
       end
     end

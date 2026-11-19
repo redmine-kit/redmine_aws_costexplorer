@@ -78,17 +78,17 @@ The plugin creates no AWS resources and needs none of its own. Cost Explorer's A
 
 ### Schedule
 
-Run the rake task `redmine_kit_aws_costexplorer:refresh` once a day:
+Run the rake task `redmine_kit:aws:costexplorer:refresh` once a day:
 
 ```sh
-bin/rake redmine_kit_aws_costexplorer:refresh
+bin/rake redmine_kit:aws:costexplorer:refresh
 ```
 
 Any time of day works: Cost Explorer updates its data about once a day, and one run costs 3 or 4 requests ([README.md](README.md#fetching-the-costs)). When the fetch fails, the task fails too (a non-zero exit, with the error on standard error), so that the scheduler records the failure. With the plugin off, it prints that nothing was fetched and succeeds.
 
 | Where | What runs the task |
 | --- | --- |
-| Serverless | An EventBridge rule (`<instance>-costexplorer-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_kit_aws_costexplorer:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)) |
+| Serverless | An EventBridge rule (`<instance>-costexplorer-refresh`) invokes the function `redmine-task` daily with `{"command": "rake", "args": ["redmine_kit:aws:costexplorer:refresh"]}` ([Serverless tasks.md](https://redmine-kit.github.io/serverless/tasks.html#scheduled-runs)) |
 | Elsewhere | cron, a systemd timer or a scheduled container task that runs the command in Redmine's directory, with Redmine's environment |
 
 ## IAM permissions

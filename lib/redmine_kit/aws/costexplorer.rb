@@ -4,7 +4,7 @@
 # "Cost Explorer" tab of the AWS administration page (docs/README.md).
 #
 # The plugin is on only when REDMINE_COSTEXPLORER_ENABLED is true. The page
-# never calls Cost Explorer: the rake task redmine_kit_aws_costexplorer:refresh,
+# never calls Cost Explorer: the rake task redmine_kit:aws:costexplorer:refresh,
 # run once a day, fetches the costs and keeps them in
 # aws_costexplorer_snapshots.
 module RedmineKit

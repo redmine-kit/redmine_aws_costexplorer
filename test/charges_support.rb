@@ -4,7 +4,7 @@ module RedmineKit
   module Aws
     module Costexplorer
       # Shared setup of the tests of Redmine Kit Charges' provider: a source
-      # (anything with settings, errors and tag_split_scopes, as
+      # (anything with settings, errors, tag_split_scopes and statement_scopes, as
       # redmine_kit_charges' ChargeSource is), and a Cost Explorer client of SDK
       # stubs that answers by the request's grouping and records the requests.
       module ChargesSupport
@@ -17,11 +17,12 @@ module RedmineKit
         class Source
           include ActiveModel::Validations
 
-          attr_accessor :settings, :tag_split_scopes
+          attr_accessor :settings, :tag_split_scopes, :statement_scopes
 
-          def initialize(settings, tag_split_scopes = [])
+          def initialize(settings, tag_split_scopes = [], statement_scopes = [])
             @settings = ChargesProvider.default_settings.merge(settings)
             @tag_split_scopes = tag_split_scopes
+            @statement_scopes = statement_scopes
           end
         end
 
@@ -50,13 +51,42 @@ module RedmineKit
                [group(['project$blue', 'AmazonEC2'], '2'), group(['project$', 'AmazonEC2'], '1')])]
         end
 
+        # A statement's line: the amount, and the quantity with its unit
+        # (none when Cost Explorer gives none).
+        def line(keys, amount, quantity = nil, unit = nil)
+          group(keys, amount).tap do |line|
+            line['Metrics']['UsageQuantity'] = { 'Amount' => quantity, 'Unit' => unit } if quantity
+          end
+        end
+
+        # The statement in two pages: October, then this month so far.
+        def statement_pages
+          [[{ 'TimePeriod' => { 'Start' => '2026-10-01', 'End' => '2026-11-01' }, 'Total' => {}, 'Estimated' => false,
+              'Groups' => [line(%w[AmazonEC2 APN1-BoxUsage:t4g.small], '12.5', '744', 'Hrs')] }],
+           [{ 'TimePeriod' => { 'Start' => '2026-11-01', 'End' => '2026-11-11' }, 'Total' => {}, 'Estimated' => true,
+              'Groups' => [line(%w[AmazonS3 APN1-Requests-Tier1], '0.25', '50000', 'N/A'),
+                           line(%w[AmazonS3 APN1-TimedStorage-ByteHrs], '0.1')] }]]
+        end
+
         # The answer of a GetCostAndUsage request, by its grouping.
         def answer(params)
           keys = params[:group_by].pluck(:key)
+          return statement_answer(params) if keys == %w[SERVICE USAGE_TYPE]
+
           results = { %w[LINKED_ACCOUNT SERVICE] => usage_results,
                       %w[LINKED_ACCOUNT RECORD_TYPE] => adjustment_results }.fetch(keys) { tag_results }
           attributes = keys.first == 'LINKED_ACCOUNT' ? ACCOUNT_NAMES : []
           { 'ResultsByTime' => results, 'DimensionValueAttributes' => attributes }.to_json
+        end
+
+        def statement_answer(params)
+          first, second = statement_pages
+          answer = if params[:next_page_token]
+                     { 'ResultsByTime' => second }
+                   else
+                     { 'ResultsByTime' => first, 'NextPageToken' => 'page-2' }
+                   end
+          answer.merge('DimensionValueAttributes' => []).to_json
         end
 
         # A client recording each request's parameters in requests; the first
@@ -81,11 +111,14 @@ module RedmineKit
         end
 
         # [result, requests] of a fetch of a source with the settings.
-        def charges_fetch(settings = {}, split: [], throttled: 0)
+        def charges_fetch(settings = {}, split: [], statement: [], throttled: 0)
+          fetch_source(Source.new(settings, split, statement), throttled: throttled)
+        end
+
+        def fetch_source(source, throttled: 0, window: WINDOW)
           requests = []
           provider = ChargesProvider.new(client: charges_client(requests, throttled: throttled), sleeper: ->(_s) {})
-          [with_enabled { provider.fetch(Source.new(settings, split), window: WINDOW, today: TestHelper::TODAY) },
-           requests]
+          [with_enabled { provider.fetch(source, window: window, today: TestHelper::TODAY) }, requests]
         end
       end
     end

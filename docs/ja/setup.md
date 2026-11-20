@@ -154,7 +154,7 @@ LocalStack の Cost Explorer は、Ultimate のプランのものです。対応
 
 ### Redmine Kit Charges
 
-Redmine Kit Charges のプロバイダー (`charges_provider_test.rb`) は、SDK のレスポンスのスタブでテストします。ソースの種類ごとのリクエスト (このアカウント、共有された請求ビューの `BillingViewArn`、スタブの STS による外部 ID 付きの AssumeRole)、行、`LimitExceededException` での再試行、拒否する設定です。`test/integration/charges_test.rb` は、1 つのソースを Redmine Kit Charges の毎日の取得で、moto に対して実行します。moto は Cost Explorer のデータを読み込める唯一のバックエンドです (AWS Emulator は `NotImplemented` を返します。moto は `BillingViewArn` を無視するので、請求ビューはスタブだけで確認します)。テストのイメージに Redmine Kit Charges が要ります。`bin/test_image` が、このチェックアウトの隣のもの (`../redmine_kit_charges`、または `REDMINE_KIT_CHARGES_DIR`) を追加し、なければ (このリポジトリが非公開の CI では) これらのテストをスキップします。
+Redmine Kit Charges のプロバイダー (`charges_provider_test.rb`) は、SDK のレスポンスのスタブでテストします。ソースの種類ごとのリクエスト (このアカウント、共有された請求ビューの `BillingViewArn`、スタブの STS による外部 ID 付きの AssumeRole)、行、アカウントの明細のリクエスト、ページと行 (`charges_provider_statement_test.rb`)、`LimitExceededException` での再試行、拒否する設定です。`test/integration/charges_test.rb` は、1 つのソースを Redmine Kit Charges の毎日の取得で、またアカウントの明細をプロバイダーで、moto に対して実行します。moto は Cost Explorer のデータを読み込める唯一のバックエンドです (AWS Emulator は `NotImplemented` を返します。moto は `BillingViewArn` を無視するので、請求ビューはスタブだけで確認します)。テストのイメージに Redmine Kit Charges が要ります。`bin/test_image` が、このチェックアウトの隣のもの (`../redmine_kit_charges`、または `REDMINE_KIT_CHARGES_DIR`) を追加し、なければ (このリポジトリが非公開の CI では) 毎日の取得のテストをスキップします。
 
 <a id="the-mocked-call"></a>
 

@@ -12,6 +12,8 @@ module RedmineKit
       # - R3: for each account an allocation splits by tag value, its daily
       #   usage by tag value and service instead of its R1 rows;
       # - R2: the month's credits, refunds and taxes by account;
+      # - R4: for each account whose statement a project sees, its months by
+      #   service and usage type, with the quantity (ChargesStatement);
       # - F0: the source's month-end forecast (system administrators only).
       class ChargesFetch
         DEFAULT_METRIC = 'UnblendedCost'
@@ -22,20 +24,33 @@ module RedmineKit
         ADJUSTMENTS = { 'Credit' => 'credit', 'Refund' => 'refund', 'Tax' => 'tax' }.freeze
         # One fetch's answer, as RedmineKit::Charges::Provider::Result has it:
         # its own, so that this file needs nothing of redmine_kit_charges.
-        Result = Data.define(:rows, :scopes, :forecast, :requests)
+        Result = Data.define(:rows, :scopes, :forecast, :requests, :statement)
+
+        # A metric's amount and currency, 0 USD when Cost Explorer gives none;
+        # also the statement's (ChargesStatement).
+        def self.money(value, estimated)
+          { amount: decimal(value), currency: value&.unit || 'USD', estimated: estimated == true }
+        end
+
+        def self.decimal(value) = BigDecimal(value&.amount.presence || 0)
 
         def initialize(source, requests, window:, today:)
           @settings = source.settings
           @split = source.tag_split_scopes
+          # :all, account IDs, or none (also for a source without the method).
+          @statement = source.respond_to?(:statement_scopes) ? source.statement_scopes : []
           @requests = requests
           @window = window
           @today = today
           @names = {}
+          @accounts = []
         end
 
         def result
           rows = usage + adjustments
-          Result.new(rows: rows, scopes: @names, forecast: forecast(rows), requests: @requests.count)
+          lines = statement
+          Result.new(rows: rows, scopes: @names, forecast: forecast(rows), requests: @requests.count,
+                     statement: lines)
         end
 
         private
@@ -45,19 +60,16 @@ module RedmineKit
 
         def usage
           rows = daily(%w[LINKED_ACCOUNT SERVICE], not_adjustments) { |keys| [keys[0], '', keys[1]] }
-          accounts = split_accounts(rows)
+          @accounts = rows.pluck(:scope).uniq.sort
+          accounts = tag_key ? listed(@split) : []
           rows.reject { |row| accounts.include?(row[:scope]) } + accounts.flat_map { |account| tagged(account) }
         end
 
-        # The accounts read by tag value: none without a tag key.
-        def split_accounts(rows)
-          return [] if @split.empty? || tag_key.nil?
-
-          @split == :all ? rows.pluck(:scope).uniq.sort : @split
-        end
+        # The accounts the source lists: :all for every account of the usage.
+        def listed(scopes) = scopes == :all ? @accounts : Array(scopes)
 
         def tagged(account)
-          filter = { and: [not_adjustments, { dimensions: { key: 'LINKED_ACCOUNT', values: [account] } }] }
+          filter = { and: [not_adjustments, linked_account(account)] }
           daily([{ type: 'TAG', key: tag_key }, 'SERVICE'], filter) do |keys|
             [account, keys[0].to_s.split('$', 2).last.to_s, keys[1]]
           end
@@ -77,6 +89,17 @@ module RedmineKit
           row(date, estimated, group.metrics, [group.keys[0], '', ''], type)
         end
 
+        # R4, one request (and its pages) per account.
+        def statement
+          lines = ChargesStatement.new(metric, @window.begin)
+          listed(@statement).flat_map do |account|
+            filter = { and: [not_adjustments, linked_account(account)] }
+            results(:MONTHLY, ChargesStatement::GROUP_BY, filter, metrics: lines.metrics).flat_map do |result, _names|
+              lines.lines(account, result)
+            end
+          end
+        end
+
         # The daily rows, the block giving a group's [scope, tag value, service].
         def daily(group_by, filter, &columns)
           results(:DAILY, group_by, filter).flat_map do |result, attributes|
@@ -91,17 +114,15 @@ module RedmineKit
           attributes.each { |value| @names[value.value] = value.attributes['description'].to_s }
         end
 
-        def results(granularity, group_by, filter)
+        def results(granularity, group_by, filter, metrics: [metric])
           @requests.each_result(time_period: period(@window.begin, @window.end + 1), granularity: granularity.to_s,
-                                metrics: [metric], filter: filter,
+                                metrics: metrics, filter: filter,
                                 group_by: group_by.map { |key| key.is_a?(Hash) ? key : dimension(key) })
         end
 
         def row(date, estimated, metrics, (scope, tag_value, service), record_type)
-          value = metrics[metric]
-          { date: date, scope: scope, tag_value: tag_value, service: service, record_type: record_type,
-            amount: value ? BigDecimal(value.amount) : BigDecimal(0), currency: value&.unit || 'USD',
-            estimated: estimated == true }
+          { date: date, scope: scope, tag_value: tag_value, service: service,
+            record_type: record_type }.merge(self.class.money(metrics[metric], estimated))
         end
 
         # The usage until yesterday plus Cost Explorer's forecast from today,
@@ -122,6 +143,8 @@ module RedmineKit
         end
 
         def dimension(key) = { type: 'DIMENSION', key: key }
+
+        def linked_account(account) = { dimensions: { key: 'LINKED_ACCOUNT', values: [account] } }
 
         def not_adjustments = { not: { dimensions: { key: 'RECORD_TYPE', values: ADJUSTMENTS.keys } } }
 

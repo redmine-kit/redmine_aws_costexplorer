@@ -105,13 +105,29 @@ Requests, by `redmine_kit:charges:refresh` once a day, for each source (each is 
 | `GetCostAndUsage`, daily, by account and service | The usage, from the previous month's first day to today, without credits, refunds and taxes |
 | `GetCostAndUsage`, monthly, by account and record type | The credits, refunds and taxes (shown apart) |
 | `GetCostAndUsage`, daily, by tag value and service | One for each account an allocation splits by tag value |
+| `GetCostAndUsage`, monthly, by service and usage type, with `UsageQuantity` | The account's statement: one for each account whose statement a project can see (below) |
 | `GetCostForecast` | The source's month-end forecast, for system administrators |
 
-So 3 requests a day for a source without a tag split, whatever the number of projects. With a billing view, every
-request carries its `BillingViewArn` (each view request is charged per source view). With a role, the fetch first gets
-15-minute credentials from STS. While Cost Explorer answers `LimitExceededException`, the request is retried after 2, 4,
-8 and 16 seconds; a source that still fails fails alone (Redmine Kit Charges keeps its previous charges and records the
-error's class). Without `REDMINE_COSTEXPLORER_ENABLED=true`, an AWS source fails without a request.
+So 3 requests a day for a source without a tag split or statements, whatever the number of projects.
+
+The account statement lists the account's charges by service, then usage type, for each month of the window, with the
+amount, the usage quantity and its unit (credits, refunds and taxes stay apart, from the request by record type). It is
+read for the accounts an allocation shows whole: an allocation without tag values, for its accounts, or for every
+account of the source when it has 「すべてのアカウント」. No region is given: Cost Explorer groups by two keys at most,
+and the usage type's prefix (such as `APN1-`) names the region. Each such account costs one request a day, so at USD
+0.01 a request, 30 × USD 0.01 = USD 0.30 per account a month, plus one more request for each further page:
+
+| Accounts with a statement | Requests a day | A month |
+| --- | --- | --- |
+| 1 | 1 | USD 0.30 |
+| 5 | 5 | USD 1.50 |
+| 20 | 20 | USD 6.00 |
+
+With a billing view, every request carries its `BillingViewArn` (each view request is charged per source view). With a
+role, the fetch first gets 15-minute credentials from STS. While Cost Explorer answers `LimitExceededException`, the
+request is retried after 2, 4, 8 and 16 seconds; a source that still fails fails alone (Redmine Kit Charges keeps its
+previous charges and records the error's class). Without `REDMINE_COSTEXPLORER_ENABLED=true`, an AWS source fails
+without a request.
 
 ## Notes
 

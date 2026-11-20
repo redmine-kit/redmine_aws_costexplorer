@@ -21,3 +21,18 @@ ja:
   text_aws_costexplorer_pending: "更新: 実行中 (%{time} から)"
   text_aws_costexplorer_failed: "取得エラー: %{time} (%{error})"
   text_aws_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) につながりませんでした。インターネットにつながらないネットワークでは、NAT などの経路が必要です。
+  label_aws_costexplorer_charges_provider: AWS Cost Explorer
+  label_aws_costexplorer_account: アカウント
+  label_aws_costexplorer_method: 取得方法
+  label_aws_costexplorer_method_account: この Redmine サーバーのアカウント
+  label_aws_costexplorer_method_billing_view: 共有された請求ビュー
+  label_aws_costexplorer_method_role: 引き受けるロール
+  label_aws_costexplorer_billing_view_arn: 請求ビューの ARN
+  label_aws_costexplorer_role_arn: ロールの ARN
+  label_aws_costexplorer_external_id: 外部 ID
+  label_aws_costexplorer_metric: コストの指標
+  label_aws_costexplorer_amortized_cost: 償却コスト
+  label_aws_costexplorer_net_unblended_cost: 純非ブレンドコスト
+  label_aws_costexplorer_cost_allocation_tag: コスト配分タグ
+  text_aws_costexplorer_external_id: ロールの信頼ポリシー (sts:ExternalId) に書きます。
+  text_aws_costexplorer_cost_allocation_tag: 割り当てがアカウントを分けるタグのキー (project など)。

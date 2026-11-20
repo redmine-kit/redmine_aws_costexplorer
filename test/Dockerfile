@@ -16,6 +16,9 @@ WORKDIR /redmine
 COPY plugin/test/database.yml config/database.yml
 COPY redmine_kit_aws plugins/redmine_kit_aws/
 COPY plugin plugins/redmine_kit_aws_costexplorer/
+# redmine_kit_charges when bin/test_image found it (else an empty folder, removed).
+COPY redmine_kit_charges plugins/redmine_kit_charges/
+RUN rmdir plugins/redmine_kit_charges 2>/dev/null || true
 # The plugin as a gem by path, as an installed gem is (docs/setup.md), and
 # redmine_kit_aws, which its gemspec requires, by path without loading it.
 # simplecov-cobertura writes the coverage that Codecov reads (bin/test with

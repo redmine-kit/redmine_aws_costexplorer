@@ -21,3 +21,18 @@ en:
   text_aws_costexplorer_pending: "Updated: running (since %{time})"
   text_aws_costexplorer_failed: "Fetch error: %{time} (%{error})"
   text_aws_costexplorer_unreachable: Cost Explorer (ce.us-east-1.amazonaws.com) could not be reached. A network without internet access needs a route to it, such as a NAT.
+  label_aws_costexplorer_charges_provider: AWS Cost Explorer
+  label_aws_costexplorer_account: Account
+  label_aws_costexplorer_method: Read from
+  label_aws_costexplorer_method_account: This Redmine server's account
+  label_aws_costexplorer_method_billing_view: A shared billing view
+  label_aws_costexplorer_method_role: A role to assume
+  label_aws_costexplorer_billing_view_arn: Billing view ARN
+  label_aws_costexplorer_role_arn: Role ARN
+  label_aws_costexplorer_external_id: External ID
+  label_aws_costexplorer_metric: Cost metric
+  label_aws_costexplorer_amortized_cost: Amortized cost
+  label_aws_costexplorer_net_unblended_cost: Net unblended cost
+  label_aws_costexplorer_cost_allocation_tag: Cost allocation tag
+  text_aws_costexplorer_external_id: "Put it in the role's trust policy (sts:ExternalId)."
+  text_aws_costexplorer_cost_allocation_tag: The key of the tag that allocations split an account by, such as project.

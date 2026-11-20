@@ -22,10 +22,15 @@ copy_plugin() {
     grep -E '^(init\.rb|Gemfile|[^/]*\.gemspec|LICENSE|(adapter|app|assets|boot|config|db|help|lib|test)/)' |
     while IFS= read -r file; do [[ -e "$file" ]] && printf '%s\n' "$file"; done | tar -cf - -T -) | tar -xf - -C "$2"
 }
+# redmine_kit_charges, optional (the plugin registers its provider when it is
+# installed): a checkout next to this one, or REDMINE_KIT_CHARGES_DIR; without
+# it (CI: a private repository) its tests here are skipped.
+charges_dir=${REDMINE_KIT_CHARGES_DIR:-../redmine_kit_charges}
 context=$(mktemp -d)
-mkdir "$context/plugin" "$context/redmine_kit_aws"
+mkdir "$context/plugin" "$context/redmine_kit_aws" "$context/redmine_kit_charges"
 copy_plugin . "$context/plugin"
 copy_plugin "$aws_dir" "$context/redmine_kit_aws"
+[[ ! -f "$charges_dir/init.rb" ]] || copy_plugin "$charges_dir" "$context/redmine_kit_charges"
 sed "s|^FROM ruby:[^ ]*|FROM $(sed -n 's/^FROM //p' "test/ruby-$ruby_version.Dockerfile")|" test/Dockerfile >"$context/Dockerfile"
 # shellcheck disable=SC2154 # test_image_args: optional, set by the sourcing script
 build_image "$image" "$context/Dockerfile" "$context" ${test_image_args[@]+"${test_image_args[@]}"}

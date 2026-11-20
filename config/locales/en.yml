@@ -1,4 +1,7 @@
 en:
+  # The plugin's name and description (Administration › Plugins; redmine_kit_ui's docs/plugin-names.md)
+  plugin_name_redmine_kit_aws_costexplorer: Redmine Kit AWS Cost Explorer
+  plugin_description_redmine_kit_aws_costexplorer: Shows AWS account costs
   label_aws_costexplorer: Cost Explorer
   label_aws_costexplorer_forecast: Month-end forecast
   label_aws_costexplorer_previous_month: Last month

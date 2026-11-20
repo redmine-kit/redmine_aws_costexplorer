@@ -8,10 +8,10 @@ The plugin's own calls to AWS, by the role of the process. Lambda's own permissi
 | --- | --- | --- |
 | `ce:GetCostAndUsage` | `*` | The costs by service, by day and, with `REDMINE_COSTEXPLORER_TAG_KEY`, by the tag |
 | `ce:GetCostForecast` | `*` | The month-end forecast |
-| `billing:GetBillingViewData` | The shared billing views' ARNs | Only for Redmine Kit Charges' sources of a shared billing view ([below](#a-shared-custom-billing-view-recommended)) |
-| `sts:AssumeRole` | The roles' ARNs | Only for Redmine Kit Charges' sources of a role in another account ([below](#a-role-in-another-account-assumerole)) |
+| `billing:GetBillingViewData` | The shared billing views' ARNs | Only for Redmine Kit Billing's sources of a shared billing view ([below](#a-shared-custom-billing-view-recommended)) |
+| `sts:AssumeRole` | The roles' ARNs | Only for Redmine Kit Billing's sources of a role in another account ([below](#a-role-in-another-account-assumerole)) |
 
-Only the role of the process that runs the rake tasks `redmine_kit:aws:costexplorer:refresh` and `redmine_kit:charges:refresh` needs these permissions (in Serverless, `redmine-task`). Web requests and Redmine's jobs never call Cost Explorer. Both actions only read. The costs are those of the whole account (or, in a member account, of that account); the tag only splits what the page shows.
+Only the role of the process that runs the rake tasks `redmine_kit:aws:costexplorer:refresh` and `redmine_kit:billing:refresh` needs these permissions (in Serverless, `redmine-task`). Web requests and Redmine's jobs never call Cost Explorer. Both actions only read. The costs are those of the whole account (or, in a member account, of that account); the tag only splits what the page shows.
 
 The Service Authorization Reference lists one resource type for both actions, `billingview` (`arn:${Partition}:billing::${Account}:billingview/${ResourceId}`), with the condition key `aws:ResourceTag/${TagKey}` (the service reference of Cost Explorer, `ce.json`, checked on 2026-11-10). The plugin does not pass a billing view (`BillingViewArn`), so Cost Explorer uses the account's primary billing view. Whether a policy limited to the primary billing view's ARN (from `billing:ListBillingViews`) allows these requests has not been checked, so the example uses `*`.
 
@@ -33,10 +33,10 @@ For the role that runs the rake task:
 }
 ```
 
-### Project charges (Redmine Kit Charges)
+### Project charges (Redmine Kit Billing)
 
-With [Redmine Kit Charges](README.md#project-charges-redmine-kit-charges), each AWS source a system administrator adds
-is read with the same two actions, by the same role (the one that runs `redmine_kit:charges:refresh`). A source of this
+With [Redmine Kit Billing](README.md#project-charges-redmine-kit-billing), each AWS source a system administrator adds
+is read with the same two actions, by the same role (the one that runs `redmine_kit:billing:refresh`). A source of this
 Redmine server's account needs nothing more. To read other accounts, add one of the two policies below to that role,
 listing only the billing views or roles the deployment allows: **the IAM policy is the real allowlist**; Redmine's
 system administrators can only use what it allows.
@@ -75,7 +75,7 @@ and shares it with the Redmine server's account through AWS RAM; the Redmine ser
 
 For a standalone account (which can't create custom billing views) or an organization that can't share one: a read-only
 role in that account trusts the Redmine server's role, with the source's external ID (shown on the source's page in
-「管理」›「料金」). Assuming a role in an organization's management account works but is not recommended: AWS advises
+「管理」›「請求」). Assuming a role in an organization's management account works but is not recommended: AWS advises
 using the management account only for tasks that need it.
 
 The Redmine server's role:

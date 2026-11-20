@@ -3,9 +3,9 @@
 module RedmineKit
   module Aws
     module Costexplorer
-      # Shared setup of the tests of Redmine Kit Charges' provider: a source
+      # Shared setup of the tests of Redmine Kit Billing's provider: a source
       # (anything with settings, errors, tag_split_scopes and statement_scopes, as
-      # redmine_kit_charges' ChargeSource is), and a Cost Explorer client of SDK
+      # redmine_kit_billing' RedmineKit::Billing::Source is), and a Cost Explorer client of SDK
       # stubs that answers by the request's grouping and records the requests.
       module ChargesSupport
         WINDOW = Date.new(2026, 10, 1)..TestHelper::TODAY
@@ -13,7 +13,7 @@ module RedmineKit
         ROLE = 'arn:aws:iam::222222222222:role/redmine-kit-cost-reader'
         ACCOUNT_NAMES = [{ 'Value' => '111111111111', 'Attributes' => { 'description' => 'prod' } }].freeze
 
-        # A source as redmine_kit_charges' ChargeSource answers the provider.
+        # A source as redmine_kit_billing' RedmineKit::Billing::Source answers the provider.
         class Source
           include ActiveModel::Validations
 

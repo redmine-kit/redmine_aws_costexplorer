@@ -16,7 +16,7 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 | The "Cost Explorer" tab | The costs of the AWS account: the total (this month, month-end forecast, last month), by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
 | Daily fetch | The rake task `redmine_kit:aws:costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
-| Project charges | The AWS provider of [Redmine Kit Charges](https://github.com/redmine-kit/redmine_kit_charges): AWS accounts' charges on projects' 「料金」 pages, from this account, shared billing views or roles in other accounts | Redmine Kit Charges is installed, `REDMINE_COSTEXPLORER_ENABLED=true`, and a system administrator adds an AWS source | [Project charges](#project-charges-redmine-kit-charges) |
+| Project charges | The AWS provider of [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing): AWS accounts' charges on projects' 「請求」 pages, from this account, shared billing views or roles in other accounts | Redmine Kit Billing is installed, `REDMINE_COSTEXPLORER_ENABLED=true`, and a system administrator adds an AWS source | [Project charges](#project-charges-redmine-kit-billing) |
 
 ## What the tab shows
 
@@ -81,12 +81,12 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 - **One more request:** A fetch makes 4 requests instead of 3.
 - **Untagged costs:** Costs without the tag (for example, shared resources or costs from before the activation) are shown as "(no tag)".
 
-## Project charges (Redmine Kit Charges)
+## Project charges (Redmine Kit Billing)
 
-When [Redmine Kit Charges](https://github.com/redmine-kit/redmine_kit_charges) (`redmine_kit_charges`) is installed too,
+When [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing) (`redmine_kit_billing`) is installed too,
 this plugin registers its AWS provider with it (an optional dependency: without it, nothing changes). A system
-administrator then adds AWS sources in 「管理」›「料金」 and allocates their accounts (and tag values) to projects; each
-project's 「料金」 page shows only what is allocated to it. The "Cost Explorer" tab stays as it is.
+administrator then adds AWS sources in 「管理」›「請求」 and allocates their accounts (and tag values) to projects; each
+project's 「請求」 page shows only what is allocated to it. The "Cost Explorer" tab stays as it is.
 
 | Source ("Read from") | What it reads | Settings |
 | --- | --- | --- |
@@ -95,10 +95,10 @@ project's 「料金」 page shows only what is allocated to it. The "Cost Explor
 | A role to assume | Another account (a standalone account, or an organization that can't share a view), through `sts:AssumeRole` with the source's external ID | The role's ARN; the external ID is generated |
 
 Each source also has a cost metric (unblended by default, or amortized, or net unblended) and, for allocations that
-split an account by tag value, a cost allocation tag key. [iam.md](iam.md#project-charges-redmine-kit-charges) has the
+split an account by tag value, a cost allocation tag key. [iam.md](iam.md#project-charges-redmine-kit-billing) has the
 policies of both ways and the permissions boundary.
 
-Requests, by `redmine_kit:charges:refresh` once a day, for each source (each is charged, one more for each further page):
+Requests, by `redmine_kit:billing:refresh` once a day, for each source (each is charged, one more for each further page):
 
 | Request | What |
 | --- | --- |
@@ -125,7 +125,7 @@ and the usage type's prefix (such as `APN1-`) names the region. Each such accoun
 
 With a billing view, every request carries its `BillingViewArn` (each view request is charged per source view). With a
 role, the fetch first gets 15-minute credentials from STS. While Cost Explorer answers `LimitExceededException`, the
-request is retried after 2, 4, 8 and 16 seconds; a source that still fails fails alone (Redmine Kit Charges keeps its
+request is retried after 2, 4, 8 and 16 seconds; a source that still fails fails alone (Redmine Kit Billing keeps its
 previous charges and records the error's class). Without `REDMINE_COSTEXPLORER_ENABLED=true`, an AWS source fails
 without a request.
 

@@ -6,7 +6,7 @@ require_relative '../charges_support'
 module RedmineKit
   module Aws
     module Costexplorer
-      # Redmine Kit Charges' provider, with SDK response stubs: the requests of
+      # Redmine Kit Billing's provider, with SDK response stubs: the requests of
       # each kind of source and the rows they give.
       class ChargesProviderFetchTest < ActiveSupport::TestCase
         include RedmineKit::Aws::Costexplorer::TestHelper

@@ -10,10 +10,10 @@
 | --- | --- | --- |
 | `ce:GetCostAndUsage` | `*` | サービス別、日別、`REDMINE_COSTEXPLORER_TAG_KEY` があればタグ別のコスト |
 | `ce:GetCostForecast` | `*` | 月末の予測 |
-| `billing:GetBillingViewData` | 共有された請求ビューの ARN | Redmine Kit Charges の、共有された請求ビューのソースだけ ([下記](#a-shared-custom-billing-view-recommended)) |
-| `sts:AssumeRole` | ロールの ARN | Redmine Kit Charges の、別のアカウントのロールのソースだけ ([下記](#a-role-in-another-account-assumerole)) |
+| `billing:GetBillingViewData` | 共有された請求ビューの ARN | Redmine Kit Billing の、共有された請求ビューのソースだけ ([下記](#a-shared-custom-billing-view-recommended)) |
+| `sts:AssumeRole` | ロールの ARN | Redmine Kit Billing の、別のアカウントのロールのソースだけ ([下記](#a-role-in-another-account-assumerole)) |
 
-この権限が要るのは、rake タスク `redmine_kit:aws:costexplorer:refresh` と `redmine_kit:charges:refresh` を実行するプロセスのロールだけです (Serverless では `redmine-task`)。Web リクエストと Redmine のジョブは Cost Explorer を呼びません。どちらの操作も読むだけです。コストはアカウント全体のもの (メンバーアカウントでは、そのアカウントのもの) で、タグは画面の表示を分けるだけです。
+この権限が要るのは、rake タスク `redmine_kit:aws:costexplorer:refresh` と `redmine_kit:billing:refresh` を実行するプロセスのロールだけです (Serverless では `redmine-task`)。Web リクエストと Redmine のジョブは Cost Explorer を呼びません。どちらの操作も読むだけです。コストはアカウント全体のもの (メンバーアカウントでは、そのアカウントのもの) で、タグは画面の表示を分けるだけです。
 
 サービス認可リファレンスは、どちらの操作にも、リソースタイプ `billingview` (`arn:${Partition}:billing::${Account}:billingview/${ResourceId}`) と、条件キー `aws:ResourceTag/${TagKey}` を挙げています (Cost Explorer のサービスリファレンス `ce.json`。2026-11-10 に確認)。プラグインは請求ビュー (`BillingViewArn`) を指定しないので、Cost Explorer はアカウントのプライマリの請求ビューを使います。プライマリの請求ビューの ARN (`billing:ListBillingViews` で分かる) に絞ったポリシーでこれらのリクエストが通るかは、まだ確認していないので、例では `*` にしています。
 
@@ -37,11 +37,11 @@ rake タスクを実行するロールに付けます。
 }
 ```
 
-<a id="project-charges-redmine-kit-charges"></a>
+<a id="project-charges-redmine-kit-billing"></a>
 
-### プロジェクトの料金 (Redmine Kit Charges)
+### プロジェクトの料金 (Redmine Kit Billing)
 
-[Redmine Kit Charges](README.md#project-charges-redmine-kit-charges) では、システム管理者が追加した AWS のソースを、同じ 2 つのアクションで、同じロール (`redmine_kit:charges:refresh` を実行するロール) が読みます。この Redmine サーバーのアカウントのソースには、追加の権限は要りません。ほかのアカウントを読むには、次のどちらかのポリシーをそのロールに追加し、デプロイで許す請求ビューやロールだけを書きます。**IAM のポリシーが、本当の許可リストです。** Redmine のシステム管理者は、ポリシーが許すものしか使えません。
+[Redmine Kit Billing](README.md#project-charges-redmine-kit-billing) では、システム管理者が追加した AWS のソースを、同じ 2 つのアクションで、同じロール (`redmine_kit:billing:refresh` を実行するロール) が読みます。この Redmine サーバーのアカウントのソースには、追加の権限は要りません。ほかのアカウントを読むには、次のどちらかのポリシーをそのロールに追加し、デプロイで許す請求ビューやロールだけを書きます。**IAM のポリシーが、本当の許可リストです。** Redmine のシステム管理者は、ポリシーが許すものしか使えません。
 
 <a id="a-shared-custom-billing-view-recommended"></a>
 
@@ -71,7 +71,7 @@ rake タスクを実行するロールに付けます。
 
 #### 別のアカウントのロール (AssumeRole)
 
-カスタム請求ビューを作れないスタンドアロンのアカウントや、ビューを共有できない組織では、そのアカウントに読み取り専用のロールを作り、ソースの外部 ID (「管理」›「料金」のソースの画面に表示) 付きで Redmine サーバーのロールを信頼させます。組織の管理アカウントのロールを引き受ける方法も動きますが、推奨しません。AWS は、管理アカウントを、管理アカウントが必要な作業にだけ使うよう勧めています。
+カスタム請求ビューを作れないスタンドアロンのアカウントや、ビューを共有できない組織では、そのアカウントに読み取り専用のロールを作り、ソースの外部 ID (「管理」›「請求」のソースの画面に表示) 付きで Redmine サーバーのロールを信頼させます。組織の管理アカウントのロールを引き受ける方法も動きますが、推奨しません。AWS は、管理アカウントを、管理アカウントが必要な作業にだけ使うよう勧めています。
 
 Redmine サーバーのロール:
 

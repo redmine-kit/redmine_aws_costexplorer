@@ -6,7 +6,7 @@ require_relative '../charges_support'
 module RedmineKit
   module Aws
     module Costexplorer
-      # The settings of an AWS source that Redmine Kit Charges' form may save:
+      # The settings of an AWS source that Redmine Kit Billing's form may save:
       # their shape only (no request to AWS), and a new external ID per source.
       class ChargesProviderSettingsTest < ActiveSupport::TestCase
         include ChargesSupport

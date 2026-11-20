@@ -6,7 +6,7 @@ require_relative '../charges_support'
 module RedmineKit
   module Aws
     module Costexplorer
-      # Redmine Kit Charges' provider when AWS refuses or throttles: retries
+      # Redmine Kit Billing's provider when AWS refuses or throttles: retries
       # while Cost Explorer throttles, AssumeRole with the external ID, no
       # forecast, and nothing at all while the plugin is off.
       class ChargesProviderFailureTest < ActiveSupport::TestCase
@@ -57,7 +57,7 @@ module RedmineKit
 
           assert_equal 'ASIA', assumed_credentials(source, calls).credentials.access_key_id
           assert_equal [{ role_arn: ROLE, external_id: source.settings['external_id'],
-                          role_session_name: 'redmine-kit-charges', duration_seconds: 900 }], calls
+                          role_session_name: 'redmine-kit-billing', duration_seconds: 900 }], calls
         end
 
         test 'AssumeRole refused (a wrong external ID) fails the fetch' do

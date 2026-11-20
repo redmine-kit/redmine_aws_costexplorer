@@ -18,7 +18,7 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 | 「Cost Explorer」のタブ | AWS アカウントのコスト。合計 (今月、月末の予測、先月)、サービス別 (使用タイプの明細)、日別 (直近 30 日間。グラフと表) | `REDMINE_COSTEXPLORER_ENABLED=true`。システム管理者 | [タブに表示するもの](#what-the-tab-shows) |
 | 毎日の取得 | rake タスク `redmine_kit:aws:costexplorer:refresh` が、1 日に 1 回コストを取得し、データベースに保存する | 同上。スケジュールで毎日実行する | [setup.md](setup.md#schedule) |
 | タグ別のコスト | コスト配分タグ (ふつうは `redmine:instance`) の値別の、今月と先月のコスト | `REDMINE_COSTEXPLORER_TAG_KEY` がある (デフォルトは無効) | [タグ別のコスト](#costs-by-tag-optional) |
-| プロジェクトの料金 | [Redmine Kit Charges](https://github.com/redmine-kit/redmine_kit_charges) の AWS プロバイダー: このアカウント、共有された請求ビュー、別のアカウントのロールから、AWS アカウントの料金をプロジェクトの「料金」に表示 | Redmine Kit Charges がインストールされ、`REDMINE_COSTEXPLORER_ENABLED=true` で、システム管理者が AWS のソースを追加している | [プロジェクトの料金](#project-charges-redmine-kit-charges) |
+| プロジェクトの料金 | [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing) の AWS プロバイダー: このアカウント、共有された請求ビュー、別のアカウントのロールから、AWS アカウントの料金をプロジェクトの「請求」に表示 | Redmine Kit Billing がインストールされ、`REDMINE_COSTEXPLORER_ENABLED=true` で、システム管理者が AWS のソースを追加している | [プロジェクトの料金](#project-charges-redmine-kit-billing) |
 
 <a id="what-the-tab-shows"></a>
 
@@ -87,11 +87,11 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 - **リクエストが 1 件増える:** 1 回の取得が 3 件から 4 件になります。
 - **タグのないコスト:** タグのないコスト (たとえば、共有のリソースや、有効にする前のコスト) は「(タグなし)」として表示します。
 
-<a id="project-charges-redmine-kit-charges"></a>
+<a id="project-charges-redmine-kit-billing"></a>
 
-## プロジェクトの料金 (Redmine Kit Charges)
+## プロジェクトの料金 (Redmine Kit Billing)
 
-[Redmine Kit Charges](https://github.com/redmine-kit/redmine_kit_charges) (`redmine_kit_charges`) もインストールされていると、このプラグインはその AWS プロバイダーを登録します (任意の依存。なければ何も変わりません)。システム管理者が「管理」›「料金」で AWS のソースを追加し、アカウント (とタグの値) をプロジェクトに割り当てると、各プロジェクトの「料金」には、そのプロジェクトに割り当てた分だけが表示されます。「Cost Explorer」タブは今のままです。
+[Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing) (`redmine_kit_billing`) もインストールされていると、このプラグインはその AWS プロバイダーを登録します (任意の依存。なければ何も変わりません)。システム管理者が「管理」›「請求」で AWS のソースを追加し、アカウント (とタグの値) をプロジェクトに割り当てると、各プロジェクトの「請求」には、そのプロジェクトに割り当てた分だけが表示されます。「Cost Explorer」タブは今のままです。
 
 | ソース (取得方法) | 読むもの | 設定 |
 | --- | --- | --- |
@@ -99,9 +99,9 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 | 共有された請求ビュー (複数のアカウントに推奨) | 組織の管理アカウントが AWS RAM でこのアカウントに共有したカスタム請求ビュー | 請求ビューの ARN |
 | 引き受けるロール | 別のアカウント (スタンドアロンのアカウント、またはビューを共有できない組織)。ソースの外部 ID 付きの `sts:AssumeRole` で読む | ロールの ARN (外部 ID は生成) |
 
-ソースごとに、コストの指標 (デフォルトは非ブレンドコスト。償却コスト、純非ブレンドコストも可) と、アカウントをタグの値で分ける割り当てのためのコスト配分タグのキーも設定します。両方の方法のポリシーとアクセス許可の境界は [iam.md](iam.md#project-charges-redmine-kit-charges) にあります。
+ソースごとに、コストの指標 (デフォルトは非ブレンドコスト。償却コスト、純非ブレンドコストも可) と、アカウントをタグの値で分ける割り当てのためのコスト配分タグのキーも設定します。両方の方法のポリシーとアクセス許可の境界は [iam.md](iam.md#project-charges-redmine-kit-billing) にあります。
 
-`redmine_kit:charges:refresh` が 1 日 1 回、ソースごとに送るリクエスト (どれも課金され、次のページごとに 1 件増えます):
+`redmine_kit:billing:refresh` が 1 日 1 回、ソースごとに送るリクエスト (どれも課金され、次のページごとに 1 件増えます):
 
 | リクエスト | 内容 |
 | --- | --- |
@@ -121,7 +121,7 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 | 5 | 5 | 1.50 USD |
 | 20 | 20 | 6.00 USD |
 
-請求ビューのソースは、すべてのリクエストに `BillingViewArn` を付けます (ビューへのリクエストは、元のビューの数だけ課金されます)。ロールのソースは、最初に STS から 15 分の認証情報を得ます。Cost Explorer が `LimitExceededException` を返すあいだは、2、4、8、16 秒待って再試行します。それでも失敗したソースだけが失敗します (Redmine Kit Charges は前の料金を残し、エラーのクラスを記録します)。`REDMINE_COSTEXPLORER_ENABLED=true` でなければ、AWS のソースはリクエストを送らずに失敗します。
+請求ビューのソースは、すべてのリクエストに `BillingViewArn` を付けます (ビューへのリクエストは、元のビューの数だけ課金されます)。ロールのソースは、最初に STS から 15 分の認証情報を得ます。Cost Explorer が `LimitExceededException` を返すあいだは、2、4、8、16 秒待って再試行します。それでも失敗したソースだけが失敗します (Redmine Kit Billing は前の料金を残し、エラーのクラスを記録します)。`REDMINE_COSTEXPLORER_ENABLED=true` でなければ、AWS のソースはリクエストを送らずに失敗します。
 
 <a id="notes"></a>
 

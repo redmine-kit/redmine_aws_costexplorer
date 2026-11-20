@@ -5,11 +5,11 @@ require 'securerandom'
 module RedmineKit
   module Aws
     module Costexplorer
-      # The AWS provider of Redmine Kit Charges (redmine_kit_charges): reads one
-      # source's charges from Cost Explorer for the projects' 「料金」 pages
-      # (docs/README.md#project-charges-redmine-kit-charges). Registered by
-      # RedmineKit::Aws::Costexplorer.setup only when redmine_kit_charges is
-      # installed; it answers the methods of RedmineKit::Charges::Provider
+      # The AWS provider of Redmine Kit Billing (redmine_kit_billing): reads one
+      # source's charges from Cost Explorer for the projects' 「請求」 pages
+      # (docs/README.md#project-charges-redmine-kit-billing). Registered by
+      # RedmineKit::Aws::Costexplorer.setup only when redmine_kit_billing is
+      # installed; it answers the methods of RedmineKit::Billing::Provider
       # without subclassing it, so that this file loads without that plugin.
       #
       # A source reads one of:
@@ -40,11 +40,11 @@ module RedmineKit
           def key = :aws_costexplorer
           def label = :label_aws_costexplorer_charges_provider
           def scope_label = :label_aws_costexplorer_account
-          # Who bills the charges (redmine_kit_charges' 請求元 / Vendor column).
+          # Who bills the charges (redmine_kit_billing' 請求元 / Vendor column).
           def vendor = 'AWS'
           def settings_keys = %w[method billing_view_arn role_arn metric tag_key]
 
-          # The fields of the administrators' source form (redmine_kit_charges
+          # The fields of the administrators' source form (redmine_kit_billing
           # draws them): a locale key for each label, choices for the lists,
           # and the generated external ID shown, not edited.
           def settings_fields

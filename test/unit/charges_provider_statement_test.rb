@@ -6,7 +6,7 @@ require_relative '../charges_support'
 module RedmineKit
   module Aws
     module Costexplorer
-      # The account statement of Redmine Kit Charges' provider (R4), with SDK
+      # The account statement of Redmine Kit Billing's provider (R4), with SDK
       # response stubs: one monthly request (in two pages here) per account
       # whose statement a project sees, and the lines it gives.
       class ChargesProviderStatementTest < ActiveSupport::TestCase
@@ -15,7 +15,7 @@ module RedmineKit
 
         NOT_ADJUSTMENTS = { not: { dimensions: { key: 'RECORD_TYPE', values: %w[Credit Refund Tax] } } }.freeze
 
-        # A source of redmine_kit_charges before the statement.
+        # A source of redmine_kit_billing before the statement.
         OlderSource = Struct.new(:settings, :tag_split_scopes)
 
         def statement_requests(requests)

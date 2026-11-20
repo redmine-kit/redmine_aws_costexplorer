@@ -3,7 +3,7 @@
 module RedmineKit
   module Aws
     module Costexplorer
-      # The Cost Explorer requests of one source of Redmine Kit Charges
+      # The Cost Explorer requests of one source of Redmine Kit Billing
       # (ChargesProvider): with the source's credentials (a role's, through
       # AssumeRole with its external ID, or the SDK's own), its billing view on
       # every request, each request counted (each is charged), and retried
@@ -13,7 +13,7 @@ module RedmineKit
         BACKOFF = [2, 4, 8, 16].freeze
         # AssumeRole's session: the shortest STS allows.
         SESSION_SECONDS = 900
-        SESSION_NAME = 'redmine-kit-charges'
+        SESSION_NAME = 'redmine-kit-billing'
 
         attr_reader :count
 

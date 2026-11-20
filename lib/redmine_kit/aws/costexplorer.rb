@@ -41,16 +41,16 @@ module RedmineKit
           register_charges_provider
         end
 
-        # The AWS provider of Redmine Kit Charges, when that plugin is installed
-        # (an optional dependency, D3): its RedmineKit::Charges is then one of
+        # The AWS provider of Redmine Kit Billing, when that plugin is installed
+        # (an optional dependency, D3): its RedmineKit::Billing is then one of
         # Rails' code loader's constants, whatever order Redmine runs the
         # plugins' init.rb in. Without it, nothing is registered and the tab
         # works alone.
         def register_charges_provider
-          return unless RedmineKit.const_defined?(:Charges, false) &&
-                        RedmineKit::Charges.respond_to?(:register_provider)
+          return unless RedmineKit.const_defined?(:Billing, false) &&
+                        RedmineKit::Billing.respond_to?(:register_provider)
 
-          RedmineKit::Charges.register_provider(ChargesProvider)
+          RedmineKit::Billing.register_provider(ChargesProvider)
         end
       end
     end

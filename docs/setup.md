@@ -126,9 +126,9 @@ LocalStack's Cost Explorer is in the Ultimate plan. Its coverage page lists `Get
 
 Without the token, moto answers `GetCostAndUsage` with results given in advance through its API (`/moto-api/static/ce/cost-and-usage-results`), so the tests check the amounts. moto has no `GetCostForecast` (it answers 500).
 
-### Redmine Kit Charges
+### Redmine Kit Billing
 
-The provider of Redmine Kit Charges (`charges_provider_test.rb`) is tested with SDK response stubs: the requests of each kind of source (this account, a shared billing view's `BillingViewArn`, AssumeRole with the external ID through a stubbed STS), the rows, the account statement's requests, pages and lines (`charges_provider_statement_test.rb`), the retries on `LimitExceededException`, and the settings it refuses. `test/integration/charges_test.rb` runs one source through Redmine Kit Charges' daily fetch, and an account statement through the provider, on moto, the backend that can load Cost Explorer data (AWS Emulator answers `NotImplemented`; moto ignores `BillingViewArn`, so billing views are checked with the stubs only). It needs Redmine Kit Charges in the test image: `bin/test_image` adds a checkout next to this one (`../redmine_kit_charges`, or `REDMINE_KIT_CHARGES_DIR`), and without it (CI, where that repository is private) the daily fetch's test is skipped.
+The provider of Redmine Kit Billing (`charges_provider_test.rb`) is tested with SDK response stubs: the requests of each kind of source (this account, a shared billing view's `BillingViewArn`, AssumeRole with the external ID through a stubbed STS), the rows, the account statement's requests, pages and lines (`charges_provider_statement_test.rb`), the retries on `LimitExceededException`, and the settings it refuses. `test/integration/charges_test.rb` runs one source through Redmine Kit Billing's daily fetch, and an account statement through the provider, on moto, the backend that can load Cost Explorer data (AWS Emulator answers `NotImplemented`; moto ignores `BillingViewArn`, so billing views are checked with the stubs only). It needs Redmine Kit Billing in the test image: `bin/test_image` adds a checkout next to this one (`../redmine_kit_billing`, or `REDMINE_KIT_BILLING_DIR`), and without it (CI, where that repository is private) the daily fetch's test is skipped.
 
 ### The mocked call
 

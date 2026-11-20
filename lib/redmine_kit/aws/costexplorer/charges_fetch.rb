@@ -5,7 +5,7 @@ require 'bigdecimal'
 module RedmineKit
   module Aws
     module Costexplorer
-      # One fetch of a source of Redmine Kit Charges (ChargesProvider), over the
+      # One fetch of a source of Redmine Kit Billing (ChargesProvider), over the
       # window (the previous month's first day to today):
       # - R1: daily usage by account and service, without credits, refunds and
       #   taxes;
@@ -20,10 +20,10 @@ module RedmineKit
         FORECAST_METRICS = { 'UnblendedCost' => 'UNBLENDED_COST', 'AmortizedCost' => 'AMORTIZED_COST',
                              'NetUnblendedCost' => 'NET_UNBLENDED_COST' }.freeze
         # Cost Explorer's RECORD_TYPE values read apart (R2), and their kind in
-        # redmine_kit_charges.
+        # redmine_kit_billing.
         ADJUSTMENTS = { 'Credit' => 'credit', 'Refund' => 'refund', 'Tax' => 'tax' }.freeze
-        # One fetch's answer, as RedmineKit::Charges::Provider::Result has it:
-        # its own, so that this file needs nothing of redmine_kit_charges.
+        # One fetch's answer, as RedmineKit::Billing::Provider::Result has it:
+        # its own, so that this file needs nothing of redmine_kit_billing.
         Result = Data.define(:rows, :scopes, :forecast, :requests, :statement)
 
         # A metric's amount and currency, 0 USD when Cost Explorer gives none;

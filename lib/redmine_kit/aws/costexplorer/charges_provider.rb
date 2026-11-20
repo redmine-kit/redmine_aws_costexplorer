@@ -40,6 +40,8 @@ module RedmineKit
           def key = :aws_costexplorer
           def label = :label_aws_costexplorer_charges_provider
           def scope_label = :label_aws_costexplorer_account
+          # Who bills the charges (redmine_kit_charges' 請求元 / Vendor column).
+          def vendor = 'AWS'
           def settings_keys = %w[method billing_view_arn role_arn metric tag_key]
 
           # The fields of the administrators' source form (redmine_kit_charges

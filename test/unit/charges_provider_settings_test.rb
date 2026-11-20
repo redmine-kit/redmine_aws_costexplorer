@@ -19,6 +19,10 @@ module RedmineKit
           source.errors
         end
 
+        test "the charges' vendor (請求元) is AWS" do
+          assert_equal 'AWS', ChargesProvider.vendor
+        end
+
         test 'each new source has its own external ID' do
           ids = Array.new(2) { ChargesProvider.default_settings['external_id'] }
 

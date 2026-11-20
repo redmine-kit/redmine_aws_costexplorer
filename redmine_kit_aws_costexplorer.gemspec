@@ -7,7 +7,7 @@
 Gem::Specification.new do |spec|
   spec.name = 'redmine_kit_aws_costexplorer'
   spec.version = File.read(File.join(__dir__, 'lib/redmine_kit/aws/costexplorer.rb'))[/VERSION = '([^']+)'/, 1]
-  spec.summary = "Shows the AWS account's costs from Cost Explorer in Redmine's administration"
+  spec.summary = 'Shows AWS account costs'
   spec.authors = ['Redmine Kit']
   spec.license = 'GPL-2.0-or-later'
   spec.homepage = 'https://github.com/redmine-kit/redmine_aws_costexplorer'

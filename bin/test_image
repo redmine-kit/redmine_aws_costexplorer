@@ -26,6 +26,10 @@ aws_dir=${REDMINE_KIT_AWS_DIR:-../redmine_kit_aws}
 # installed): a checkout next to this one, or REDMINE_KIT_BILLING_DIR; without
 # it (CI: a private repository) its tests here are skipped.
 billing_dir=${REDMINE_KIT_BILLING_DIR:-../redmine_kit_billing}
+# redmine_kit_organizations, which redmine_kit_billing requires (Redmine stops
+# at boot without it): a checkout next to this one, or
+# REDMINE_KIT_ORGANIZATIONS_DIR; without it, redmine_kit_billing is left out.
+organizations_dir=${REDMINE_KIT_ORGANIZATIONS_DIR:-../redmine_kit_organizations}
 # copy_plugin <checkout> <dir>: the files the plugin runs and tests with (not
 # docs/, nor a checkout of redmine_kit_aws that CI puts inside this one).
 copy_plugin() {
@@ -38,7 +42,10 @@ copy_plugin() {
 test_context=$(mktemp -d)
 copy_plugin . "$test_context/plugins/redmine_kit_aws_costexplorer"
 copy_plugin "$aws_dir" "$test_context/plugins/redmine_kit_aws"
-[[ ! -f "$billing_dir/init.rb" ]] || copy_plugin "$billing_dir" "$test_context/plugins/redmine_kit_billing"
+if [[ -f "$billing_dir/init.rb" && -f "$organizations_dir/init.rb" ]]; then
+  copy_plugin "$billing_dir" "$test_context/plugins/redmine_kit_billing"
+  copy_plugin "$organizations_dir" "$test_context/plugins/redmine_kit_organizations"
+fi
 # The plugin as a gem by path, so that Bundler loads boot/ (docs/setup.md),
 # and redmine_kit_aws, which its gemspec requires, by path without loading it.
 # Redmine's Gemfile reads plugins/*/PluginGemfile with the plugins' Gemfiles.

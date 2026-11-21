@@ -45,7 +45,7 @@ db="redmine_test_$$"
 setup='bin/rails db:drop db:create db:migrate redmine:plugins:migrate db:schema:dump >/dev/null'
 teardown='; status=$?; bin/rails db:drop >/dev/null 2>&1; exit $status'
 run() {
-  "$cli" run --rm "${opts[@]}" -e TEST_DATABASE="$db" "$image" sh -c "$setup"' && "$@"'"$teardown" test "$@"
+  "$cli" run --rm "${run_opts[@]}" "${opts[@]}" -e TEST_DATABASE="$db" "$image" sh -c "$setup"' && "$@"'"$teardown" test "$@"
 }
 # The plugin's tests; with COVERAGE set, in one process with the coverage
 # written to coverage/coverage.xml (test/test_helper.rb). COVERAGE itself is not
@@ -56,7 +56,7 @@ run_plugin() {
     rm -f coverage/.resultset.json && mkdir -p coverage
     cov=(-e PLUGIN_COVERAGE=1 -e PARALLEL_WORKERS=1 -v "$PWD/coverage:/redmine/plugins/$plugin/coverage")
   fi
-  "$cli" run --rm "${opts[@]}" ${cov[@]+"${cov[@]}"} -e TEST_AWS_BACKEND="$backend" -e TEST_DATABASE="$db" "$image" \
+  "$cli" run --rm "${run_opts[@]}" "${opts[@]}" ${cov[@]+"${cov[@]}"} -e TEST_AWS_BACKEND="$backend" -e TEST_DATABASE="$db" "$image" \
     sh -c "$setup"' && "$@"'"$teardown" test "$@"
 }
 redmine_tests=(test/functional/admin_controller_test.rb test/unit/lib/redmine/plugin_test.rb)

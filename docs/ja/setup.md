@@ -45,8 +45,6 @@ ln -s "$(bundle info --path redmine_kit_aws)" plugins/redmine_kit_aws
 ln -s "$(bundle info --path redmine_kit_aws_costexplorer)" plugins/redmine_kit_aws_costexplorer
 ```
 
-<a id="without-the-gem"></a>
-
 Bundler は、それぞれのリポジトリからもプラグインをインストールできます。この場合、トークンは不要です。`plugins/` へのリンクは上と同じです。
 
 ```ruby
@@ -54,6 +52,8 @@ Bundler は、それぞれのリポジトリからもプラグインをインス
 gem 'redmine_kit_aws', git: 'https://github.com/redmine-kit/redmine_aws.git', tag: 'v0.1.0', require: false
 gem 'redmine_kit_aws_costexplorer', git: 'https://github.com/redmine-kit/redmine_aws_costexplorer.git', tag: 'v0.1.0', require: false
 ```
+
+<a id="without-the-gem"></a>
 
 ### gem を使わないとき
 

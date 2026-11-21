@@ -75,7 +75,7 @@ and shares it with the Redmine server's account through AWS RAM; the Redmine ser
 
 For a standalone account (which can't create custom billing views) or an organization that can't share one: a read-only
 role in that account trusts the Redmine server's role, with the source's external ID (shown on the source's page in
-「管理」›「請求」). Assuming a role in an organization's management account works but is not recommended: AWS advises
+Administration › Billing). Assuming a role in an organization's management account works but is not recommended: AWS advises
 using the management account only for tasks that need it.
 
 The Redmine server's role:

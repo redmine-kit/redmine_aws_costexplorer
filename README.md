@@ -13,8 +13,8 @@ A Redmine plugin that shows the costs of the AWS account in Redmine's administra
 
 ## Documentation
 
-- Website: https://redmine-kit.github.io/redmine_aws_costexplorer/ (日本語: https://redmine-kit.github.io/redmine_aws_costexplorer/ja/)
-- Markdown: [docs/README.md](docs/README.md) (日本語: [docs/ja/README.md](docs/ja/README.md)), with [setup](docs/setup.md) and [IAM permissions](docs/iam.md)
+- Website: https://redmine-kit.github.io/redmine_aws_costexplorer/ ([日本語](https://redmine-kit.github.io/redmine_aws_costexplorer/ja/))
+- Markdown: [docs/README.md](docs/README.md) ([日本語](docs/ja/README.md)), with [setup](docs/setup.md) and [IAM permissions](docs/iam.md)
 
 ## Sponsors
 

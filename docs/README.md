@@ -16,7 +16,7 @@ Each feature has a condition that enables it. Without `REDMINE_COSTEXPLORER_ENAB
 | The "Cost Explorer" tab | The costs of the AWS account: the total (this month, month-end forecast, last month), by service (with usage types), and daily for the last 30 days (chart and table) | `REDMINE_COSTEXPLORER_ENABLED=true`; administrators | [What the tab shows](#what-the-tab-shows) |
 | Daily fetch | The rake task `redmine_kit:aws:costexplorer:refresh` fetches the costs once a day and keeps them in the database | Same as above; run daily by a schedule | [setup.md](setup.md#schedule) |
 | Costs by tag | The costs of this month and the previous month by the values of a cost allocation tag (normally `redmine:instance`) | `REDMINE_COSTEXPLORER_TAG_KEY` is set (off by default) | [Costs by tag](#costs-by-tag-optional) |
-| Project charges | The AWS provider of [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing): AWS accounts' charges on projects' 「請求」 pages, from this account, shared billing views or roles in other accounts | Redmine Kit Billing is installed, `REDMINE_COSTEXPLORER_ENABLED=true`, and a system administrator adds an AWS source | [Project charges](#project-charges-redmine-kit-billing) |
+| Project charges | The AWS provider of [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing): AWS accounts' charges on projects' "Billing" pages, from this account, shared billing views or roles in other accounts | Redmine Kit Billing is installed, `REDMINE_COSTEXPLORER_ENABLED=true`, and a system administrator adds an AWS source | [Project charges](#project-charges-redmine-kit-billing) |
 
 ## What the tab shows
 
@@ -46,15 +46,15 @@ The costs of the whole account. All amounts are AWS Cost Explorer's unblended co
 
 The screen uses the Japanese terms of the Cost Explorer documentation (checked on 2026-11-10).
 
-| Screen (en / ja) | AWS term | Source |
-| --- | --- | --- |
-| Unblended cost / 非ブレンドコスト | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
-| Daily unblended costs / 日別の非ブレンドコスト | Same | Same |
-| Cost / コスト | 「コスト」, as in 「月末の予測コスト」 on the same page. The Japanese pages of this plugin use the same word, not 「費用」 | Same |
-| Month-end forecast / 月末の予測 | A shorter form of 「月末の予測コスト」 on the same page | Same |
-| Estimated / 推定 | 「過去 1 か月の推定コスト」 on the same page | Same |
-| Service, Usage types, Cost allocation tag / サービス、使用タイプ、コスト配分タグ | `SERVICE`, `USAGE_TYPE`, tags | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |
-| (no tag) / (タグなし) | Costs without the tag | The plugin's own term; to recheck in the console |
+| English | Japanese | AWS term | Source |
+| --- | --- | --- | --- |
+| Unblended cost | 非ブレンドコスト | `UnblendedCost` | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-exploring-data.html |
+| Daily unblended costs | 日別の非ブレンドコスト | Same | Same |
+| Cost | コスト | 「コスト」, as in 「月末の予測コスト」 on the same page. The Japanese pages of this plugin use the same word, not 「費用」 | Same |
+| Month-end forecast | 月末の予測 | A shorter form of 「月末の予測コスト」 on the same page | Same |
+| Estimated | 推定 | 「過去 1 か月の推定コスト」 on the same page | Same |
+| Service, Usage types, Cost allocation tag | サービス、使用タイプ、コスト配分タグ | `SERVICE`, `USAGE_TYPE`, tags | https://docs.aws.amazon.com/ja_jp/cost-management/latest/userguide/ce-filtering.html |
+| (no tag) | (タグなし) | Costs without the tag | The plugin's own term; to recheck in the console |
 
 <a id="fetching-the-costs"></a>
 
@@ -85,8 +85,8 @@ For an AWS account that holds several Redmine servers, the costs can be split by
 
 When [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing) (`redmine_kit_billing`) is installed too,
 this plugin registers its AWS provider with it (an optional dependency: without it, nothing changes). A system
-administrator then adds AWS sources in 「管理」›「請求」 and allocates their accounts (and tag values) to projects; each
-project's 「請求」 page shows only what is allocated to it. The "Cost Explorer" tab stays as it is.
+administrator then adds AWS sources in Administration › Billing and allocates their accounts (and tag values) to projects; each
+project's "Billing" page shows only what is allocated to it. The "Cost Explorer" tab stays as it is.
 
 | Source ("Read from") | What it reads | Settings |
 | --- | --- | --- |
@@ -113,7 +113,7 @@ So 3 requests a day for a source without a tag split or statements, whatever the
 The account statement lists the account's charges by service, then usage type, for each month of the window, with the
 amount, the usage quantity and its unit (credits, refunds and taxes stay apart, from the request by record type). It is
 read for the accounts an allocation shows whole: an allocation without tag values, for its accounts, or for every
-account of the source when it has 「すべてのアカウント」. No region is given: Cost Explorer groups by two keys at most,
+account of the source when it has "All accounts". No region is given: Cost Explorer groups by two keys at most,
 and the usage type's prefix (such as `APN1-`) names the region. Each such account costs one request a day, so at USD
 0.01 a request, 30 × USD 0.01 = USD 0.30 per account a month, plus one more request for each further page:
 

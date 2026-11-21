@@ -27,7 +27,7 @@ module RedmineKit
           assert_equal 16.megabytes, migration_columns[:data][:limit]
         end
 
-        # The AWS provider of Redmine Kit Billing (D3): registered when that
+        # The AWS provider of Redmine Kit Billing: registered when that
         # plugin is installed, and nothing (no error) without it.
         def test_the_charges_provider_with_redmine_kit_billing_only
           if Redmine::Plugin.installed?(:redmine_kit_billing)

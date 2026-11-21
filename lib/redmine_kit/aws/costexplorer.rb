@@ -42,7 +42,7 @@ module RedmineKit
         end
 
         # The AWS provider of Redmine Kit Billing, when that plugin is installed
-        # (an optional dependency, D3): its RedmineKit::Billing is then one of
+        # (an optional dependency): its RedmineKit::Billing is then one of
         # Rails' code loader's constants, whatever order Redmine runs the
         # plugins' init.rb in. Without it, nothing is registered and the tab
         # works alone.

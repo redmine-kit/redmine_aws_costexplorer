@@ -60,6 +60,15 @@ module RedmineKit
                           role_session_name: 'redmine-kit-billing', duration_seconds: 900 }], calls
         end
 
+        test "an account or a billing view: the client signs with the SDK's own credentials" do
+          keys = { 'AWS_ACCESS_KEY_ID' => 'AKIACHAIN', 'AWS_SECRET_ACCESS_KEY' => 'chain-secret' }
+          [{ 'method' => 'account' }, { 'method' => 'billing_view', 'billing_view_arn' => VIEW }].each do |settings|
+            client = with_env(keys) { ChargesRequests.new(Source.new(settings).settings).send(:client) }
+
+            assert_equal 'AKIACHAIN', client.config.credentials&.access_key_id, settings['method']
+          end
+        end
+
         test 'AssumeRole refused (a wrong external ID) fails the fetch' do
           provider = ChargesProvider.new(sts_client: sts('AccessDenied'))
           source = Source.new('method' => 'role', 'role_arn' => ROLE)

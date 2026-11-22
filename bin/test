@@ -69,5 +69,9 @@ elif (($#)); then
   run_plugin bin/rails test "${@/#/plugins/redmine_kit_aws_costexplorer/}"
 else
   run_plugin bin/rails test plugins/redmine_kit_aws_costexplorer/test
-  run bin/rails test "${redmine_tests[@]}"
+  # Each file in a process of its own: Redmine's plugin_test.rb points
+  # Redmine::Plugin.directory at its fixtures and leaves it there, so routes
+  # drawn later in the same process (at its first request) lack the installed
+  # plugins' routes, and the admin menu's Organizations (redmine_kit_organizations) fails.
+  run sh -c 'status=0; for file; do bin/rails test "$file" || status=1; done; exit $status' redmine "${redmine_tests[@]}"
 fi

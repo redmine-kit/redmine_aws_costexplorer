@@ -23,6 +23,7 @@ else
   backend=moto
 fi
 echo "AWS backend: $backend"
+stop_services_at_exit "$name"
 bin/services >/dev/null
 source bin/test_image
 # The services by name in Docker (test/Dockerfile has their URLs); by address

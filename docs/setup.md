@@ -112,6 +112,8 @@ An interface endpoint may also work, but it is not checked. The AWS PrivateLink 
 
 The tests are in `test/` and run with Redmine's standard mechanism, in Redmine 7.0.3 on PostgreSQL 16, in Apple container when it is installed and running, else in Docker (`CONTAINER_CLI=container` or `docker` chooses; at most two test runs of the redmine-kit repositories at once on a machine, `TEST_SLOTS`). Cost Explorer is LocalStack when `LOCALSTACK_AUTH_TOKEN` is set (in CI, the organization's secret), and moto otherwise.
 
+A run stops the service containers it started (it doesn't remove them) when it ends, whether the tests pass, fail or are interrupted. Containers that were running before the run, or that another run of this repository still uses, are left running. `KEEP_SERVICES=1` keeps them running after the run.
+
 The tests stay on moto and LocalStack, not on [AWS Emulator](https://docs.aws.amazon.com/emulator/latest/userguide/), which the organization uses for tests against AWS: AWS Emulator 1.0.512 (checked on 2026-11-19) answers `NotImplemented` to `GetCostAndUsage`, `GetCostForecast` and `GetDimensionValues`, and only moto can load cost data for the tests. They move to the emulator once it supports them.
 
 ### Unit and functional tests

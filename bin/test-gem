@@ -16,6 +16,7 @@ set -euo pipefail
     source bin/container_cli
     source bin/test_slot
     name=redmine-kit-aws-costexplorer-test
+    stop_services_at_exit "$name"
     bin/services >/dev/null
     # test/Dockerfile as bin/test builds it.
     source bin/test_image

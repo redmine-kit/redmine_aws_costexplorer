@@ -18,6 +18,16 @@ AWS アカウントのコストを、AWS Cost Explorer から Redmine の管理�
 - Web サイト: https://redmine-kit.github.io/redmine_aws_costexplorer/ja/ (English: https://redmine-kit.github.io/redmine_aws_costexplorer/)
 - Markdown: [docs/ja/README.md](docs/ja/README.md) (English: [docs/README.md](docs/README.md))。[導入](docs/ja/setup.md)と [IAM 権限](docs/ja/iam.md)があります。
 
+<a id="help"></a>
+
+## ヘルプ
+
+[Redmine Kit Help](https://github.com/redmine-kit/redmine_help) をインストールしていれば、プラグインのヘルプは `help/` にあります。トピック「Cost Explorer」(英語と日本語) です。「Cost Explorer」タブで、ヘルプのパネルがこのトピックを開きます (`help/map.yml`)。Redmine のディレクトリで、インストールされたガイドに対してチェックできます。
+
+```sh
+bin/rails redmine_kit:help:check PLUGIN=redmine_kit_aws_costexplorer
+```
+
 <a id="sponsors"></a>
 
 ## スポンサー

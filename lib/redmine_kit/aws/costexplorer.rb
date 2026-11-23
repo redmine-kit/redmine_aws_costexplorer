@@ -38,14 +38,14 @@ module RedmineKit
             :costexplorer, label: :label_aws_costexplorer,
                            url: { controller: 'aws_costexplorer', action: 'index' }, position: 60
           )
-          register_charges_provider
+          ActiveSupport.on_load(:redmine_kit_billing) { RedmineKit::Aws::Costexplorer.register_charges_provider }
         end
 
         # The AWS provider of Redmine Kit Billing, when that plugin is installed
-        # (an optional dependency): its RedmineKit::Billing is then one of
-        # Rails' code loader's constants, whatever order Redmine runs the
-        # plugins' init.rb in. Without it, nothing is registered and the tab
-        # works alone.
+        # (an optional dependency): setup's on_load(:redmine_kit_billing) calls
+        # it when billing has loaded, whatever order Redmine runs the plugins'
+        # init.rb in. Without it, nothing is registered and the tab works
+        # alone.
         def register_charges_provider
           return unless RedmineKit.const_defined?(:Billing, false) &&
                         RedmineKit::Billing.respond_to?(:register_provider)

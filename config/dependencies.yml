@@ -8,3 +8,4 @@ requires:
 suggests:
   - redmine_kit_billing
   - redmine_kit_help
+  - redmine_kit_ui

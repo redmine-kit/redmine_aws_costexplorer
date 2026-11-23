@@ -1,0 +1,90 @@
+/* Redmine Kit AWS Cost Explorer: the stylesheet of the plugin's module for the new UI, built from frontend/src by `npm run build`
+   (frontend/vite.config.js): the Tailwind CSS utilities its source uses. Edit the source, not this file. */
+/*! tailwindcss v4.3.5 | MIT License | https://tailwindcss.com */
+@layer properties {
+  @supports (((-webkit-hyphens: none)) and (not (margin-trim: block))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
+    *, :before, :after, ::backdrop {
+      --tw-ordinal: initial;
+      --tw-slashed-zero: initial;
+      --tw-numeric-figure: initial;
+      --tw-numeric-spacing: initial;
+      --tw-numeric-fraction: initial;
+    }
+  }
+}
+
+@layer theme;
+
+@layer utilities {
+  .flex {
+    display: flex;
+  }
+
+  .inline-flex {
+    display: inline-flex;
+  }
+
+  .table {
+    display: table;
+  }
+
+  .flex-col {
+    flex-direction: column;
+  }
+
+  .items-center {
+    align-items: center;
+  }
+
+  .gap-2 {
+    gap: .5rem;
+  }
+
+  .gap-4 {
+    gap: 1rem;
+  }
+
+  .px-gutter {
+    padding-inline: var(--rk-gutter);
+  }
+
+  .text-meta {
+    font-size: var(--rk-type-meta-size);
+    line-height: var(--tw-leading, 1.4);
+    font-weight: var(--tw-font-weight, 400);
+  }
+
+  .text-text-muted {
+    color: var(--rk-text-muted);
+  }
+
+  .tabular-nums {
+    --tw-numeric-spacing: tabular-nums;
+    font-variant-numeric: var(--tw-ordinal, ) var(--tw-slashed-zero, ) var(--tw-numeric-figure, ) var(--tw-numeric-spacing, ) var(--tw-numeric-fraction, );
+  }
+}
+
+@property --tw-ordinal {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-slashed-zero {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-numeric-figure {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-numeric-spacing {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-numeric-fraction {
+  syntax: "*";
+  inherits: false
+}

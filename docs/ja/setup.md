@@ -29,6 +29,7 @@ Redmine Kit AWS Cost Explorer を使うために、Redmine サーバーに必要
 | --- | --- |
 | [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing) | Billing のソースとしての AWS の料金 |
 | [Redmine Kit Help](https://github.com/redmine-kit/redmine_help) | ヘルプのパネルに表示するこのプラグインのヘルプ |
+| [Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) | 新しい UI の「Cost Explorer」タブの画面 ([README.md](README.md#in-the-new-ui)) |
 
 <a id="installation"></a>
 
@@ -186,7 +187,7 @@ Redmine Kit Billing のプロバイダー (`charges_provider_test.rb`) は、SDK
 
 ### テストの実行
 
-`bin/test` は、プラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine Kit AWS (`../redmine_kit_aws`) か、`REDMINE_KIT_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。`COVERAGE=1` を付けると、プラグインのテストは、プラグイン自身のファイルのカバレッジ (SimpleCov。Cobertura の XML の `coverage/coverage.xml`) も出力し、1 プロセスで実行します。CI は Ruby 4.0 でこれを有効にし、レポートを `plugin` フラグで [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送信します。送信の認証は OIDC (`id-token: write`) なので、トークンをシークレットに保存しません。Codecov のステータスは参考情報で、コミットや Pull Request を失敗にしません (`codecov.yml`)。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`TEST_RUBY=3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
+`bin/test` は、[Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) をインストールした状態 (隣のチェックアウト `../redmine_kit_ui` の `HEAD`。`REDMINE_KIT_UI` と `REDMINE_KIT_UI_REF` で別のものを選べます) と、インストールしない状態のプラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine Kit AWS (`../redmine_kit_aws`) か、`REDMINE_KIT_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。`COVERAGE=1` を付けると、プラグインのテストは、プラグイン自身のファイルのカバレッジ (SimpleCov。Cobertura の XML の `coverage/coverage.xml`) も出力し、1 プロセスで実行します。CI は Ruby 4.0 でこれを有効にし、レポートを `plugin` フラグで [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送信します。送信の認証は OIDC (`id-token: write`) なので、トークンをシークレットに保存しません。Codecov のステータスは参考情報で、コミットや Pull Request を失敗にしません (`codecov.yml`)。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`TEST_RUBY=3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
 
 `bin/test-gem` は gem を確認します。チェックアウトからプラグインと Redmine Kit AWS の gem をビルドし、[gem](#gem) のとおりにインストールして `plugins/` にリンクし、すべてのファイルを読み込んで Redmine を起動します (`zeitwerk:check` と、起動時にすべてを読み込む production 環境)。`bin/release` もこれを実行するので、gem にないファイルがあれば、アダプタがインストールする前に失敗します。
 
@@ -197,6 +198,15 @@ COVERAGE=1 bin/test # カバレッジを coverage/coverage.xml に出力する
 bin/lint            # RuboCop
 bin/test-gem        # プラグインと Redmine Kit AWS の gem をビルド・インストールし、plugins/ にリンクして起動する
 bin/services --down # PostgreSQL と、moto か LocalStack を止める
+```
+
+新しい UI のモジュールは、`frontend/` で Node.js (バージョンは `frontend/.nvmrc`) を使って確認します。`.npmrc` には `ignore-scripts=true` があり、`@redmine-kit/ui` と `@redmine-kit/plugin` は、隣にある ui リポジトリのチェックアウト (`../../ui/packages/…`) から取得します。
+
+```sh
+cd frontend
+npm install
+npm run check       # 型チェック、コンポーネントのテスト (vitest)、ビルド、kit-check-ui、Storybook のビルド
+npm run storybook   # タブの状態の Storybook (ポート 6008)
 ```
 
 <a id="releasing"></a>

@@ -24,6 +24,7 @@ Without it, Redmine stops at boot and names it. Installed as a gem, this plugin 
 | --- | --- |
 | [Redmine Kit Billing](https://github.com/redmine-kit/redmine_kit_billing) | the AWS charges as a source of Billing |
 | [Redmine Kit Help](https://github.com/redmine-kit/redmine_help) | this plugin's help in the Help panel |
+| [Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) | the new UI's screen of the Cost Explorer tab ([README.md](README.md#in-the-new-ui)) |
 
 ## Installation
 
@@ -153,7 +154,7 @@ Only `GetCostForecast` is mocked, because neither backend implements it. The int
 
 ### Running the tests
 
-`bin/test` runs the plugin's tests, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The tests build Redmine with Redmine Kit AWS from a checkout next to this one (`../redmine_kit_aws`), or from the directory in `REDMINE_KIT_AWS_DIR`; CI checks out `redmine-kit/redmine_aws`. With `COVERAGE=1`, the plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`) and run in one process. CI sets it on Ruby 4.0 and uploads the report to [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) with the flag `plugin`. The upload authenticates with OIDC (`id-token: write`), so no token is stored as a secret. Codecov's statuses are informational and never fail a commit or a pull request (`codecov.yml`). CI runs the lint and the tests on Ruby 3.2 and 4.0; locally, `TEST_RUBY=3.2 bin/test` (or `bin/lint`) runs them on Ruby 3.2.
+`bin/test` runs the plugin's tests with [Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) installed (from the checkout next to this one, `../redmine_kit_ui` at `HEAD`; `REDMINE_KIT_UI` and `REDMINE_KIT_UI_REF` choose another), then without it, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The tests build Redmine with Redmine Kit AWS from a checkout next to this one (`../redmine_kit_aws`), or from the directory in `REDMINE_KIT_AWS_DIR`; CI checks out `redmine-kit/redmine_aws`. With `COVERAGE=1`, the plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`) and run in one process. CI sets it on Ruby 4.0 and uploads the report to [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) with the flag `plugin`. The upload authenticates with OIDC (`id-token: write`), so no token is stored as a secret. Codecov's statuses are informational and never fail a commit or a pull request (`codecov.yml`). CI runs the lint and the tests on Ruby 3.2 and 4.0; locally, `TEST_RUBY=3.2 bin/test` (or `bin/lint`) runs them on Ruby 3.2.
 
 `bin/test-gem` checks the gems: it builds the gems of the plugin and of Redmine Kit AWS from the checkouts, installs them as [Gem](#gem) says, links them into `plugins/` and starts Redmine with every file loaded (`zeitwerk:check`, and the production environment, which loads them at start-up). CI runs it too, so a file missing from the gem fails before adapters install it.
 
@@ -164,6 +165,15 @@ COVERAGE=1 bin/test # with the coverage in coverage/coverage.xml
 bin/lint            # RuboCop
 bin/test-gem        # the gems of the plugin and Redmine Kit AWS: built, installed, linked into plugins/, booted
 bin/services --down # stops PostgreSQL and moto or LocalStack
+```
+
+The new UI's module is checked in `frontend/` with Node.js (the version in `frontend/.nvmrc`); `.npmrc` has `ignore-scripts=true`, and `@redmine-kit/ui` and `@redmine-kit/plugin` come from the checkout of the ui repository next to this one (`../../ui/packages/…`):
+
+```sh
+cd frontend
+npm install
+npm run check       # type check, the components' tests (vitest), the build, kit-check-ui, the Storybook's build
+npm run storybook   # the Storybook of the tab's states, on port 6008
 ```
 
 ## Releasing

@@ -44,6 +44,12 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 - **取得の日時:** 右上に、データを取得した日時を表示します (「更新: `<日時>` (1 日 1 回)」)。毎日のタスクが取得しているあいだは、代わりに「更新: 実行中 (`<日時>` から)」を表示します。Cost Explorer のデータは、およそ 1 日に 1 回更新されるので、1 日前のデータはふつうです。
 - **エラー:** 最後の取得が失敗したときは、最後に成功したデータの上に「取得エラー: `<日時>` (`<エラーのクラス>`)」を表示します。開始から 1 時間たっても終わらない取得 (タスクのタイムアウトや停止) も同じように表示し、クラスの代わりに「タイムアウト」と表示します。Cost Explorer につながらなかったとき (ネットワークの経路がない、DNS、タイムアウト) は、インターネットにつながらないネットワークには経路が必要なことも表示します ([setup.md](setup.md#network))。画面には、Redmine Kit AWS の「ステータス」のタブと同じく例外のクラスだけを表示します。アカウントやリソースを含むことがある例外のメッセージは、Redmine のログに記録します (`[redmine_kit_aws_costexplorer] fetch of snapshot … failed …`、予測は `[redmine_kit_aws_costexplorer] no forecast: …`)。
 
+<a id="in-the-new-ui"></a>
+
+### 新しい UI
+
+[Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) をインストールしていれば、タブは、Redmine Kit AWS のページ「AWS」のタブとして、新しい UI が描画します (`config/kit_ui.yml`。`frontend/` から `assets/javascripts/kit/costexplorer.js` にビルドするコンポーネント `AwsCostexplorer`。[Redmine Kit AWS の api.md](https://redmine-kit.github.io/redmine_aws/ja/api.html#the-new-ui))。`require_admin` 付きの同じコントローラーから、同じ値を表示します。カードの見出しに「更新: …」(または取得中)、項目の上に警告と取得エラー、合計は 3 つの数値で、先月が推定のあいだは「推定」を添えます。サービス別は使用タイプを折りたたんだ表、日別はグラフ (確定と推定のコストを積み上げ) と表、コスト配分タグ別です。ブラウザーのセッションで `GET /admin/aws/costexplorer.json` を読み込みます。`enabled`、`failure` (例外のクラスだけの文と、ネットワークの案内)、`pending`、`updated`、`costs` で、金額は Redmine のヘルパーで整形します。どちらの UI でも、この画面に操作はありません。
+
 <a id="terms"></a>
 
 ### 用語

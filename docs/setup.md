@@ -28,18 +28,19 @@ Without it, Redmine stops at boot and names it. Installed as a gem, this plugin 
 
 ## Installation
 
-1. Put the plugin in `plugins/redmine_kit_aws_costexplorer` and Redmine Kit AWS in `plugins/redmine_kit_aws`: install the gems ([Gem](#gem)) or clone the repositories ([Without the gem](#without-the-gem)).
-2. Run the plugin's migrations. They create the table of snapshots (`aws_costexplorer_snapshots`).
+1. Install the plugin as a gem ([Gem](#gem)), or put checkouts of it and of [Redmine Kit AWS](https://redmine-kit.github.io/redmine_aws/), which it requires, in Redmine's `plugins/` ([Without the gem](#without-the-gem)). The order doesn't matter: at boot, Redmine stops and names `redmine_kit_aws` when it is missing ([Required plugins](#required-plugins)).
+2. Run `bundle install` in Redmine's folder.
+3. Run the plugin's migrations. They create the table of snapshots (`aws_costexplorer_snapshots`).
 
    ```sh
-   bin/rake redmine:plugins:migrate
+   bin/rails redmine:plugins:migrate RAILS_ENV=production
    ```
-
-3. Set the environment variables (below) and the schedule ([Schedule](#schedule)).
+4. Set the environment variables (below) and the schedule ([Schedule](#schedule)).
+5. Restart Redmine.
 
 ### Gem
 
-`bin/release` publishes each version of the plugin as a gem to GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`, [Releasing](#releasing)). The first version is 0.1.0. Installing from GitHub Packages needs a GitHub token with `read:packages`, even for a public package. The gem holds the plugin's run-time files (`init.rb`, `lib/`, `app/`, `assets/`, `config/`, `db/`, `help/`, `LICENSE`); the plugin's `Gemfile` is not in it. The gem depends on `redmine_kit_aws`, which Bundler installs from the same source, so `Gemfile.local` names only this plugin's gem. Redmine loads plugins only from `plugins/`, so both installed gems are linked there:
+**As a gem** (first choice): add it to Redmine's `Gemfile.local`, in a block of Redmine Kit's registry on GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`, where `bin/release` publishes it: [Releasing](#releasing)). Bundler takes the plugins it requires from there too ([Required plugins](#required-plugins)), and never takes these gems from rubygems.org. The registry needs a GitHub token with `read:packages`, even for a public package, given to Bundler in the environment variable `BUNDLE_RUBYGEMS__PKG__GITHUB__COM` (`<user>:<token>`), never in a file of a repository.
 
 ```ruby
 # Redmine's Gemfile.local
@@ -48,30 +49,26 @@ source 'https://rubygems.pkg.github.com/redmine-kit' do
 end
 ```
 
-```sh
-bundle config set --global rubygems.pkg.github.com <user>:<token>   # or the variable BUNDLE_RUBYGEMS__PKG__GITHUB__COM
-bundle install
-ln -s "$(bundle info --path redmine_kit_aws)" plugins/redmine_kit_aws
-ln -s "$(bundle info --path redmine_kit_aws_costexplorer)" plugins/redmine_kit_aws_costexplorer
-```
-
-Bundler can also install the plugins from their repositories, which needs no token; link them into `plugins/` as above:
+**From the repositories** (for development), Bundler takes the gems from git instead; it doesn't take the plugins a gem requires from git, so their lines come too:
 
 ```ruby
 # Redmine's Gemfile.local
-gem 'redmine_kit_aws', git: 'https://github.com/redmine-kit/redmine_aws.git', tag: 'v0.1.0', require: false
-gem 'redmine_kit_aws_costexplorer', git: 'https://github.com/redmine-kit/redmine_aws_costexplorer.git', tag: 'v0.1.0', require: false
+gem 'redmine_kit_aws', git: 'https://github.com/redmine-kit/redmine_aws.git', branch: 'main'
+gem 'redmine_kit_aws_costexplorer', git: 'https://github.com/redmine-kit/redmine_aws_costexplorer.git', branch: 'main'
 ```
+
+Bundler requires `boot/redmine_kit_aws_costexplorer.rb`, which hands the gem's folder to Redmine's plugin loader (and, from the gems it depends on, Redmine Kit AWS's): Redmine runs the gem's `init.rb`, serves its assets, strings, views and migrations, adds its `lib/` and `app/` to Rails' code loader and draws its routes, as for a plugin in `plugins/`, so no link in `plugins/` is needed. A folder of the same id in `plugins/` wins over the gem. The gem holds the run-time files; the plugin's `Gemfile` is not in it.
 
 ### Without the gem
 
-Clone the repository into `plugins/redmine_kit_aws_costexplorer` and Redmine Kit AWS into `plugins/redmine_kit_aws`, then install the gems. Redmine's `Gemfile` loads the plugin's, which adds `aws-sdk-costexplorer`. Nothing of the plugin has to load before Rails starts, so it needs no line in `Gemfile.local`.
+Clone the repositories into Redmine's `plugins/`, in folders named after the plugins' ids, which differ from the repositories' names:
 
 ```sh
 git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_kit_aws
 git clone https://github.com/redmine-kit/redmine_aws_costexplorer.git plugins/redmine_kit_aws_costexplorer
-bundle install
 ```
+
+Nothing of the plugin has to load before Rails starts, so it needs no line in `Gemfile.local`; Redmine's `Gemfile` loads the plugin's, which adds the gems it uses.
 
 ## Configuration
 
@@ -156,14 +153,14 @@ Only `GetCostForecast` is mocked, because neither backend implements it. The int
 
 `bin/test` runs the plugin's tests with [Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) installed (from the checkout next to this one, `../redmine_kit_ui` at `HEAD`; `REDMINE_KIT_UI` and `REDMINE_KIT_UI_REF` choose another), then without it, then Redmine's tests around administration and plugins; `bin/test --redmine` runs every Redmine test with the plugin installed, as the CI does. The tests build Redmine with Redmine Kit AWS from a checkout next to this one (`../redmine_kit_aws`), or from the directory in `REDMINE_KIT_AWS_DIR`; CI checks out `redmine-kit/redmine_aws`. With `COVERAGE=1`, the plugin's tests also write the coverage of the plugin's own files (SimpleCov, Cobertura XML in `coverage/coverage.xml`) and run in one process. CI sets it on Ruby 4.0 and uploads the report to [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) with the flag `plugin`. The upload authenticates with OIDC (`id-token: write`), so no token is stored as a secret. Codecov's statuses are informational and never fail a commit or a pull request (`codecov.yml`). CI runs the lint and the tests on Ruby 3.2 and 4.0; locally, `TEST_RUBY=3.2 bin/test` (or `bin/lint`) runs them on Ruby 3.2.
 
-`bin/test-gem` checks the gems: it builds the gems of the plugin and of Redmine Kit AWS from the checkouts, installs them as [Gem](#gem) says, links them into `plugins/` and starts Redmine with every file loaded (`zeitwerk:check`, and the production environment, which loads them at start-up). CI runs it too, so a file missing from the gem fails before adapters install it.
+`bin/test-gem` checks the gem as the template of the organization's plugins does: it builds the gems of the plugin and of Redmine Kit AWS from the checkouts, takes the checkouts out of `plugins/`, installs the gems as [Gem](#gem) says and starts Redmine with every file loaded (`zeitwerk:check`, and the production environment, which loads them at start-up), checking that each plugin comes from its gem's folder with its boot file, code, routes, migrations and assets; then again with the checkouts back in `plugins/`, which win. CI runs it too, so a file missing from the gem fails before adapters install it.
 
 ```sh
 bin/test            # the plugin's tests and Redmine's tests around administration
 bin/test --redmine  # with every Redmine test
 COVERAGE=1 bin/test # with the coverage in coverage/coverage.xml
 bin/lint            # RuboCop
-bin/test-gem        # the gems of the plugin and Redmine Kit AWS: built, installed, linked into plugins/, booted
+bin/test-gem        # the gems: built, installed, booted from the gems, then from plugins/
 bin/services --down # stops PostgreSQL and moto or LocalStack
 ```
 

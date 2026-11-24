@@ -35,20 +35,21 @@ Redmine Kit AWS Cost Explorer を使うために、Redmine サーバーに必要
 
 ## インストール
 
-1. プラグインを `plugins/redmine_kit_aws_costexplorer` に、Redmine Kit AWS を `plugins/redmine_kit_aws` に置きます。gem をインストールするか ([gem](#gem))、2 つのリポジトリをクローンします ([gem を使わないとき](#without-the-gem))。
-2. プラグインのマイグレーションを実行します。スナップショットのテーブル (`aws_costexplorer_snapshots`) を作ります。
+1. プラグインを gem としてインストールするか ([gem](#gem))、プラグインと、これが必要とする [Redmine Kit AWS](https://redmine-kit.github.io/redmine_aws/ja/) のチェックアウトを Redmine の `plugins/` に置きます ([gem を使わないとき](#without-the-gem))。順序は問いません。`redmine_kit_aws` がないときは、Redmine が起動時に停止し、その名前を示します ([必須プラグイン](#required-plugins))。
+2. Redmine のフォルダーで `bundle install` を実行します。
+3. プラグインのマイグレーションを実行します。スナップショットのテーブル (`aws_costexplorer_snapshots`) を作ります。
 
    ```sh
-   bin/rake redmine:plugins:migrate
+   bin/rails redmine:plugins:migrate RAILS_ENV=production
    ```
-
-3. 環境変数 (下記) とスケジュール ([スケジュール](#schedule)) を設定します。
+4. 環境変数 (下記) とスケジュール ([スケジュール](#schedule)) を設定します。
+5. Redmine を再起動します。
 
 <a id="gem"></a>
 
 ### gem
 
-`bin/release` が、各バージョンのプラグインを gem として GitHub Packages (`https://rubygems.pkg.github.com/redmine-kit`。[リリース](#releasing)) に公開します。最初のバージョンは 0.1.0 です。GitHub Packages からのインストールには、公開のパッケージでも、`read:packages` のある GitHub のトークンが要ります。gem には、プラグインの実行に使うファイル (`init.rb`、`lib/`、`app/`、`assets/`、`config/`、`db/`、`help/`、`LICENSE`) が入っていて、プラグインの `Gemfile` は入っていません。gem は `redmine_kit_aws` に依存し、Bundler が同じソースからインストールするので、`Gemfile.local` に書くのはこのプラグインの gem だけです。Redmine は `plugins/` からだけプラグインを読むので、インストールした 2 つの gem をそこにリンクします。
+**gem として** (推奨): Redmine の `Gemfile.local` に、GitHub Packages にある Redmine Kit のレジストリ (`https://rubygems.pkg.github.com/redmine-kit`。`bin/release` が公開します: [リリース](#releasing)) のブロックで追加します。このプラグインが必要とするプラグイン ([必須プラグイン](#required-plugins)) も Bundler がそこから取得し、これらの gem を rubygems.org から取得することはありません。レジストリには、公開のパッケージでも `read:packages` を持つ GitHub のトークンが必要です。Bundler には環境変数 `BUNDLE_RUBYGEMS__PKG__GITHUB__COM` (`<user>:<token>`) で渡し、リポジトリのファイルには書きません。
 
 ```ruby
 # Redmine の Gemfile.local
@@ -57,32 +58,28 @@ source 'https://rubygems.pkg.github.com/redmine-kit' do
 end
 ```
 
-```sh
-bundle config set --global rubygems.pkg.github.com <ユーザー>:<トークン>   # か、変数 BUNDLE_RUBYGEMS__PKG__GITHUB__COM
-bundle install
-ln -s "$(bundle info --path redmine_kit_aws)" plugins/redmine_kit_aws
-ln -s "$(bundle info --path redmine_kit_aws_costexplorer)" plugins/redmine_kit_aws_costexplorer
-```
-
-Bundler は、それぞれのリポジトリからもプラグインをインストールできます。この場合、トークンは不要です。`plugins/` へのリンクは上と同じです。
+**リポジトリから** (開発用): Bundler は gem を git から取得します。Bundler は gem が必要とするプラグインを git からは取得しないので、その行も追加します。
 
 ```ruby
 # Redmine の Gemfile.local
-gem 'redmine_kit_aws', git: 'https://github.com/redmine-kit/redmine_aws.git', tag: 'v0.1.0', require: false
-gem 'redmine_kit_aws_costexplorer', git: 'https://github.com/redmine-kit/redmine_aws_costexplorer.git', tag: 'v0.1.0', require: false
+gem 'redmine_kit_aws', git: 'https://github.com/redmine-kit/redmine_aws.git', branch: 'main'
+gem 'redmine_kit_aws_costexplorer', git: 'https://github.com/redmine-kit/redmine_aws_costexplorer.git', branch: 'main'
 ```
+
+Bundler が `boot/redmine_kit_aws_costexplorer.rb` を読み込み、gem のフォルダーと、依存する gem の Redmine Kit AWS のフォルダーを Redmine のプラグインローダーに渡します。Redmine は `plugins/` のプラグインと同じく、gem の `init.rb` を実行し、アセット、文字列、ビュー、マイグレーションを使い、`lib/` と `app/` を Rails のコードローダーに追加し、ルートを追加するので、`plugins/` へのリンクは不要です。`plugins/` に同じ id のフォルダーがあれば、そちらが優先されます。 gem には実行に必要なファイルが入り、プラグインの `Gemfile` は入りません。
 
 <a id="without-the-gem"></a>
 
 ### gem を使わないとき
 
-リポジトリを `plugins/redmine_kit_aws_costexplorer` に、Redmine Kit AWS を `plugins/redmine_kit_aws` にクローンし、gem をインストールします。Redmine の `Gemfile` がプラグインの `Gemfile` を読み、`aws-sdk-costexplorer` を追加します。Rails の起動前に読み込むものがないので、`Gemfile.local` に行を追加する必要はありません。
+リポジトリを Redmine の `plugins/` にクローンします。フォルダー名は、リポジトリ名ではなく、プラグインの ID にします。
 
 ```sh
 git clone https://github.com/redmine-kit/redmine_aws.git plugins/redmine_kit_aws
 git clone https://github.com/redmine-kit/redmine_aws_costexplorer.git plugins/redmine_kit_aws_costexplorer
-bundle install
 ```
+
+Rails の起動前に読み込むものがないので、`Gemfile.local` に行を追加する必要はありません。Redmine の `Gemfile` がプラグインの `Gemfile` を読み込み、使う gem を追加します。
 
 <a id="configuration"></a>
 
@@ -189,14 +186,14 @@ Redmine Kit Billing のプロバイダー (`charges_provider_test.rb`) は、SDK
 
 `bin/test` は、[Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) をインストールした状態 (隣のチェックアウト `../redmine_kit_ui` の `HEAD`。`REDMINE_KIT_UI` と `REDMINE_KIT_UI_REF` で別のものを選べます) と、インストールしない状態のプラグインのテストと、管理画面とプラグインのまわりの Redmine のテストを動かします。`bin/test --redmine` は、CI と同じく、プラグインをインストールした状態で Redmine のすべてのテストを動かします。テストの Redmine には、隣にチェックアウトした Redmine Kit AWS (`../redmine_kit_aws`) か、`REDMINE_KIT_AWS_DIR` のディレクトリのものをインストールします。CI は `redmine-kit/redmine_aws` をチェックアウトします。`COVERAGE=1` を付けると、プラグインのテストは、プラグイン自身のファイルのカバレッジ (SimpleCov。Cobertura の XML の `coverage/coverage.xml`) も出力し、1 プロセスで実行します。CI は Ruby 4.0 でこれを有効にし、レポートを `plugin` フラグで [Codecov](https://codecov.io/gh/redmine-kit/redmine_aws_costexplorer) に送信します。送信の認証は OIDC (`id-token: write`) なので、トークンをシークレットに保存しません。Codecov のステータスは参考情報で、コミットや Pull Request を失敗にしません (`codecov.yml`)。CI は、静的チェックとテストを Ruby 3.2 と 4.0 で実行します。ローカルでは、`TEST_RUBY=3.2 bin/test` (または `bin/lint`) で Ruby 3.2 で実行します。
 
-`bin/test-gem` は gem を確認します。チェックアウトからプラグインと Redmine Kit AWS の gem をビルドし、[gem](#gem) のとおりにインストールして `plugins/` にリンクし、すべてのファイルを読み込んで Redmine を起動します (`zeitwerk:check` と、起動時にすべてを読み込む production 環境)。`bin/release` もこれを実行するので、gem にないファイルがあれば、アダプタがインストールする前に失敗します。
+`bin/test-gem` は、組織のプラグインのテンプレートと同じく gem を確認します。チェックアウトからプラグインと Redmine Kit AWS の gem をビルドし、チェックアウトを `plugins/` から外して [gem](#gem) のとおりにインストールし、すべてのファイルを読み込んで Redmine を起動します (`zeitwerk:check` と、起動時にすべてを読み込む production 環境)。各プラグインが gem のフォルダーから、boot のファイル、コード、ルート、マイグレーション、アセットとともに読み込まれることを確認し、チェックアウトを `plugins/` に戻して、チェックアウトが優先されることも確認します。。`bin/release` もこれを実行するので、gem にないファイルがあれば、アダプタがインストールする前に失敗します。
 
 ```sh
 bin/test            # プラグインのテストと、管理画面のまわりの Redmine のテスト
 bin/test --redmine  # Redmine のすべてのテストも
 COVERAGE=1 bin/test # カバレッジを coverage/coverage.xml に出力する
 bin/lint            # RuboCop
-bin/test-gem        # プラグインと Redmine Kit AWS の gem をビルド・インストールし、plugins/ にリンクして起動する
+bin/test-gem        # gem をビルド・インストールし、gem から、次に plugins/ から起動する
 bin/services --down # PostgreSQL と、moto か LocalStack を止める
 ```
 

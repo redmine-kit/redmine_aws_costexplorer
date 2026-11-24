@@ -15,7 +15,8 @@ Gem::Specification.new do |spec|
   spec.homepage = 'https://github.com/redmine-kit/redmine_aws_costexplorer'
   # The Ruby versions of Redmine 7.0 (its Gemfile: ruby '>= 3.2.0', '< 4.1.0').
   spec.required_ruby_version = ['>= 3.2', '< 4.1']
-  spec.files = Dir['{init.rb,LICENSE}', '{app,assets,config,db,lib,help}/**/*']
+  spec.require_paths = ['boot']
+  spec.files = Dir['{init.rb,LICENSE}', '{app,boot,assets,config,db,lib,help}/**/*']
   spec.add_dependency 'aws-sdk-costexplorer', '~> 1.160'
   spec.metadata['github_repo'] = 'ssh://github.com/redmine-kit/redmine_aws_costexplorer'
   # The plugins it requires (config/dependencies.yml): installing the gem installs them.

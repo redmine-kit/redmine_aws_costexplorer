@@ -68,7 +68,9 @@ export function AwsCostexplorer() {
       <CardBody>
         {!data.enabled && <Notice tone="warning" text={t('text_aws_costexplorer_disabled')} wrap />}
         {data.failure && <Notice tone="danger" text={[data.failure.text, data.failure.unreachable].filter(Boolean).join('\n')} wrap />}
-        {data.costs ? <Costs costs={data.costs} /> : <EmptyState variant="pane" />}
+        {/* disabled: the notice says why there are no costs, and nothing else under it; enabled before the first
+            fetch: the tab's whole content is empty (EmptyState pane) */}
+        {data.costs ? <Costs costs={data.costs} /> : data.enabled && <EmptyState variant="pane" />}
       </CardBody>
     </>
   );

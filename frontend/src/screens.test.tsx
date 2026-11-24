@@ -32,11 +32,14 @@ describe('AwsCostexplorer', () => {
     expect(within(services).getByText('APN1-RDS:GP3-Storage')).toBeInTheDocument();
   });
 
-  it('not on: the warning and 表示するデータがありません; a failed fetch: its class and the advice', async () => {
-    const { unmount } = renderKit(<AwsCostexplorer />, { responses: { [COSTS]: disabled } });
+  it('not on: the warning alone; on before the first fetch: 表示するデータがありません; a failed fetch: its class and the advice', async () => {
+    let view = renderKit(<AwsCostexplorer />, { responses: { [COSTS]: disabled } });
     expect(await screen.findByText('REDMINE_COSTEXPLORER_ENABLED が true でないため、コストを取得しません。')).toBeInTheDocument();
-    expect(screen.getByText('表示するデータがありません')).toBeInTheDocument();
-    unmount();
+    expect(screen.queryByText('表示するデータがありません')).toBeNull();
+    view.unmount();
+    view = renderKit(<AwsCostexplorer />, { responses: { [COSTS]: { ...disabled, enabled: true } } });
+    expect(await screen.findByText('表示するデータがありません')).toBeInTheDocument();
+    view.unmount();
     renderKit(<AwsCostexplorer />, { responses: { [COSTS]: failed } });
     expect(await screen.findByText(/Seahorse::Client::NetworkingError/)).toBeInTheDocument();
     expect(screen.getByText(/NAT などの経路が必要です/)).toBeInTheDocument();

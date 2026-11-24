@@ -58,7 +58,7 @@ function AwsCostexplorer() {
 			text: [data.failure.text, data.failure.unreachable].filter(Boolean).join("\n"),
 			wrap: true
 		}),
-		data.costs ? /* @__PURE__ */ jsx(Costs, { costs: data.costs }) : /* @__PURE__ */ jsx(EmptyState, { variant: "pane" })
+		data.costs ? /* @__PURE__ */ jsx(Costs, { costs: data.costs }) : data.enabled && /* @__PURE__ */ jsx(EmptyState, { variant: "pane" })
 	] })] });
 }
 function Costs({ costs }) {

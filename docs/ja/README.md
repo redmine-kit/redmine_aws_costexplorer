@@ -48,7 +48,7 @@ Redmine Kit AWS Cost Explorer (`redmine_kit_aws_costexplorer`) は、AWS アカ�
 
 ### 新しい UI
 
-[Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) をインストールしていれば、タブは、Redmine Kit AWS のページ「AWS」のタブとして、新しい UI が描画します (`config/kit_ui.yml`。`frontend/` から `assets/javascripts/kit/costexplorer.js` にビルドするコンポーネント `AwsCostexplorer`。[Redmine Kit AWS の api.md](https://redmine-kit.github.io/redmine_aws/ja/api.html#the-new-ui))。`require_admin` 付きの同じコントローラーから、同じ値を表示します。カードの見出しに「更新: …」(または取得中)、項目の上に警告と取得エラー、合計は 3 つの数値で、先月が推定のあいだは「推定」を添えます。サービス別は使用タイプを折りたたんだ表、日別はグラフ (確定と推定のコストを積み上げ) と表、コスト配分タグ別です。ブラウザーのセッションで `GET /admin/aws/costexplorer.json` を読み込みます。`enabled`、`failure` (例外のクラスだけの文と、ネットワークの案内)、`pending`、`updated`、`costs` で、金額は Redmine のヘルパーで整形します。どちらの UI でも、この画面に操作はありません。
+[Redmine Kit UI](https://github.com/redmine-kit/redmine_kit_ui) をインストールしていれば、タブは、Redmine Kit AWS のページ「AWS」のタブとして、新しい UI が描画します (`config/kit_ui.yml`。`frontend/` から `assets/javascripts/kit/costexplorer.js` にビルドするコンポーネント `AwsCostexplorer`。[Redmine Kit AWS の api.md](https://redmine-kit.github.io/redmine_aws/ja/api.html#the-new-ui))。`require_admin` 付きの同じコントローラーから、同じ値を表示します。カードの見出しに「更新: …」(または取得中)、項目の上に警告と取得エラー、合計は 3 つの数値で、先月が推定のあいだは「推定」を添えます。サービス別は使用タイプを折りたたんだ表、日別はグラフ (確定と推定のコストを積み上げ) と表、コスト配分タグ別です。ブラウザーのセッションで `GET /admin/aws/costexplorer.json` を読み込みます。`enabled`、`failure` (例外のクラスだけの文と、ネットワークの案内)、`pending`、`updated`、`costs` で、金額は Redmine のヘルパーで整形します。無効のあいだ、タブは警告だけを表示します。有効で、まだ一度も取得していないときは、タブの内容は空の状態です。どちらの UI でも、この画面に操作はありません。
 
 <a id="terms"></a>
 
